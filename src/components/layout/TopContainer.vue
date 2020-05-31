@@ -7,9 +7,9 @@
 </template>
 
 <script>
-    import WeatherInfo from "./common/WeatherInfo";
-    import DateInfo from "./common/DateInfo";
-    import SysInfo from "./common/SysInfo";
+    import WeatherInfo from "../common/WeatherInfo";
+    import DateInfo from "../common/DateInfo";
+    import SysInfo from "../common/SysInfo";
 
     export default {
         name: "TopContainer",

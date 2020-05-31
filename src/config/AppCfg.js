@@ -13,6 +13,7 @@ const appCfg = {
         center: [39.12, 117.20]
     },
     windy: {
+        //获取风场数据路径
         getUrl() {
             //eg: http://yun.fpi-inc.site/fpi-windy-server/windfield/api/v1.0/show-windy/common/cn/2020052813.json
             //时间格式：年月日小时（24小时制）

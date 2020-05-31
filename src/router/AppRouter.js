@@ -6,7 +6,7 @@
 
 import Vue from 'vue'
 import Router from 'vue-router'
-import MainContainer from "@/components/MainContainer";
+import MainContainer from "@/components/layout/MainContainer";
 
 Vue.use(Router);
 

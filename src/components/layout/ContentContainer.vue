@@ -5,7 +5,7 @@
 </template>
 
 <script>
-    import MapContainer from "./MapContainer";
+    import MapContainer from "../map/MapContainer";
 
     export default {
         name: "ContentContainer",
