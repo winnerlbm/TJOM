@@ -5,8 +5,8 @@ const appCfg = {
         hColor: '#EE5522'
     },
     map: {
-        mapRootUrl: 'http://114.116.231.97:6080/geoserver/NPWS/wms',
-        wfsRootUrl: 'http://114.116.231.97:6080/geoserver/NPWS/ows',
+        mapRootUrl: 'http://114.116.231.97:7080/geoserver/NPWS/wms',
+        wfsRootUrl: 'http://114.116.231.97:7080/geoserver/NPWS/ows',
         minZoom: 6,
         maxZoom: 18,
         zoom: 11,
