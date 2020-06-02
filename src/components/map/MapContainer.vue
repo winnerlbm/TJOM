@@ -17,7 +17,8 @@
         components: {InfoContainer},
         data() {
             return {
-                highLayer: null
+                highLayer: null,
+                featureProps: null
             };
         },
         //需要页面加载完执行的方法,可以写在$nextTick中
@@ -50,10 +51,12 @@
                                 if (this.highLayer) {
                                     map.removeLayer(this.highLayer)
                                 }
-                                if (data) {
+                                if (data && data.features && data.features.length > 0) {
+                                    //获取要素属性
+                                    this.featureProps = data.features["0"].properties
                                     this.highLayer = L.geoJSON(data, {
                                         style: function (feature) {
-                                            return {color: appCfg.common.hColor};
+                                            return {color: appCfg.common.hColor}
                                         }
                                     })
                                     this.highLayer.addTo(map)
