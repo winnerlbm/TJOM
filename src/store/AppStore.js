@@ -12,14 +12,16 @@ Vue.use(Vuex);
 const appModule = {
     //the data attribute of all components
     state: {
-
+        chartFontSize: 15,
     },
     //the getters as computed attribute for all components
     getters: {
         otherParams: () => [{name: 'home', title: 'index'}]
     },
     mutations: {
-
+        setChartFontSize(state, chartFontSize) {
+            state.chartFontSize = chartFontSize
+        }
     },
     plugins: [createPersistedState()]
 };

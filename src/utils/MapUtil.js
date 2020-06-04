@@ -2,7 +2,7 @@ import appCfg from "@config/AppCfg"
 import L from "leaflet";
 //直接引入leaflet插件库
 import 'leaflet.chinatmsproviders'
-import 'leaflet-velocity'
+import {velocityLayer} from 'leaflet-velocity-ts-module'
 
 const mapUtil = {
     lMap: null,
@@ -27,7 +27,7 @@ const mapUtil = {
             minZoom: appCfg.map.minZoom
         }).addTo(map);*/
 
-        L.tileLayer.chinaProvider('Geoq.Normal.Map', {
+        L.tileLayer.chinaProvider('GaoDe.Satellite.Map', {
             maxZoom: appCfg.map.maxZoom,
             minZoom: appCfg.map.minZoom
         }).addTo(map);
@@ -36,8 +36,17 @@ const mapUtil = {
     },
     //加载风场
     windyLayer(data) {
-        return L.velocityLayer({
-            displayValues: false,
+        return velocityLayer({
+            //效率优先
+            /*displayValues: true,
+            maxVelocity: 10,
+            colorScale: ['#ffffff'],
+            particleMultiplier: 1 / 900,
+            velocityScale: 0.008,
+            data: data*/
+
+            //效果优先
+            /*displayValues: false,
             displayOptions: {
                 velocityType: "风场",
                 position: "bottomleft",
@@ -45,21 +54,15 @@ const mapUtil = {
                 angleConvention: "bearingCW",
                 displayPosition: "bottomleft",
                 displayEmptyString: "无风场数据"
-            },
+            },*/
             data: data,
-
             // OPTIONAL
             minVelocity: 0,
             maxVelocity: 10,
-            velocityScale: 0.005,
+            velocityScale: 0.008,
             colorScale: ["rgb(255,255,255)", "rgb(255,255,255)", "rgb(255,255,255)", "rgb(255,255,255)", "rgb(255,255,255)"],
             onAdd: null,
-            onRemove: null,
-            opacity: 0.97,
-
-            particleMultiplier: 1 / 300,
-            lineWidth: 1,
-            frameRate: 15
+            onRemove: null
         });
     },
     //加载wms

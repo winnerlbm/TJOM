@@ -25,7 +25,7 @@
         mounted() {
             this.$nextTick(() => {
                 this.$mapUtil.initMap('map')
-                //this.getWindyData()
+                this.getWindyData()
                 this.$mapUtil.wmsLayer('NPWS:TjMap').addTo(this.$mapUtil.lMap)
                 this.queryFeatureByClick('NPWS:TjMap', 2000, 'the_geom', this.$mapUtil.lMap)
             });

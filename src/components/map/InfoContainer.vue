@@ -1,7 +1,7 @@
 <template>
     <div class="info-container-cls">
        <div style="flex: 1; margin: 10px">
-           <span style="color: #FFFFFF">Hello world</span>
+           <span style="color: #FFFFFF;font-size: 0.5rem">Hello world</span>
        </div>
     </div>
 </template>
@@ -14,7 +14,7 @@
 
 <style scoped>
     .info-container-cls {
-        width: 2rem;
+        width: 10rem;
         height: 100%;
         display: flex;
         flex-direction: column;

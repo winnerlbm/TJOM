@@ -2,12 +2,13 @@ const appCfg = {
     common: {
         nColor: '#FFFFFF',
         cColor: '#11dcf2',
-        hColor: '#EE5522'
+        hColor: '#EE5522',
+        chartLabelFont: 0.26
     },
     map: {
         mapRootUrl: 'http://114.116.231.97:7080/geoserver/NPWS/wms',
         wfsRootUrl: 'http://114.116.231.97:7080/geoserver/NPWS/ows',
-        minZoom: 6,
+        minZoom: 4,
         maxZoom: 18,
         zoom: 11,
         center: [39.12, 117.20]
