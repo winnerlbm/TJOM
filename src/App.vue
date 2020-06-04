@@ -9,6 +9,7 @@
 <script>
     /*加载默认模块，本段代码可以注释*/
     import appCfg from "./config/AppCfg";
+    import store from "@/store/AppStore";
 
     export default {
         name: 'app',
