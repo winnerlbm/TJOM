@@ -60,7 +60,8 @@ const mapUtil = {
             minVelocity: 0,
             maxVelocity: 10,
             velocityScale: 0.008,
-            colorScale: ["rgb(255,255,255)", "rgb(255,255,255)", "rgb(255,255,255)", "rgb(255,255,255)", "rgb(255,255,255)"],
+            dimension: 4,
+            colorScale: ['#313695', '#4575b4', '#74add1', '#abd9e9', '#e0f3f8', '#ffffbf', '#fee090', '#fdae61', '#f46d43', '#d73027', '#a50026'],
             onAdd: null,
             onRemove: null
         });
