@@ -27,7 +27,7 @@ const mapUtil = {
             minZoom: appCfg.map.minZoom
         }).addTo(map);*/
 
-        L.tileLayer.chinaProvider('GaoDe.Satellite.Map', {
+        L.tileLayer.chinaProvider('Geoq.Normal.Blue', {
             maxZoom: appCfg.map.maxZoom,
             minZoom: appCfg.map.minZoom
         }).addTo(map);
