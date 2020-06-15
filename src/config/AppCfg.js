@@ -10,7 +10,7 @@ const appCfg = {
         wfsRootUrl: 'http://114.116.231.97:7080/geoserver/NPWS/ows',
         minZoom: 4,
         maxZoom: 18,
-        zoom: 11,
+        zoom: 7,
         center: [39.12, 117.20]
     },
     windy: {

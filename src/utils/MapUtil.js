@@ -18,19 +18,19 @@ const mapUtil = {
         })
 
         //初始化底图-天地图
-        /*L.tileLayer.chinaProvider('TianDiTu.Satellite.Map', {
-            maxZoom: appCfg.map.maxZoom,
-            minZoom: appCfg.map.minZoom
-        }).addTo(map);*/
-        /*L.tileLayer.chinaProvider('GaoDe.Satellite.Annotion', {
-            maxZoom: appCfg.map.maxZoom,
-            minZoom: appCfg.map.minZoom
-        }).addTo(map);*/
-
-        L.tileLayer.chinaProvider('Geoq.Normal.Blue', {
+        L.tileLayer.chinaProvider('TianDiTu.Satellite.Map', {
             maxZoom: appCfg.map.maxZoom,
             minZoom: appCfg.map.minZoom
         }).addTo(map);
+        L.tileLayer.chinaProvider('TianDiTu.Satellite.Annotion', {
+            maxZoom: appCfg.map.maxZoom,
+            minZoom: appCfg.map.minZoom
+        }).addTo(map);
+
+        /*L.tileLayer.chinaProvider('Geoq.Normal.Blue', {
+            maxZoom: appCfg.map.maxZoom,
+            minZoom: appCfg.map.minZoom
+        }).addTo(map);*/
 
         mapUtil.lMap = map;
     },
@@ -74,6 +74,46 @@ const mapUtil = {
             transparent: true,
             crs: L.CRS.EPSG4326
         })
+    },
+    //加载热力图
+    heatmapLayer(map) {
+        let heatData = {
+            max: 30,
+            data: [
+                {lat: 39.64, lng: 117.7728, count: 10},
+                {lat: 38.75, lng: 116.55, count: 30},
+                {lat: 40.15, lng: 119.4667, count: 15},
+                {lat: 41.35, lng: 117.9167, count: 22},
+                {lat: 39.561, lng: 120.214, count: 16},
+                {lat: 38.5036, lng: 117.685, count: 13},
+                {lat: 40.0477, lng: 118.1227, count: 25},
+                {lat: 40.0326, lng: 119.719, count: 19},
+                {lat: 38.9003, lng: 118.3024, count1: 11},
+                {lat: 40.2085, lng: 119.6918, count: 13}
+            ]
+        };
+
+        let cfg = {
+            // radius should be small ONLY if scaleRadius is true (or small radius is intended)
+            "radius": 1,
+            "maxOpacity": .6,
+            // scales the radius based on map zoom
+            "scaleRadius": true,
+            // if set to false the heatmap uses the global maximum for colorization
+            // if activated: uses the data maximum within the current map boundaries
+            //   (there will always be a red spot with useLocalExtremas true)
+            "useLocalExtrema": true,
+            // which field name in your data represents the latitude - default "lat"
+            latField: 'lat',
+            // which field name in your data represents the longitude - default "lng"
+            lngField: 'lng',
+            // which field name in your data represents the data value - default "value"
+            valueField: 'count'
+        };
+
+        let heatmapLayer = new HeatmapOverlay(cfg).addTo(map);
+        heatmapLayer.setData(heatData);
     }
+
 }
 export default mapUtil

@@ -20,7 +20,7 @@ import mapUtil from './utils/MapUtil'
 import 'font-awesome/css/font-awesome.css'
 
 /*引入leaflet及图表库*/
-import 'leaflet/dist/leaflet.css';
+// import 'leaflet/dist/leaflet.css';
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({

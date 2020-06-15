@@ -1,7 +1,7 @@
 <template>
     <div class="info-container-cls">
        <div style="flex: 1; margin: 10px">
-           <span style="color: #FFFFFF;font-size: 0.5rem">Hello world</span>
+           <span style="color: #FFFFFF;font-size: 0.5rem">内容建设中...</span>
        </div>
     </div>
 </template>

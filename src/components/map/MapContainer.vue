@@ -1,7 +1,8 @@
+<script src="../../../public/libs/heatmap/leaflet-heatmap.js"></script>
 <template>
     <div style="flex: 1">
         <div id="map">
-            <info-container class="map-info-cls"/>
+            <info-container v-show="true" class="map-info-cls"/>
         </div>
     </div>
 </template>
@@ -28,6 +29,7 @@
                 this.getWindyData()
                 this.$mapUtil.wmsLayer('NPWS:TjMap').addTo(this.$mapUtil.lMap)
                 this.queryFeatureByClick('NPWS:TjMap', 2000, 'the_geom', this.$mapUtil.lMap)
+                this.$mapUtil.heatmapLayer(this.$mapUtil.lMap)
             });
         },
         methods: {
