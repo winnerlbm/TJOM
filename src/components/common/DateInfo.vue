@@ -1,12 +1,19 @@
 <template>
     <div class="date-info-cls">
-		<span class="nowtime"
-              style="color: #01F9E3;font-size: 30px;font-family: lcd,serif;margin-right: 25px;">
-			{{nowTime}}
-		</span>
         <span class="date">
-			<span style="font-family: lcd;font-size: 18px;color: #01F9E3;">{{nowDate}}</span>
-			<span style="font-family: MicrosoftYaHei,serif;font-size: 16px;color: #01F9E3;">{{nowWeek}}</span>
+			<span class="nowtime"
+				  style="color: #e2e9e9;font-size: 25px;font-family: lcd,serif;margin-right: 10px;">
+			{{nowTime}}
+			</span>
+			<span style="font-family: lcd;font-size: 14px;color: #e2e9e9;">{{nowDate}}</span>
+			<!--<span style="font-family: MicrosoftYaHei,serif;font-size: 16px;color: #e2e9e9;">{{nowWeek}}</span>-->
+		</span>
+		<span class="line"></span>
+		<span class="user">
+			<span style="color: #e2e9e9;font-size: 16px;font-family: lcd,serif;margin-right: 16px;">
+			{{userName}}
+			</span>
+			<span style="font-family: lcd;font-size: 14px;color: #e2e9e9;">退出</span>
 		</span>
     </div>
 </template>
@@ -33,7 +40,8 @@
                 nowDate: '',
                 nowWeek: '',
                 activeIndex: '/index',
-                langVisible: false
+                langVisible: false,
+				userName:"超级管理员"
             }
         },
         watch: {
@@ -114,7 +122,13 @@
         justify-content: space-between;
         align-items: center;
     }
-
+	.line {
+		display: inline-block;
+		width: 2px;
+		height: 45px;
+		background-color: rgba(12, 79, 158, 0.62);
+		margin: 0 15px;
+	}
     .date {
         display: flex;
         height: 100%;
@@ -123,4 +137,12 @@
         justify-content: center;
         align-items: flex-start;
     }
+	.user {
+		display: flex;
+		height: 100%;
+		overflow: hidden;
+		flex-direction: column;
+		justify-content: center;
+		align-items: flex-start;
+	}
 </style>

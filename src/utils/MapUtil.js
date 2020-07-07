@@ -2,10 +2,15 @@ import appCfg from "@config/AppCfg"
 import L from "leaflet";
 //直接引入leaflet插件库
 import 'leaflet.chinatmsproviders'
+import 'leaflet-draw'
+import "leaflet.markercluster"
 import {velocityLayer} from 'leaflet-velocity-ts-module'
 
 const mapUtil = {
     lMap: null,
+    baseMapLayer:null, //底图
+    annoMapLayer:null,
+    layerTemps:[],
     initMap(mapDivId) {
         //初始化地图对象
         let map = L.map(mapDivId, {
@@ -15,22 +20,23 @@ const mapUtil = {
             minZoom: appCfg.map.minZoom,
             zoomControl: false,
             attributionControl: false
-        })
+        });
 
         //初始化底图-天地图
-        L.tileLayer.chinaProvider('TianDiTu.Satellite.Map', {
+       /* this.baseMapLayer = L.tileLayer.chinaProvider('TianDiTu.Satellite.Map', {
             maxZoom: appCfg.map.maxZoom,
             minZoom: appCfg.map.minZoom
         }).addTo(map);
-        L.tileLayer.chinaProvider('TianDiTu.Satellite.Annotion', {
-            maxZoom: appCfg.map.maxZoom,
-            minZoom: appCfg.map.minZoom
-        }).addTo(map);
-
-        /*L.tileLayer.chinaProvider('Geoq.Normal.Blue', {
+        this.annoMapLayer = L.tileLayer.chinaProvider('TianDiTu.Satellite.Annotion', {
             maxZoom: appCfg.map.maxZoom,
             minZoom: appCfg.map.minZoom
         }).addTo(map);*/
+
+
+        this.baseMapLayer = L.tileLayer.chinaProvider('Geoq.Normal.PurplishBlue', {
+            maxZoom: appCfg.map.maxZoom,
+            minZoom: appCfg.map.minZoom
+        }).addTo(map);
 
         mapUtil.lMap = map;
     },
@@ -76,8 +82,8 @@ const mapUtil = {
         })
     },
     //加载热力图
-    heatmapLayer(map) {
-        let heatData = {
+    heatmapLayer(map,heatData) {
+        /*let heatData = {
             max: 30,
             data: [
                 {lat: 39.64, lng: 117.7728, count: 10},
@@ -91,12 +97,12 @@ const mapUtil = {
                 {lat: 38.9003, lng: 118.3024, count1: 11},
                 {lat: 40.2085, lng: 119.6918, count: 13}
             ]
-        };
+        };*/
 
         let cfg = {
             // radius should be small ONLY if scaleRadius is true (or small radius is intended)
-            "radius": 1,
-            "maxOpacity": .6,
+            "radius": .27,
+            "maxOpacity": .65,
             // scales the radius based on map zoom
             "scaleRadius": true,
             // if set to false the heatmap uses the global maximum for colorization
@@ -113,6 +119,107 @@ const mapUtil = {
 
         let heatmapLayer = new HeatmapOverlay(cfg).addTo(map);
         heatmapLayer.setData(heatData);
+        return heatmapLayer;
+    },
+    //通过图层id，移除指定图层
+    removeLayer(layerId,map){
+        map.eachLayer(function (layer) {
+           // map.removeLayer(layer);
+            console.log(layer);
+        });
+    },
+    changeBaseMap(map,baseType){
+        if(map.hasLayer(this.baseMapLayer)&&this.baseMapLayer){
+            map.removeLayer(this.baseMapLayer);
+        }
+        if(map.hasLayer(this.annoMapLayer)&&this.annoMapLayer){
+            map.removeLayer(this.annoMapLayer);
+        }
+        if(baseType == "PurplishBlue"){//蓝色智图
+            this.baseMapLayer = L.tileLayer.chinaProvider('Geoq.Normal.PurplishBlue', {
+                maxZoom: appCfg.map.maxZoom,
+                minZoom: appCfg.map.minZoom
+            }).addTo(map);
+        }else if(baseType == "Warm"){//暖色版
+            this.baseMapLayer = L.tileLayer.chinaProvider('Geoq.Normal.Warm', {
+                maxZoom: appCfg.map.maxZoom,
+                minZoom: appCfg.map.minZoom
+            }).addTo(map);
+        }else if(baseType == "tdtimg"){
+            //初始化底图-天地图
+            this.baseMapLayer = L.tileLayer.chinaProvider('TianDiTu.Satellite.Map', {
+                maxZoom: appCfg.map.maxZoom,
+                minZoom: appCfg.map.minZoom
+            }).addTo(map);
+            this.annoMapLayer = L.tileLayer.chinaProvider('TianDiTu.Satellite.Annotion', {
+                maxZoom: appCfg.map.maxZoom,
+                minZoom: appCfg.map.minZoom
+            }).addTo(map);
+        }else if(baseType == "tdtvec"){
+            //初始化底图-天地图
+            this.baseMapLayer = L.tileLayer.chinaProvider('TianDiTu.Normal.Map', {
+                maxZoom: appCfg.map.maxZoom,
+                minZoom: appCfg.map.minZoom
+            }).addTo(map);
+            this.annoMapLayer = L.tileLayer.chinaProvider('TianDiTu.Normal.Annotion', {
+                maxZoom: appCfg.map.maxZoom,
+                minZoom: appCfg.map.minZoom
+            }).addTo(map);
+        }else if(baseType == "tdtter"){
+            //初始化底图-天地图
+            this.baseMapLayer = L.tileLayer.chinaProvider('TianDiTu.Terrain.Map', {
+                maxZoom: appCfg.map.maxZoom,
+                minZoom: appCfg.map.minZoom
+            }).addTo(map);
+            this.annoMapLayer = L.tileLayer.chinaProvider('TianDiTu.Terrain.Annotion', {
+                maxZoom: appCfg.map.maxZoom,
+                minZoom: appCfg.map.minZoom
+            }).addTo(map);
+        }
+        this.baseMapLayer.setZIndex(0);
+    },
+    createPointMarker(proper,img){
+        let mcIcon = L.icon({
+            iconUrl: img ,
+            iconSize: [20, 20],
+            iconAnchor: [0, 0],
+            popupAnchor: [12, 0],
+            shadowSize: [68, 95],
+            shadowAnchor: [22, 94]
+        });
+        return L.marker([ proper.latitude,proper.longitude],{
+            icon:mcIcon,
+            id:proper.id
+        });
+
+    },
+    createPointMarkerByLgnt(proper,img){
+        let mcIcon = L.icon({
+            iconUrl: img ,
+            iconSize: [20, 20],
+            iconAnchor: [0, 0],
+            popupAnchor: [12, 0],
+            shadowSize: [68, 95],
+            shadowAnchor: [22, 94]
+        });
+        return L.marker([ proper.lat,proper.lng],{
+            icon:mcIcon,
+            id:proper.id
+        });
+    },
+    createLayerGroup(markers,map){
+        return L.layerGroup(markers);
+    },
+    addTemLayer(layerId,layer){
+        this.layerTemps.push({layerId:layerId,layer:layer});
+    },
+    removeTemLayer(layerId){
+        this.layerTemps.some((item,i) =>{
+            if(item.layerId == layerId){
+                this.lMap.removeLayer(item.layer);
+                this.layerTemps.slice(i,1);
+            }
+        });
     }
 
 }

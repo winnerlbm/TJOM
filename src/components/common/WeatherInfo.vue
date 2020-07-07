@@ -1,7 +1,8 @@
 <template>
     <div class="weatherContainerCls">
         <img :src="weatherImg" class="weather"/>
-        <span class="week">{{weather}}</span>
+        <span class="week">{{cityName}}</span>
+       <!-- <span class="week">{{weather}}</span>-->
     </div>
 </template>
 
@@ -13,7 +14,8 @@
         data() {
             return {
                 weather: '',
-                weatherImg: ''
+                weatherImg: '',
+                cityName:'天津市'
             }
         },
         mounted() {
@@ -40,19 +42,21 @@
         display: flex;
         height: 100%;
         overflow: hidden;
-        flex-direction: column;
+        flex-direction: row;
         justify-content: center;
         align-items: center;
     }
 
     .weather {
-        height: 32px;
+        height: 25px;
     }
 
     .week {
         font-family: lcd;
-        color: #01F9E3;
+        color: #e2e9e9;
         font-size: 16px;
         line-height: 16px;
+        font-weight: 600;
+        margin-left: 10px;
     }
 </style>

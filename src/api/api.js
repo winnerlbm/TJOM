@@ -6,7 +6,6 @@ import appCfg from "@/config/AppCfg";
 
 
 let baseUrl = process.env.VUE_APP_BASE_URL;
-// let baseUrl = "http://"+window.location.host+"/";
 
 /*核对用户是否登录*/
 const checkLoginUser = params => post(baseUrl + 'login', params);
@@ -16,7 +15,7 @@ const getWindyData = () => get(appCfg.windy.getUrl());
 
 const getWfsFeature = (url) => get(url);
 
-const getWeatherInfo = (url) => get(url)
+const getWeatherInfo = (url) => get(url);
 
 export {
     checkLoginUser,
