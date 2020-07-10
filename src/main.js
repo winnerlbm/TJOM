@@ -3,7 +3,7 @@ import App from './App.vue'
 
 /*主键库及主题*/
 import ElementUI from 'element-ui'
-import locale from 'element-ui/lib/locale/lang/en'
+import locale from 'element-ui/lib/locale/lang/zh-CN'
 import 'element-theme-chalk/lib/index.css'
 
 Vue.use(ElementUI, {locale});

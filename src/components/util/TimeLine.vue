@@ -28,9 +28,8 @@
                              @mouseleave="leavePopup">
                             <div class="timeProgress-bar" :style="{'width':width+'px'}">
                                 <p class="bigDot">
-                 <span class="dot">
-
-                 </span>
+                                     <span class="dot">
+                                     </span>
                                 </p>
                                 <div class="curr-popup for-animate" v-show="isShowAniPopup">
                                     {{timeUnit==='天'?curr_day.mon + '-'+ curr_day.day:curr_day.hour + ":00"}}
@@ -39,28 +38,14 @@
                         </div>
                         <ul>
                             <li v-for="item in timeList" class="every" ref="liNode">
-                                <span class="year" v-show="isCrossYear">{{item.year}}-</span><span class="mon">{{item.month}}</span>-<span class="day">{{item.day}}</span>
+                                <span class="day">{{item.text}}</span>
                             </li>
                         </ul>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="timeUnit">
-            <div class="inner">
-                <div class="timeUnitBtn day" @click="changeTimeUnit(1)" :class="{'active':timeUnit==='天'}">天</div>
-                <div class="line">/</div>
-                <div class="timeUnitBtn hour" @click="changeTimeUnit(2)" :class="{'active':timeUnit==='时'}">时</div>
-            </div>
-        </div>
-        <div class="speed">
-            <div class="inner">
-                <div v-for="(item, key, index) in defaultOptions.speedConfig" class="inner-div">
-                    <div class="speedBtn" :key="index" @click="changeSpeed(item)" :class="{'active':speedIndex=== item}">{{key}}</div>
-                    <div class="line">/</div>
-                </div>
-            </div>
-        </div>
+
     </div>
 </template>
 
@@ -111,7 +96,32 @@
                 isShowClickPopup: false,// 是否展示点击时的popup
                 isShowHoverPopup: false,// 是否展示hover时的popup
                 hoverPopupLeft: 0,
-                timeList: [],
+                timeList: [
+                    {hour:"0",text:"0:00"},
+                    {hour:"1",text:"1:00"},
+                    {hour:"2",text:"2:00"},
+                    {hour:"3",text:"3:00"},
+                    {hour:"4",text:"4:00"},
+                    {hour:"5",text:"5:00"},
+                    {hour:"6",text:"6:00"},
+                    {hour:"7",text:"7:00"},
+                    {hour:"8",text:"8:00"},
+                    {hour:"9",text:"9:00"},
+                    {hour:"10",text:"10:00"},
+                    {hour:"11",text:"11:00"},
+                    {hour:"12",text:"12:00"},
+                    {hour:"13",text:"13:00"},
+                    {hour:"14",text:"14:00"},
+                    {hour:"15",text:"15:00"},
+                    {hour:"16",text:"16:00"},
+                    {hour:"17",text:"17:00"},
+                    {hour:"18",text:"18:00"},
+                    {hour:"19",text:"19:00"},
+                    {hour:"20",text:"20:00"},
+                    {hour:"21",text:"21:00"},
+                    {hour:"22",text:"22:00"},
+                    {hour:"23",text:"23:00"}
+                ],
                 isCrossYear: false,
                 nextBtn:false,
                 prevBtn: false
@@ -125,9 +135,9 @@
             this.timeUnit = this.defaultOptions.timeUnit;
             this.speed = this.defaultOptions.speed;
             this.speedIndex = this.speed
-            this.boxLeft = this.$refs.timeProgressBox.getBoundingClientRect().left +29 //加29是因为.timeProgress-inner设置了margin-left:29px;
+            this.boxLeft = this.$refs.timeProgressBox.getBoundingClientRect().left +29; //加29是因为.timeProgress-inner设置了margin-left:29px;
             // this.boxRight = document.body.clientWidth - this.boxLeft - this.$refs.timeProgressBox.clientWidth;
-            this.fillDate()
+          //  this.fillDate()
             this.initDate()
         },
         watch:{

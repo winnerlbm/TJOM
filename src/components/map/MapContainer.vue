@@ -68,7 +68,7 @@
         <div class="dataLayer">
 
         </div>
-        <time-line :options="options" @onAnimate="onAnimate" @onClickEnd="onclick"></time-line>
+        <hour-line ref="hourline" v-show="hourShow" @onTimeChange="onTimeChange"></hour-line>
     </div>
 </template>
 
@@ -79,11 +79,11 @@
     import InfoContainer from "./InfoContainer";
     import layerContainer from "./layerContainer";
     import SearchContainer from "./SearchContainer";
-    import TimeLine from "../util/TimeLine";
+    import HourLine from "../util/HourLine";
 
     export default {
         name: "MapContainer",
-        components: {InfoContainer,layerContainer,SearchContainer,TimeLine},
+        components: {InfoContainer,layerContainer,SearchContainer,HourLine},
         data() {
             return {
                 highLayer: null,
@@ -94,6 +94,7 @@
                 windySelect:false,
                 roadSelect:false,
                 showClass:"baseMap",
+                hourShow:true,
                 mapboxShow:false,
                 layersShow:false,
                 allgrid:[],//风力数据存储
@@ -268,8 +269,11 @@
                 if(!this.windySelect&&this.windyLayer){
                     this.$mapUtil.lMap.removeLayer(this.windyLayer);
                     this.toolImg.windyImg = require("../../assets/image/menu/wind.png");
+                    this.hourShow = false;
                 }else{
                     this.getWindyData();
+                    this.hourShow = true;
+                   // this.$refs.hourline.calcWidth();
                     this.toolImg.windyImg = require("../../assets/image/menu/windSel.png");
                 }
             },
@@ -525,6 +529,9 @@
                 console.log(val);
             },
             onclick(val){
+                console.log(val);
+            },
+            onTimeChange(val){
                 console.log(val);
             }
         }
