@@ -8,7 +8,8 @@ const appCfg = {
     map: {
         mapRootUrl: 'http://114.116.231.97:7080/geoserver/NPWS/wms',
         wfsRootUrl: 'http://114.116.231.97:7080/geoserver/NPWS/ows',
-        minZoom: 4,
+        gisApiUrl: 'http://202.99.99.49:8100/dc-server/',
+        minZoom: 0,
         maxZoom: 18,
         zoom: 7,
         center: [39.12, 117.20]

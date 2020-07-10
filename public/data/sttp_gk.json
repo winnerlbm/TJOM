@@ -1,0 +1,28 @@
+{
+  "code": "200",
+  "msg": "成功!",
+  "data": [
+    {
+      "id": "c069cf46b11111eaa748b0823eec6a3e",
+      "stationId": "26",
+      "lat": "39.1587",
+      "lng": "117.264",
+      "height": null,
+      "stationName": "国家级空气监测1号站",
+      "stationType": "1",
+      "param": "AQI,PM2_5,CO,PM10,SO2,O3,NO2"
+    },
+    {
+      "id": "c069cf46b11111eaa748b083feec323e",
+      "stationId": "27",
+      "lat": "39.1087",
+      "lng": "117.434",
+      "height": null,
+      "stationName": "国家级空气监测2号站",
+      "stationType": "1",
+      "param": "AQI,PM2_5,CO,PM10,SO2,O3,NO2"
+    }
+  ],
+  "ts": "1592968391302",
+  "success": true
+}

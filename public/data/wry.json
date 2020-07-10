@@ -1,0 +1,26 @@
+{
+  "code": "200",
+  "msg": "成功!",
+  "data": [
+    {
+      "outletId": "2c938667709a616e01709a7028dc0025",
+      "permitLicence": "hb120100600001373Z001P",
+      "portName": "废水排污口1",
+      "portCode": "WG1141260",
+      "longitude": 117.464,
+      "latitude": 39.1587,
+      "monitorType": "WG"
+    },
+    {
+      "outletId": "2c938667709a616e01709a747f830033",
+      "permitLicence": "hb120100600001373Z001P",
+      "portName": "废水排污口2",
+      "portCode": "WG1141260",
+      "longitude": 117.264,
+      "latitude": 39.1587,
+      "monitorType": "WG"
+    }
+  ],
+  "ts": "1592983504571",
+  "success": true
+}

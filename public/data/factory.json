@@ -1,0 +1,46 @@
+{
+  "code": "200",
+  "msg": "成功!",
+  "data": [
+    {
+      "id": "bd32dfdcaed611ea99b5b083feec6a3e",
+      "dataId": "3a798207bead48b8b3b7cf12b9c94411",
+      "permitLicence": "hb120100600001373Z001P",
+      "companyName": "天津市武清区石蕊纸制品厂",
+      "lngDegree": "116",
+      "lngMinute": "54",
+      "lngSecond": "58.00",
+      "latDegree": "39",
+      "latMinute": "19",
+      "latSecond": "23.63",
+      "industryType": "造纸和纸制品业",
+      "operationAddress": "天津市武清区石各庄镇李各庄村",
+      "divisionProvince": "天津市",
+      "divisionCity": "市辖区",
+      "divisionArea": "武清区",
+      "startEffectiveDate": "2020-05-27",
+      "endEffectiveDate": "2020-05-27"
+    },
+    {
+      "id": "bd32dfdcaed611ea99b5b083feec6a43",
+      "dataId": "3a798207bead48b8b3b7cf12b9c94411",
+      "permitLicence": "hb120100600001373Z001P",
+      "companyName": "天津市武清区石蕊纸制品厂2",
+      "lngDegree": "116",
+      "lngMinute": "54",
+      "lngSecond": "58.00",
+      "latDegree": "39",
+      "latMinute": "19",
+      "latSecond": "23.63",
+      "industryType": "造纸和纸制品业",
+      "operationAddress": "天津市武清区石各庄镇李各庄村",
+      "divisionProvince": "天津市",
+      "divisionCity": "市辖区",
+      "divisionArea": "武清区",
+      "startEffectiveDate": "2020-05-27",
+      "endEffectiveDate": "2020-05-27"
+    }
+  ],
+  "ts": "1592964519507",
+  "success": true
+}

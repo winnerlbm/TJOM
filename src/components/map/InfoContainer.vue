@@ -1,14 +1,27 @@
 <template>
     <div class="info-container-cls">
        <div style="flex: 1; margin: 10px">
-           <span style="color: #FFFFFF;font-size: 0.5rem">内容建设中...</span>
+           <span style="color: #FFFFFF;font-size: 0.5rem">统计图及基础信息分布区</span>
        </div>
     </div>
 </template>
 
 <script>
     export default {
-        name: "InfoContainer"
+        name: "InfoContainer",
+        data(){
+            return {
+                treeList:[
+
+                ]
+            }
+        },
+        props:{
+            map : Object
+        },
+        methods: {
+
+        }
     }
 </script>
 

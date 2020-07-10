@@ -2,6 +2,8 @@
     <div class="sys-info-cls">
         <div class="sys-logo-cls"/>
         <span class="sys-title-cls">{{sysTitle}}</span>
+        <span class="pot">.</span>
+        <span class="gist">GIS平台</span>
     </div>
 </template>
 
@@ -18,19 +20,34 @@
 
 <style scoped>
     .sys-logo-cls {
-        width: 48px;
-        height: 48px;
+        width: 83px;
+        height: 50px;
+        margin-left: 20px;
         background-image: url("../../assets/image/logo.png");
         background-repeat: no-repeat;
         background-size: 100% 100%;
-        -moz-background-size: 100% 100%
+        -moz-background-size: 100% 100%;
+        display: none;
     }
 
     .sys-title-cls {
-        color: #01F9E3;
-        font-size: 32px;
-        font-weight: bold;
-        /*margin-left: 10px;*/
+        color: #e2e9e9;
+        font-size: 24px;
+        font-weight: 500;
+        margin-left: 20px ;
+    }
+    .pot {
+        color: #e2e9e9;
+        font-size: 24px;
+        font-weight: 500;
+        margin: 0 14px 5px 14px;
+    }
+    .gist {
+        color: #e2e9e9;
+        font-size: 18px;
+        font-weight: 500;
+        vertical-align: middle;
+        margin-top: 8px;
     }
 
     .sys-info-cls {

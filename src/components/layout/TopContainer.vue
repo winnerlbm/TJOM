@@ -24,8 +24,17 @@
         flex-direction: row;
         justify-content: center;
         align-items: stretch;
+        width: 100%;
+        position: absolute;
+        z-index: 999;
+        top: 0;
         height: 65px;
         overflow: hidden;
-        background-color: #1B1B1B;
+        /* background-color: #1B1B1B; */
+        background-image: url("../../assets/image/title.png");
+        background-repeat: no-repeat;
+        background-size: 100% 100%;
+        /* background-color: transparent; */
+        left: 0;
     }
 </style>

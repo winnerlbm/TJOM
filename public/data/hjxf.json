@@ -1,0 +1,44 @@
+{
+  "code": "200",
+  "msg": "成功!",
+  "data": [
+    {
+      "permitLicence": "9112000071824811X4001P",
+      "indexValue": "2",
+      "lat": "38.8587",
+      "lng": "117.264"
+    },
+    {
+      "permitLicence": "9112011605207452X0001Q",
+      "indexValue": "0",
+      "lat": "38.9587",
+      "lng": "117.364"
+    },
+    {
+      "permitLicence": "91120116058733768F001V",
+      "indexValue": "4",
+      "lat": "38.9587",
+      "lng": "117.264"
+    },
+    {
+      "permitLicence": "91120116094282853N001R",
+      "indexValue": "5",
+      "lat": "39.8587",
+      "lng": "117.164"
+    },
+    {
+      "permitLicence": "911201163105543242001R",
+      "indexValue": "10",
+      "lat": "39.2787",
+      "lng": "117.364"
+    },
+    {
+      "permitLicence": "91120116550389591G001P",
+      "indexValue": "6",
+      "lat": "39.3587",
+      "lng": "117.164"
+    }
+  ],
+  "ts": "1592983060170",
+  "success": true
+}
