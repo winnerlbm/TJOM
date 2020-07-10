@@ -88,7 +88,7 @@ const mapUtil = {
                 {lat: 38.5036, lng: 117.685, count: 13},
                 {lat: 40.0477, lng: 118.1227, count: 25},
                 {lat: 40.0326, lng: 119.719, count: 19},
-                {lat: 38.9003, lng: 118.3024, count1: 11},
+                {lat: 38.9003, lng: 118.3024, count: 11},
                 {lat: 40.2085, lng: 119.6918, count: 13}
             ]
         };
