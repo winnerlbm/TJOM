@@ -160,7 +160,9 @@
                 },this.speed);
             },
             stopPlay(){
-                clearInterval(this.timer);
+                if(this.timer){
+                    clearInterval(this.timer);
+                }
             },
             calcWidth(){
                 let width_all = this.$refs.timeProgressBox.clientWidth;

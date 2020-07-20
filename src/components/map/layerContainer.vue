@@ -136,11 +136,12 @@
                         model.longitude =  this.DegreeConvertBack(model.lngDegree,model.lngMinute,model.lngSecond);
                         model.latitude = this.DegreeConvertBack(model.latDegree,model.latMinute,model.latSecond);
                         let marker = this.$mapUtil.createPointMarker(model,facMarker);
-                        let html = this.createHtml(model);
-                        marker.bindPopup(html);
-                        facLayer.addLayer(marker);
+                        if(marker){
+                            let html = this.createHtml(model);
+                            marker.bindPopup(html);
+                            facLayer.addLayer(marker);
+                        }
                     }
-
                     this.$mapUtil.lMap.addLayer(facLayer);
                     this.$mapUtil.addTemLayer(layerId,facLayer);
                 })
@@ -155,9 +156,11 @@
                     let markers = [];
                     for(let model of list) {
                         let marker = this.$mapUtil.createPointMarker(model,wryMarker);
-                        let html = this.createWryHtml(model);
-                        marker.bindPopup(html);
-                        markers.push(marker);
+                        if(marker){
+                            let html = this.createWryHtml(model);
+                            marker.bindPopup(html);
+                            markers.push(marker);
+                        }
                     }
                     let facLayer = L.layerGroup(markers);
                     this.$mapUtil.lMap.addLayer(facLayer);
@@ -174,9 +177,11 @@
                     let markers = [];
                     for(let model of list) {
                         let marker = this.$mapUtil.createPointMarker(model,wryMarker);
-                        let html = this.createWryHtml(model);
-                        marker.bindPopup(html);
-                        markers.push(marker);
+                        if(marker){
+                            let html = this.createWryHtml(model);
+                            marker.bindPopup(html);
+                            markers.push(marker);
+                        }
                     }
                     let facLayer = L.layerGroup(markers);
                     this.$mapUtil.lMap.addLayer(facLayer);
@@ -194,9 +199,11 @@
                     let markers = [];
                     for(let model of list) {
                         let marker = this.$mapUtil.createPointMarkerByLgnt(model,sttpMarker);
-                        let html = this.createSttpHtml(model);
-                        marker.bindPopup(html);
-                        markers.push(marker);
+                        if(marker){
+                            let html = this.createSttpHtml(model);
+                            marker.bindPopup(html);
+                            markers.push(marker);
+                        }
                     }
                     let facLayer = L.layerGroup(markers);
                     this.$mapUtil.lMap.addLayer(facLayer);
@@ -213,9 +220,11 @@
                     let markers = [];
                     for(let model of list) {
                         let marker = this.$mapUtil.createPointMarkerByLgnt(model,sttpMarker);
-                        let html = this.createSttpHtml(model);
-                        marker.bindPopup(html);
-                        markers.push(marker);
+                        if(marker){
+                            let html = this.createSttpHtml(model);
+                            marker.bindPopup(html);
+                            markers.push(marker);
+                        }
                     }
                     let facLayer = L.layerGroup(markers);
                     this.$mapUtil.lMap.addLayer(facLayer);

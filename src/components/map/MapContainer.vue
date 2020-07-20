@@ -178,7 +178,7 @@
                                 .openOn(this.$mapUtil.lMap);
 
                         }else{
-                            //this.queryFeatureByClick('NPWS:TjMap', 2000, 'the_geom', this.$mapUtil.lMap,evt)
+                            this.queryFeatureByClick('NPWS:TjMap', 2000, 'the_geom', this.$mapUtil.lMap,evt)
                         }
                     }
                 });
@@ -265,6 +265,7 @@
                     this.$mapUtil.lMap.removeLayer(this.windyLayer);
                     this.toolImg.windyImg = require("../../assets/image/menu/wind.png");
                     this.hourShow = false;
+                    this.$refs.hourline.stopPlay();
                 }else{
                     this.getWindyData();
                     this.hourShow = true;

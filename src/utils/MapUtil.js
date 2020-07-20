@@ -179,34 +179,41 @@ const mapUtil = {
         this.baseMapLayer.setZIndex(0);
     },
     createPointMarker(proper,img){
-        let mcIcon = L.icon({
-            iconUrl: img ,
-            iconSize: [20, 20],
-            iconAnchor: [0, 0],
-            popupAnchor: [12, 0],
-            shadowSize: [68, 95],
-            shadowAnchor: [22, 94]
-        });
+        if(proper.latitude&&proper.longitude&&proper.latitude!=""&&proper.longitude!=""){
+            let mcIcon = L.icon({
+                iconUrl: img ,
+                iconSize: [20, 20],
+                iconAnchor: [0, 0],
+                popupAnchor: [12, 0],
+                shadowSize: [68, 95],
+                shadowAnchor: [22, 94]
+            });
 
-        return L.marker([ proper.latitude,proper.longitude],{
-            icon:mcIcon,
-            id:proper.id
-        });
-
+            return L.marker([ proper.latitude,proper.longitude],{
+                icon:mcIcon,
+                id:proper.id
+            });
+        }else{
+            return null;
+        }
     },
     createPointMarkerByLgnt(proper,img){
-        let mcIcon = L.icon({
-            iconUrl: img ,
-            iconSize: [20, 20],
-            iconAnchor: [0, 0],
-            popupAnchor: [12, 0],
-            shadowSize: [68, 95],
-            shadowAnchor: [22, 94]
-        });
-        return L.marker([ proper.lat,proper.lng],{
-            icon:mcIcon,
-            id:proper.id
-        });
+        if(proper.lat&&proper.lng&&proper.lat!=""&&proper.lng!=""){
+            let mcIcon = L.icon({
+                iconUrl: img ,
+                iconSize: [20, 20],
+                iconAnchor: [0, 0],
+                popupAnchor: [12, 0],
+                shadowSize: [68, 95],
+                shadowAnchor: [22, 94]
+            });
+            return L.marker([ proper.lat,proper.lng],{
+                icon:mcIcon,
+                id:proper.id
+            });
+        }else{
+            return null;
+        }
     },
     createLayerGroup(markers,map){
         return L.layerGroup(markers);
