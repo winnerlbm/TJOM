@@ -129,13 +129,12 @@
                     params: {}
                 }).then(res => {
                     let list = res.data.data;
-                    let markers = [];
                     let facLayer = L.markerClusterGroup();
                     for(let model of list) {
-                        let lant = model.latDegree+"°"+model.latMinute+"′"+model.latSecond+"″";
-                        let lgtt = model.lngDegree+"°"+model.lngMinute+"′"+model.lngSecond+"″";
-                        model.longitude = this.DegreeConvertBack(lgtt);
-                        model.latitude = this.DegreeConvertBack(lant);
+                      //  let lant = model.latDegree+"°"+model.latMinute+"′"+model.latSecond+"″";
+                      //  let lgtt = model.lngDegree+"°"+model.lngMinute+"′"+model.lngSecond+"″";
+                        model.longitude =  this.DegreeConvertBack(model.lngDegree,model.lngMinute,model.lngSecond);
+                        model.latitude = this.DegreeConvertBack(model.latDegree,model.latMinute,model.latSecond);
                         let marker = this.$mapUtil.createPointMarker(model,facMarker);
                         let html = this.createHtml(model);
                         marker.bindPopup(html);
@@ -223,11 +222,11 @@
                     this.$mapUtil.addTemLayer(layerId,facLayer);
                 })
             },
-            DegreeConvertBack(value){ ///<summary>度分秒转换成为度</summary>
-                let du = value.split("°")[0];
-                let fen = value.split("°")[1].split("′")[0];
-                let miao = value.split("°")[1].split("′")[1].split('″')[0];
-                return Math.abs(du) + (Math.abs(fen)/60 + Math.abs(miao)/3600);
+            DegreeConvertBack(deg,min,sec){ ///<summary>度分秒转换成为度</summary>
+                //let du = value.split("°")[0];
+                //let fen = value.split("°")[1].split("′")[0];
+                //let miao = value.split("°")[1].split("′")[1].split('″')[0];
+                return Math.abs(deg) + (Math.abs(min)/60 + Math.abs(sec)/3600);
             },
             createHtml(model){
                 let html = [];

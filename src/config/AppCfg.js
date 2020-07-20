@@ -16,19 +16,20 @@ const appCfg = {
     },
     windy: {
         //获取风场数据路径
-        getUrl() {
+        getUrl(curDate) {
             //eg: http://yun.fpi-inc.site/fpi-windy-server/windfield/api/v1.0/show-windy/common/cn/2020052813.json
             //时间格式：年月日小时（24小时制）
-            let year, month, day, hour
-            year = new Date().getFullYear()
-            month = new Date().getMonth() + 1
-            month = month < 10 ? '0' + month : '' + month
-            day = new Date().getDate()
-            day = day < 10 ? '0' + day : '' + day
-            hour = new Date().getHours()
-            hour = hour < 10 ? '0' + hour : '' + hour
-            let curDate = year + month + day + hour
-            console.log(curDate)
+            if(!curDate){
+                let year, month, day, hour;
+                year = new Date().getFullYear();
+                month = new Date().getMonth() + 1;
+                month = month < 10 ? '0' + month : '' + month;
+                day = new Date().getDate();
+                day = day < 10 ? '0' + day : '' + day;
+                hour = new Date().getHours();
+                hour = hour < 10 ? '0' + hour : '' + hour;
+                curDate = year + month + day + hour;
+            }
             return 'http://yun.fpi-inc.site/fpi-windy-server/windfield/api/v1.0/show-windy/common/cn/' + curDate + '.json'
         }
     }

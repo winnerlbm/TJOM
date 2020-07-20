@@ -11,7 +11,7 @@ let baseUrl = process.env.VUE_APP_BASE_URL;
 const checkLoginUser = params => post(baseUrl + 'login', params);
 
 /*加载风场数据*/
-const getWindyData = () => get(appCfg.windy.getUrl());
+const getWindyData = (params) => get(appCfg.windy.getUrl(params));
 
 const getWfsFeature = (url) => get(url);
 

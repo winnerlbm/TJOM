@@ -5,7 +5,9 @@
             <!--数据统计面板-->
             <info-container v-show="false" class="map-info-cls"/>
             <!--图层管理面板-->
-            <layer-container class="layerClass" v-show="layersShow == true"></layer-container>
+            <layer-container class="layerClass" v-show="layersShow"></layer-container>
+
+            <marker-container ref="markRef" class="layerClass" v-show="markerShow"></marker-container>
             <!--搜索面板-->
             <search-container class="searchClass"></search-container>
             <!--工具条面板-->
@@ -19,13 +21,17 @@
                         <img :src="toolImg.roadImg" alt="">
                         <span>路况</span>
                     </li>
+                    <li @click="setMarkMap"  :class="{'spanSel':markSelect == true}" style="border-right: 1px solid rgba(12, 60, 119, 0.64);">
+                        <img :src="toolImg.markImg" style="margin-right: 5px;" alt="">
+                        <span>标记</span>
+                    </li>
                     <li @click="setMapBox"  :class="{'spanSel':mapboxShow == true}"  style="padding-right: 5px;border-right: 1px solid rgba(12, 60, 119, 0.64);">
                         <img :src="toolImg.mapboxImg" style="width: 15px;height: 15px;" alt="">
                         <span>工具箱</span>
                         <img class="openBox" :src="toolImg.updowImg" alt="">
                     </li>
                     <li @click="setLayers"  :class="{'spanSel':layersShow == true}">
-                        <img :src="toolImg.layerImg" alt="">
+                        <img :src="toolImg.layerImg" alt=""  style="margin-right: 5px;">
                         <span>图层</span>
                     </li>
                 </ul>
@@ -80,10 +86,11 @@
     import layerContainer from "./layerContainer";
     import SearchContainer from "./SearchContainer";
     import HourLine from "../util/HourLine";
+    import MarkerContainer from "./MarkerContainer";
 
     export default {
         name: "MapContainer",
-        components: {InfoContainer,layerContainer,SearchContainer,HourLine},
+        components: {InfoContainer,layerContainer,SearchContainer,HourLine,MarkerContainer},
         data() {
             return {
                 highLayer: null,
@@ -93,6 +100,8 @@
                 selecteMapIndex:0,
                 windySelect:false,
                 roadSelect:false,
+                markSelect:false,
+                markerShow:false,
                 showClass:"baseMap",
                 hourShow:true,
                 mapboxShow:false,
@@ -111,8 +120,6 @@
                     {id:"tdtLayer",name:"影像图",type:"tdtimg",image:require("../../assets/image/map/mapimg.jpg")},
                     {id:"tdtLayer",name:"矢量图",type:"tdtvec",image:require("../../assets/image/map/mapvec.jpg")},
                     {id:"tdtLayer",name:"地形图",type:"tdtter",image:require("../../assets/image/map/mapter.jpg")}
-
-                 //   {id:"tdtLayer",name:"暖色版",type:"Warm",image:require("../../assets/image/google.png")}
                 ],
                 themeList:[
                     {id:"theme_road",name:"路况",type:"road",selected:false},
@@ -142,31 +149,20 @@
                     roadImg:require("../../assets/image/menu/road.png"),
                     mapboxImg:require("../../assets/image/menu/toolbox.png"),
                     layerImg:require("../../assets/image/menu/layers.png"),
-                    updowImg:require("../../assets/image/menu/up.png")
+                    updowImg:require("../../assets/image/menu/up.png"),
+                    markImg:require("../../assets/image/menu/marks.png")
                 },
                 layerTemps:[],
-                drawControl:null,
-                options: {
-                    speedConfig: { // 速度配置
-                        "慢": 5000,
-                        "中":3000,
-                        "快":1000,
-                    },
-                    speed:1000,
-                    startDate:'2018-07-01 ',
-                    endDate:'2018-07-31',
-                    timeUnitControl: true, //是否显示时/天切换控件
-                    timeUnit: '天', // 默认按天还是按小时
-                    isShowHour: true, // 按小时是否可点
-                }
+                drawControl:null
             };
         },
         //需要页面加载完执行的方法,可以写在$nextTick中
         mounted() {
             this.$nextTick(() => {
-                this.$mapUtil.initMap('map')
-               // this.getWindyData()
-                this.$mapUtil.wmsLayer('NPWS:TjMap').addTo(this.$mapUtil.lMap)
+                this.$mapUtil.initMap('map');
+                this.$refs.markRef.initDraw();
+                this.hourShow = false;
+                this.$mapUtil.wmsLayer('NPWS:TjMap').addTo(this.$mapUtil.lMap);
               //  this.queryFeatureByClick('NPWS:TjMap', 2000, 'the_geom', this.$mapUtil.lMap)
                // this.$mapUtil.heatmapLayer(this.$mapUtil.lMap)
                // this.$mapUtil.removeLayer("layeri",this.$mapUtil.lMap)
@@ -182,7 +178,7 @@
                                 .openOn(this.$mapUtil.lMap);
 
                         }else{
-                            this.queryFeatureByClick('NPWS:TjMap', 2000, 'the_geom', this.$mapUtil.lMap,evt)
+                            //this.queryFeatureByClick('NPWS:TjMap', 2000, 'the_geom', this.$mapUtil.lMap,evt)
                         }
                     }
                 });
@@ -203,9 +199,8 @@
         },
         methods: {
             /*加载风场数据*/
-            getWindyData() {
-                getWindyData().then((data) => {
-                    console.log(data);
+            getWindyData(date) {
+                getWindyData(date).then((data) => {
                     if (data && data.length > 0) {
                         this.analysisWindyData(data);
                         this.windyLayer = this.$mapUtil.windyLayer(data);
@@ -301,6 +296,16 @@
                     }).addTo(this.$mapUtil.lMap);
                     this.layerTemps.push({layerId:layerId,layer:layer});
                     this.toolImg.roadImg = require("../../assets/image/menu/roadSel.png");
+                }
+            },
+            setMarkMap(){
+                this.markSelect = !this.markSelect;
+                if(!this.markSelect){
+                    this.toolImg.markImg = require("../../assets/image/menu/marks.png");
+                    this.markerShow = false;
+                }else{
+                    this.toolImg.markImg = require("../../assets/image/menu/markSel.png");
+                    this.markerShow = true;
                 }
             },
             setMapBox(){
@@ -525,14 +530,15 @@
             doSomething(e){
 
             },
-            onAnimate(val){
-                console.log(val);
-            },
-            onclick(val){
-                console.log(val);
-            },
             onTimeChange(val){
-                console.log(val);
+                let day = val.day;
+                let hour = val.hour;
+                let yhour = hour < 10 ? '0' + hour : '' + hour;
+                let ymd = day.replace(/-/g,"")+yhour;
+                if(this.$mapUtil.lMap.hasLayer(this.windyLayer)){
+                    this.$mapUtil.lMap.removeLayer(this.windyLayer);
+                }
+                this.getWindyData(ymd);
             }
         }
     }
@@ -816,9 +822,11 @@
     .popuDiv {
         height: 28px;
         line-height: 28px;
-        min-width: 200px;
+        min-width: 250px;
         width:auto;
         padding: 0 5px;
+        word-break: break-all;
+        word-wrap: break-word;
     }
     .el-checkbox__inner {
         background-color: transparent;

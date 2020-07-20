@@ -53,16 +53,16 @@
                 hour_veg:10,
                 isShowHoverPopup:false,
                 hours:[
-                    {hour:"0",text:"0:00"},
-                    {hour:"1",text:"1:00"},
-                    {hour:"2",text:"2:00"},
-                    {hour:"3",text:"3:00"},
-                    {hour:"4",text:"4:00"},
-                    {hour:"5",text:"5:00"},
-                    {hour:"6",text:"6:00"},
-                    {hour:"7",text:"7:00"},
-                    {hour:"8",text:"8:00"},
-                    {hour:"9",text:"9:00"},
+                    {hour:"00",text:"0:00"},
+                    {hour:"01",text:"1:00"},
+                    {hour:"02",text:"2:00"},
+                    {hour:"03",text:"3:00"},
+                    {hour:"04",text:"4:00"},
+                    {hour:"05",text:"5:00"},
+                    {hour:"06",text:"6:00"},
+                    {hour:"07",text:"7:00"},
+                    {hour:"08",text:"8:00"},
+                    {hour:"09",text:"9:00"},
                     {hour:"10",text:"10:00"},
                     {hour:"11",text:"11:00"},
                     {hour:"12",text:"12:00"},
@@ -170,11 +170,23 @@
             },
             dateClick(){
 
+            },
+            getCurrentDate(){
+                let year, month, day;
+                year = new Date().getFullYear();
+                month = new Date().getMonth() + 1;
+                month = month < 10 ? '0' + month : '' + month;
+                day = new Date().getDate();
+                day = day < 10 ? '0' + day : '' + day;
+                let curDate = year +"-"+ month +"-"+ day;
+                return curDate;
             }
         },
         mounted(){
             this.$nextTick(function () {
                 this.calcWidth();
+                this.currentDate = this.getCurrentDate();
+
             });
             let _this = this;
             window.onresize = ()=>{
@@ -256,7 +268,7 @@
         display: flex;
     }
     .timeList ul li {
-        width: 5em;
+        width: 5%;
         position: relative;
         padding-top: 1.5em;
     }

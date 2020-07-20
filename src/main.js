@@ -18,7 +18,7 @@ import mapUtil from './utils/MapUtil'
 
 /*字体库 fa4*/
 import 'font-awesome/css/font-awesome.css'
-import '_leaflet-draw@1.0.4@leaflet-draw/dist/leaflet.draw.css';
+import 'leaflet-draw/dist/leaflet.draw.css';
 /*引入leaflet及图表库*/
 import 'leaflet/dist/leaflet.css';
 import "leaflet.markercluster/dist/MarkerCluster.css"

@@ -187,6 +187,7 @@ const mapUtil = {
             shadowSize: [68, 95],
             shadowAnchor: [22, 94]
         });
+
         return L.marker([ proper.latitude,proper.longitude],{
             icon:mcIcon,
             id:proper.id
