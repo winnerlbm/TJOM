@@ -56,16 +56,14 @@
 
 <script>
     import appCfg from "@config/AppCfg"
-    import facMarker from "../../assets/image/map/factory.png";
-    import wryMarker from "../../assets/image/map/wry.png";
-    import sttpMarker from "../../assets/image/map/sttp.png";
     export default {
         name: "layerContainer",
         data(){
             return {
                 factoryList:[
                   //  {type:"wry",name:"污染源",checked:false,image:require("../../assets/image/icon/wry.png")},
-                    {type:"factory",name:"工况信息",checked:false,image:require("../../assets/image/icon/gkxx.png")},
+                    {type:"factory",name:"企业信息",checked:false,image:require("../../assets/image/icon/gkxx.png")},
+                    {type:"mine",name:"工况企业信息",checked:false,image:require("../../assets/image/icon/gkxx.png")},
                     {type:"ww",name:"废气排污口",checked:false,image:require("../../assets/image/icon/wry.png")},
                     {type:"wg",name:"废水排污口",checked:false,image:require("../../assets/image/icon/wry.png")},
                     /*{type:"gk",name:"入河海污口",checked:false,image:require("../../assets/image/icon/wry.png")},
@@ -73,17 +71,19 @@
                 ],
                 moniList:[
                     {type:"sttp_normal",name:"常规监测站",checked:false,image:require("../../assets/image/icon/cgz.png")},
-                    {type:"sttp_yd",name:"移动监测站(小时)",checked:false,image:require("../../assets/image/icon/ydz.png")},
+                    {type:"sttp_yd",name:"移动监测站",checked:false,image:require("../../assets/image/icon/ydz.png")},
                     {type:"sttp_wz",name:"微站",checked:false,image:require("../../assets/image/icon/wz.png")}
                 ],
                 airList:[
+                    {type:"sttp_all",name:"空气质量监测站点",checked:false,image:require("../../assets/image/icon/gkz.png")},
                     {type:"sttp_gk",name:"国控站点",checked:false,image:require("../../assets/image/icon/gkz.png")},
-                    {type:"sttp_sk",name:"省(区)控站点(小时)",checked:false,image:require("../../assets/image/icon/skz.png")}
+                    {type:"sttp_sk",name:"省(区)控站点",checked:false,image:require("../../assets/image/icon/skz.png")}
                 ],
                 statisList:[
                     {type:"hjxf",name:"环境信访热力图",checked:false,image:require("../../assets/image/icon/rlt_1.png")},
                     {type:"xzcf",name:"行政处罚热力图",checked:false,image:require("../../assets/image/icon/rlt_2.png")},
-                    /*{type:"gk",name:"在线监测热力图",checked:false,image:require("../../assets/image/icon/rlt_1.png")}*/
+                    {type:"fqpk",name:"废气排口超标热力图",checked:false,image:require("../../assets/image/icon/rlt_1.png")},
+                    {type:"fspk",name:"废水排口超标热力图",checked:false,image:require("../../assets/image/icon/rlt_1.png")}
                 ]
             }
         },
@@ -92,20 +92,41 @@
         },
         mounted(){
             console.log(appCfg.map.gisApiUrl);
+            let _self = this;
+            window.getMineTime = function(id,type){
+                let param = {
+                    id:id,
+                    type:type
+                };
+               // _self.$emit('showTimeData', param);
+                _self.$parent.showTimeData(param)
+            };
         },
         methods: {
             setFactory(val,item){
                 if(val){
                     if(item.type == "factory"){
                         this.getFactory(item.type);
-                    }else if(item.type == "sttp_yd"||item.type == "sttp_wz"||item.type == "sttp_gk"||item.type == "sttp_sk"){
+                    }else if(item.type == "sttp_yd"){
                         this.getSttp(item.type);
                     }else if(item.type == "wry"){
                         this.getWry(item.type);
-                    }else if(item.type == "ww"||item.type == "wg"){
+                    }else if(item.type == "wg"){
                         this.getPwk(item.type);
                     }else if(item.type == "sttp_normal"){
                         this.getNormalSttp(item.type);
+                    }else if(item.type == "sttp_wz"){
+                        this.getWzSttp(item.type);
+                    }else if(item.type == "mine"){
+                        this.getMineData(item.type);
+                    }else if(item.type == "sttp_all"){
+                        this.getSttpAll(item.type);
+                    }else if(item.type == "sttp_gk"){
+                        this.getCsttp(item.type,1);
+                    }else if(item.type == "sttp_sk"){
+                        this.getCsttp(item.type,2);
+                    }else if(item.type == "ww"){
+                        this.getPwk(item.type);
                     }
                 }else{
                     this.$mapUtil.removeTemLayer(item.type);
@@ -117,25 +138,51 @@
                         this.getXzcfData(item.type);
                     }else if(item.type == "hjxf"){
                         this.getHjxfData(item.type);
+                    }else if(item.type == "fspk"){
+                        this.getWaterData(item.type);
+                    }else if(item.type == "fqpk"){
+                        this.getAirData(item.type);
                     }
                 }else{
                     this.$mapUtil.removeTemLayer(item.type);
                 }
             },
             getFactory(layerId){
+                let wzIcon = require("../../assets/image/map/map_fac.png");
+                let body = {
+                    "conditions":[
+                        {
+                            "operator":"AND",
+                            "field":"",
+                            "match":"contain",
+                            "value":"",
+                            "maxValue":"",
+                            "minValue":""
+                        }
+                    ],
+                    "page":{
+                        "pageable": false,
+                        "currentPage": 1,
+                        "pageSize": 10
+                    },
+                    "sort":{
+                        "field": "",
+                        "order": "DESC"
+                    }
+                };
                 this.$axios({
-                    url: appCfg.map.gisApiUrl+"api/gis/company",
-                    method: "get",
-                    params: {}
+                    url: appCfg.map.gisApiUrl+"api/share/data/2c9a818f7371258f01737666a9c811af?userKey="+appCfg.map.userKey,
+                    method: "post",
+                    data: body,
+                    header:{'Content-type': 'application/json'}
                 }).then(res => {
-                    let list = res.data.data;
+
+                    let list = res.data.data.list;
                     let facLayer = L.markerClusterGroup();
                     for(let model of list) {
-                      //  let lant = model.latDegree+"°"+model.latMinute+"′"+model.latSecond+"″";
-                      //  let lgtt = model.lngDegree+"°"+model.lngMinute+"′"+model.lngSecond+"″";
                         model.longitude =  this.DegreeConvertBack(model.lngDegree,model.lngMinute,model.lngSecond);
                         model.latitude = this.DegreeConvertBack(model.latDegree,model.latMinute,model.latSecond);
-                        let marker = this.$mapUtil.createPointMarker(model,facMarker);
+                        let marker = this.$mapUtil.createPointMarker(model,wzIcon);
                         if(marker){
                             let html = this.createHtml(model);
                             marker.bindPopup(html);
@@ -146,18 +193,78 @@
                     this.$mapUtil.addTemLayer(layerId,facLayer);
                 })
             },
-            getWry(layerId){
+            getMineData(layerId){
+                let wzIcon = require("../../assets/image/map/map_gk.png");
+                let body = {
+                    "conditions":[
+                        {
+                            "operator":"AND",
+                            "field":"",
+                            "match":"contain",
+                            "value":"",
+                            "maxValue":"",
+                            "minValue":""
+                        }
+                    ],
+                    "page":{
+                        "pageable": false,
+                        "currentPage": 1,
+                        "pageSize": 10
+                    },
+                    "sort":{
+                        "field": "",
+                        "order": "DESC"
+                    }
+                };
                 this.$axios({
-                    url: "./data/wry.json",
-                    method: "get",
-                    params: {}
+                    url: appCfg.map.gisApiUrl+"api/share/data/2c9a818f73768e6501737affb75b00ad?userKey="+appCfg.map.userKey,
+                    method: "post",
+                    data: body,
+                    header:{'Content-type': 'application/json'}
                 }).then(res => {
-                    let list = res.data.data;
+
+                    let list = res.data.data.list;
+                    let facLayer = L.markerClusterGroup();
+                    for(let model of list) {
+                        let marker = this.$mapUtil.createPointMarker(model,wzIcon);
+                        if(marker){
+                            let html = this.createMineHtml(model);
+                            marker.bindPopup(html);
+                            facLayer.addLayer(marker);
+                        }
+                    }
+                    this.$mapUtil.lMap.addLayer(facLayer);
+                    this.$mapUtil.addTemLayer(layerId,facLayer);
+                })
+            },
+            getWry(layerId){
+                let wzIcon = require("../../assets/image/map/map_water.png");
+                let body = {
+                    "conditions":[
+
+                    ],
+                    "page":{
+                        "pageable": false,
+                        "currentPage": 1,
+                        "pageSize": 10
+                    },
+                    "sort":{
+                        "field": "",
+                        "order": "DESC"
+                    }
+                };
+                this.$axios({
+                    url: appCfg.map.gisApiUrl+"api/share/data/2c9a818f73768e6501737696cc1e0021?userKey="+appCfg.map.userKey,
+                    method: "post",
+                    data: body,
+                    header:{'Content-type': 'application/json'}
+                }).then(res => {
+                    let list = res.data.data.list;
                     let markers = [];
                     for(let model of list) {
-                        let marker = this.$mapUtil.createPointMarker(model,wryMarker);
+                        let marker = this.$mapUtil.createPointMarker(model,wzIcon);
                         if(marker){
-                            let html = this.createWryHtml(model);
+                            let html = this.createPwkHtml(model);
                             marker.bindPopup(html);
                             markers.push(marker);
                         }
@@ -168,17 +275,33 @@
                 })
             },
             getPwk(layerId){
+                let wzIcon = require("../../assets/image/map/map_water.png");
+                let body = {
+                    "conditions":[
+
+                    ],
+                    "page":{
+                        "pageable": false,
+                        "currentPage": 1,
+                        "pageSize": 10
+                    },
+                    "sort":{
+                        "field": "",
+                        "order": "DESC"
+                    }
+                };
                 this.$axios({
-                    url: appCfg.map.gisApiUrl+"api/city/outlet",
-                    method: "get",
-                    params: {monitorType:layerId}
+                    url: appCfg.map.gisApiUrl+"api/share/data/2c9a818f73768e6501737695b208001e?userKey="+appCfg.map.userKey,
+                    method: "post",
+                    data: body,
+                    header:{'Content-type': 'application/json'}
                 }).then(res => {
-                    let list = res.data.data;
+                    let list = res.data.data.list;
                     let markers = [];
                     for(let model of list) {
-                        let marker = this.$mapUtil.createPointMarker(model,wryMarker);
+                        let marker = this.$mapUtil.createPointMarker(model,wzIcon);
                         if(marker){
-                            let html = this.createWryHtml(model);
+                            let html = this.createPwkHtml(model);
                             marker.bindPopup(html);
                             markers.push(marker);
                         }
@@ -189,18 +312,81 @@
                 })
             },
             getSttp(layerId){
-                let url = "./data/"+layerId+".json";
+                let wzIcon = require("../../assets/image/map/map_yd.png");
+                let body = {
+                    "conditions":[
+
+                    ],
+                    "page":{
+                        "pageable": false,
+                        "currentPage": 1,
+                        "pageSize": 10
+                    },
+                    "sort":{
+                        "field": "",
+                        "order": "DESC"
+                    }
+                };
                 this.$axios({
-                    url: url,
-                    method: "get",
-                    params: {}
+                    url: appCfg.map.gisApiUrl+"api/share/data/2c9a818f73768e65017376b69a16003c?userKey="+appCfg.map.userKey,
+                    method: "post",
+                    data: body,
+                    header:{'Content-type': 'application/json'}
                 }).then(res => {
-                    let list = res.data.data;
+                    let list = res.data.data.list;
                     let markers = [];
                     for(let model of list) {
-                        let marker = this.$mapUtil.createPointMarkerByLgnt(model,sttpMarker);
+                        let marker = this.$mapUtil.createPointMarkerByLgnt(model,wzIcon);
                         if(marker){
                             let html = this.createSttpHtml(model);
+                            marker.bindPopup(html);
+                            markers.push(marker);
+                        }
+                    }
+                    let facLayer = L.layerGroup(markers);
+                    this.$mapUtil.lMap.addLayer(facLayer);
+                    this.$mapUtil.addTemLayer(layerId,facLayer);
+                })
+            },
+            getCsttp(layerId,type){
+                let wzIcon = require("../../assets/image/map/sttp_gk.png");
+                let body = {
+                    "conditions":[
+                        {
+                            "operator":"AND",
+                            "field":"managerType",
+                            "match":"equal",
+                            "value":type,//国家级
+                            "maxValue":"",
+                            "minValue":""
+                        }
+                    ],
+                    "page":{
+                        "pageable": false,
+                        "currentPage": 1,
+                        "pageSize": 10
+                    },
+                    "sort":{
+                        "field": "",
+                        "order": "DESC"
+                    }
+                };
+                this.$axios({
+                    url: appCfg.map.gisApiUrl+"api/share/data/2c9a818f73768e65017376b968ff0048?userKey="+appCfg.map.userKey,
+                    method: "post",
+                    data: body,
+                    header:{'Content-type': 'application/json'}
+                }).then(res => {
+                    let list = res.data.data.list;
+                    if(list.length == 0){
+                        this.$message("未查询到相关数据！");
+                        return;
+                    }
+                    let markers = [];
+                    for(let model of list) {
+                        let marker = this.$mapUtil.createPointMarker(model,wzIcon);
+                        if(marker){
+                            let html = this.createGSttpHtml(model);
                             marker.bindPopup(html);
                             markers.push(marker);
                         }
@@ -211,15 +397,29 @@
                 })
             },
             getNormalSttp(layerId){
+                let wzIcon = require("../../assets/image/map/fac.png");
+                let body = {
+                    "conditions":[
+                        {
+                            "operator":"AND",
+                            "field":"stationType",
+                            "match":"equal",
+                            "value":"1",//普通站
+                            "maxValue":"",
+                            "minValue":""
+                        }
+                    ]
+                };
                 this.$axios({
-                    url: appCfg.map.gisApiUrl+"api/gis/station",
-                    method: "get",
-                    params: {}
+                    url: appCfg.map.gisApiUrl+"api/share/data/2c9a818f73768e65017376b5f9b30039?userKey="+appCfg.map.userKey,
+                    method: "post",
+                    data: body,
+                    header:{'Content-type': 'application/json'}
                 }).then(res => {
-                    let list = res.data.data;
+                    let list = res.data.data.list;
                     let markers = [];
                     for(let model of list) {
-                        let marker = this.$mapUtil.createPointMarkerByLgnt(model,sttpMarker);
+                        let marker = this.$mapUtil.createPointMarkerByLgnt(model,wzIcon);
                         if(marker){
                             let html = this.createSttpHtml(model);
                             marker.bindPopup(html);
@@ -231,10 +431,79 @@
                     this.$mapUtil.addTemLayer(layerId,facLayer);
                 })
             },
+            getWzSttp(layerId){
+                let wzIcon = require("../../assets/image/map/map_wz2.png");
+                let body = {
+                    "conditions":[
+                        {
+                            "operator":"AND",
+                            "field":"stationType",
+                            "match":"equal",
+                            "value":"2",//微通站
+                            "maxValue":"",
+                            "minValue":""
+                        }
+                    ]
+                };
+                this.$axios({
+                    url: appCfg.map.gisApiUrl+"api/share/data/2c9a818f73768e65017376b5f9b30039?userKey="+appCfg.map.userKey,
+                    method: "post",
+                    data: body,
+                    header:{'Content-type': 'application/json'}
+                }).then(res => {
+                    let list = res.data.data.list;
+                    let markers = [];
+                    for(let model of list) {
+                        let marker = this.$mapUtil.createPointMarkerByLgnt(model,wzIcon);
+                        if(marker){
+                            let html = this.createSttpHtml(model);
+                            marker.bindPopup(html);
+                            markers.push(marker);
+                        }
+                    }
+                    let facLayer = L.layerGroup(markers);
+                    this.$mapUtil.lMap.addLayer(facLayer);
+                    this.$mapUtil.addTemLayer(layerId,facLayer);
+                })
+            },
+            getSttpAll(layerId){
+                let wzIcon = require("../../assets/image/map/map_air.png");
+                let body = {
+                    "conditions":[
+
+                    ],
+                    "page":{
+                        "pageable": false,
+                        "currentPage": 1,
+                        "pageSize": 10
+                    },
+                    "sort":{
+                        "field": "",
+                            "order": "DESC"
+                    }
+                };
+                this.$axios({
+                    url: appCfg.map.gisApiUrl+"api/share/data/2c9a818f73768e65017376b968ff0048?userKey="+appCfg.map.userKey,
+                    method: "post",
+                    data: body,
+                    header:{'Content-type': 'application/json'}
+                }).then(res => {
+                    let list = res.data.data.list;
+                    let markers = [];
+                    for(let model of list) {
+                        let marker = this.$mapUtil.createPointMarker(model,wzIcon);
+                        if(marker){
+                            let html = this.createGSttpHtml(model);
+                            marker.bindPopup(html);
+                            markers.push(marker);
+                        }
+                    }
+                    let facLayer = L.layerGroup(markers);
+                    this.$mapUtil.lMap.addLayer(facLayer);
+                    this.$mapUtil.addTemLayer(layerId,facLayer);
+                })
+            },
             DegreeConvertBack(deg,min,sec){ ///<summary>度分秒转换成为度</summary>
-                //let du = value.split("°")[0];
-                //let fen = value.split("°")[1].split("′")[0];
-                //let miao = value.split("°")[1].split("′")[1].split('″')[0];
                 return Math.abs(deg) + (Math.abs(min)/60 + Math.abs(sec)/3600);
             },
             createHtml(model){
@@ -245,11 +514,41 @@
                 html.push('<div class="popuDiv"><span>排污许可证号：</span>'+model.permitLicence+'</div>');
                 return html.join('');
             },
+            createMineHtml(model){
+                let html = [];
+                html.push('<div class="popuDiv"><span>企业名称：</span>'+model.enterpriseName+'</div>');
+                html.push('<div class="popuDiv"><span>企业地址：</span>'+model.address+'</div>');
+                html.push('<div class="popuDiv"><span>排污许可证号：</span>'+model.permitLicence+'</div>');
+                html.push('<div class="poputools">');
+                html.push('<button onclick="getMineTime(\''+model.enterpriseNo+'\',\'mine\')">实时工况信息</button>');
+                html.push('</div>');
+                return html.join('');
+            },
             createSttpHtml(model){
                 let html = [];
                 html.push('<div class="popuDiv"><span>站点名称：</span>'+model.stationName+'</div>');
                 html.push('<div class="popuDiv"><span>站点类型：</span>'+this.getStationTypeNm(model.stationType)+'</div>');
                 html.push('<div class="popuDiv"><span>监测参数：</span>'+model.param+'</div>');
+                html.push('<div class="poputools">');
+                html.push('<button onclick="getMineTime(\''+model.stationId+'\',\'stpmine\')">分钟数据</button>');
+                html.push('<button onclick="getMineTime(\''+model.stationId+'\',\'stphour\')">小时数据</button>');
+                html.push('</div>');
+                return html.join('');
+            },
+            createPwkHtml(model){
+                let html = [];
+                html.push('<div class="popuDiv"><span>公司名称：</span>'+model.companyName+'</div>');
+                html.push('<div class="popuDiv"><span>排口类型：</span>'+model.portName+'</div>');
+                html.push('<div class="popuDiv"><span>使用状态：</span>'+model.useStatusName+'</div>');
+                html.push('<div class="popuDiv"><span>排污许可证：</span>'+model.permitLicence+'</div>');
+                return html.join('');
+            },
+            createGSttpHtml(model){
+                let html = [];
+                html.push('<div class="popuDiv"><span>站点名称：</span>'+model.pointName+'</div>');
+                html.push('<div class="popuDiv"><span>站点类型：</span>'+model.manageLevelName+'</div>');
+                html.push('<div class="popuDiv"><span>站点编码：</span>'+model.pointCode+'</div>');
+                html.push('<div class="popuDiv"><span>站点地址：</span>'+model.address+'</div>');
                 return html.join('');
             },
             createWryHtml(model){
@@ -270,36 +569,34 @@
                 }
             },
             getXzcfData(layerId){
+                let body = {
+                    "conditions":[
+                        {
+                            "operator":"AND",
+                            "match":"contain",
+                            "field":"startDate",
+                            "value":"2010-01-01"
+                        },
+                        {
+                            "operator":"AND",
+                            "match":"contain",
+                            "field":"endDate",
+                            "value":"2020-01-01"
+                        }
+                    ]
+                };
                 this.$axios({
-                    url: "./data/xzcf.json",
-                    method: "get",
-                    params: {}
+                    url: appCfg.map.gisApiUrl+"api/share/data/2c9a818f73768e6501737b048d0300bc?userKey="+appCfg.map.userKey,
+                    method: "post",
+                    data: body,
+                    header:{'Content-type': 'application/json'}
                 }).then(res => {
                     let list = res.data.data;
 
                     let data = [];
                     for(let model of list) {
-                       let point = {lat: model.lat, lng: model.lng, count: Number(model.indexValue)};
-                       data.push(point)
-                    }
-                    let heatData = {
-                        max: 10,
-                        data: data
-                    };
-                    let heatLayer = this.$mapUtil.heatmapLayer(this.$mapUtil.lMap,heatData);
-                    this.$mapUtil.addTemLayer(layerId,heatLayer);
-                })
-            },
-            getHjxfData(layerId){
-                this.$axios({
-                    url: "./data/hjxf.json",
-                    method: "get",
-                    params: {}
-                }).then(res => {
-                    let list = res.data.data;
-
-                    let data = [];
-                    for(let model of list) {
+                        model.lng =  this.DegreeConvertBack(model.lngDegree,model.lngMinute,model.lngSecond);
+                        model.lat = this.DegreeConvertBack(model.latDegree,model.latMinute,model.latSecond);
                         let point = {lat: model.lat, lng: model.lng, count: Number(model.indexValue)};
                         data.push(point)
                     }
@@ -310,6 +607,126 @@
                     let heatLayer = this.$mapUtil.heatmapLayer(this.$mapUtil.lMap,heatData);
                     this.$mapUtil.addTemLayer(layerId,heatLayer);
                 })
+            },
+            getHjxfData(layerId){
+                let body = {
+                    "conditions":[
+                        {
+                            "operator":"AND",
+                            "match":"contain",
+                            "field":"startDate",
+                            "value":"2010-01-01"
+                        },
+                        {
+                            "operator":"AND",
+                            "match":"contain",
+                            "field":"endDate",
+                            "value":"2020-01-01"
+                        }
+                    ]
+                };
+                this.$axios({
+                    url: appCfg.map.gisApiUrl+"api/share/data/2c9a818f73768e6501737b04109f00b9?userKey="+appCfg.map.userKey,
+                    method: "post",
+                    data: body,
+                    header:{'Content-type': 'application/json'}
+                }).then(res => {
+                    let list = res.data.data;
+                    let data = [];
+                    for(let model of list) {
+                        model.lng =  this.DegreeConvertBack(model.lngDegree,model.lngMinute,model.lngSecond);
+                        model.lat = this.DegreeConvertBack(model.latDegree,model.latMinute,model.latSecond);
+                        let point = {lat: model.lat, lng: model.lng, count: Number(model.indexValue)};
+                        data.push(point)
+                    }
+                    let heatData = {
+                        max: 10,
+                        data: data
+                    };
+                    let heatLayer = this.$mapUtil.heatmapLayer(this.$mapUtil.lMap,heatData);
+                    this.$mapUtil.addTemLayer(layerId,heatLayer);
+                })
+            },
+            getWaterData(layerId){
+                let body = {
+                    "conditions":[
+                        {
+                            "operator":"AND",
+                            "match":"contain",
+                            "field":"startDate",
+                            "value":"2010-01-01"
+                        },
+                        {
+                            "operator":"AND",
+                            "match":"contain",
+                            "field":"endDate",
+                            "value":"2020-01-01"
+                        }
+                    ]
+                };
+                this.$axios({
+                    url: appCfg.map.gisApiUrl+"api/share/data/2c9a818f73768e6501737b05a40800c2?userKey="+appCfg.map.userKey,
+                    method: "post",
+                    data: body,
+                    header:{'Content-type': 'application/json'}
+                }).then(res => {
+                    let list = res.data.data;
+                    let data = [];
+                    for(let model of list) {
+                        if( model.latitude!="null"&&model.longitude!="null"){
+                            let point = {lat: model.latitude, lng: model.longitude, count: Number(model.indexValue)};
+                            data.push(point)
+                        }
+                    }
+                    let heatData = {
+                        max: 10,
+                        data: data
+                    };
+                    let heatLayer = this.$mapUtil.heatmapLayer(this.$mapUtil.lMap,heatData);
+                    this.$mapUtil.addTemLayer(layerId,heatLayer);
+                })
+            },
+            getAirData(layerId){
+                let body = {
+                    "conditions":[
+                        {
+                            "operator":"AND",
+                            "match":"contain",
+                            "field":"startDate",
+                            "value":"2010-01-01"
+                        },
+                        {
+                            "operator":"AND",
+                            "match":"contain",
+                            "field":"endDate",
+                            "value":"2020-01-01"
+                        }
+                    ]
+                };
+                this.$axios({
+                    url: appCfg.map.gisApiUrl+"api/share/data/2c9a818f73768e6501737b053f3a00bf?userKey="+appCfg.map.userKey,
+                    method: "post",
+                    data: body,
+                    header:{'Content-type': 'application/json'}
+                }).then(res => {
+                    let list = res.data.data;
+                    let data = [];
+                    for(let model of list) {
+                        if( model.latitude!="null"&&model.longitude!="null"){
+                            let point = {lat: model.latitude, lng: model.longitude, count: Number(model.indexValue)};
+                            data.push(point)
+                        }
+                    }
+                    let heatData = {
+                        max: 10,
+                        data: data
+                    };
+                    let heatLayer = this.$mapUtil.heatmapLayer(this.$mapUtil.lMap,heatData);
+                    this.$mapUtil.addTemLayer(layerId,heatLayer);
+                })
+            },
+            getMineTime(id){
+                console.log(id);
             }
         }
     }
@@ -324,7 +741,7 @@
         width: 250px;
         height: auto;
         background-color: rgba(0, 0, 0, 0.49);
-        z-index: 990;
+        z-index: 1090;
         border-radius: 5px;
     }
     .etitle{

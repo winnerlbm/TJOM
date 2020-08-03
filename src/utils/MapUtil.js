@@ -182,9 +182,9 @@ const mapUtil = {
         if(proper.latitude&&proper.longitude&&proper.latitude!=""&&proper.longitude!=""){
             let mcIcon = L.icon({
                 iconUrl: img ,
-                iconSize: [20, 20],
-                iconAnchor: [0, 0],
-                popupAnchor: [12, 0],
+                iconSize: [30, 30],
+                iconAnchor: [10, 20],
+                popupAnchor: [6, -12],
                 shadowSize: [68, 95],
                 shadowAnchor: [22, 94]
             });
@@ -201,9 +201,9 @@ const mapUtil = {
         if(proper.lat&&proper.lng&&proper.lat!=""&&proper.lng!=""){
             let mcIcon = L.icon({
                 iconUrl: img ,
-                iconSize: [20, 20],
-                iconAnchor: [0, 0],
-                popupAnchor: [12, 0],
+                iconSize: [30, 30],
+                iconAnchor: [10, 20],
+                popupAnchor: [6,-12],
                 shadowSize: [68, 95],
                 shadowAnchor: [22, 94]
             });

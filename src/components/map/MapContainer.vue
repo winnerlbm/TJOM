@@ -75,6 +75,8 @@
 
         </div>
         <hour-line ref="hourline" v-show="hourShow" @onTimeChange="onTimeChange"></hour-line>
+
+        <time-container ref="timeContainer"></time-container>
     </div>
 </template>
 
@@ -87,10 +89,10 @@
     import SearchContainer from "./SearchContainer";
     import HourLine from "../util/HourLine";
     import MarkerContainer from "./MarkerContainer";
-
+    import TimeContainer from "./TimeContainer";
     export default {
         name: "MapContainer",
-        components: {InfoContainer,layerContainer,SearchContainer,HourLine,MarkerContainer},
+        components: {InfoContainer,layerContainer,SearchContainer,HourLine,MarkerContainer,TimeContainer},
         data() {
             return {
                 highLayer: null,
@@ -540,6 +542,10 @@
                     this.$mapUtil.lMap.removeLayer(this.windyLayer);
                 }
                 this.getWindyData(ymd);
+            },
+            showTimeData(param){
+                console.log(param);
+                this.$refs.timeContainer.searchData(param.id,param.type);
             }
         }
     }
@@ -821,7 +827,7 @@
 </style>
 <style>
     .popuDiv {
-        height: 28px;
+        height: auto;
         line-height: 28px;
         min-width: 250px;
         width:auto;
@@ -832,4 +838,18 @@
     .el-checkbox__inner {
         background-color: transparent;
     }
+    .poputools {
+        text-align: right;
+    }
+    .poputools button {
+        border: none;
+        padding: 5px;
+        border-radius: 3px;
+        background-color: #409eff;
+        color: #fff;
+        cursor: pointer;
+        margin-left: 5px;
+        font-size: 12px;
+    }
+
 </style>

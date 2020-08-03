@@ -2,7 +2,7 @@
     <div class="searchDiv">
         <div class="inputDiv">
             <input type="text" placeholder="请输入查询关键字" v-model="searchVal">
-            <img src="../../assets/image/menu/switch.png" alt="" class="switch">
+            <img src="../../assets/image/menu/switch.png" @click="hideData" alt="" class="switch">
             <button class="searchBtn" @click="searchData"><img  class="switch" src="../../assets/image/menu/search.png" alt="" ></button>
         </div>
         <div class="resultDiv" v-show="showResult == true">
@@ -36,6 +36,9 @@
         methods:{
             searchData(){
                 this.showResult = true;
+            },
+            hideData(){
+                this.showResult = false;
             }
         }
     }
