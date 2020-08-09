@@ -11,8 +11,8 @@ const appCfg = {
         gisApiUrl: 'http://202.99.99.49:8100/dc-server/',
         userKey:"9b10ae3a-bf25-46db-ac20-c0e8963367e0",
         minZoom: 4,
-        maxZoom: 18,
-        zoom: 7,
+        maxZoom: 16,
+        zoom: 10,
         center: [39.12, 117.20]
     },
     windy: {

@@ -77,6 +77,7 @@
         <hour-line ref="hourline" v-show="hourShow" @onTimeChange="onTimeChange"></hour-line>
 
         <time-container ref="timeContainer"></time-container>
+        <data-container ref="dataContainer"></data-container>
     </div>
 </template>
 
@@ -90,9 +91,10 @@
     import HourLine from "../util/HourLine";
     import MarkerContainer from "./MarkerContainer";
     import TimeContainer from "./TimeContainer";
+    import DataContainer from "./DataContainer";
     export default {
         name: "MapContainer",
-        components: {InfoContainer,layerContainer,SearchContainer,HourLine,MarkerContainer,TimeContainer},
+        components: {InfoContainer,layerContainer,SearchContainer,HourLine,MarkerContainer,TimeContainer,DataContainer},
         data() {
             return {
                 highLayer: null,
@@ -163,6 +165,7 @@
             this.$nextTick(() => {
                 this.$mapUtil.initMap('map');
                 this.$refs.markRef.initDraw();
+                this.$refs.dataContainer.initDraw();
                 this.hourShow = false;
                 this.$mapUtil.wmsLayer('NPWS:TjMap').addTo(this.$mapUtil.lMap);
               //  this.queryFeatureByClick('NPWS:TjMap', 2000, 'the_geom', this.$mapUtil.lMap)
@@ -546,6 +549,19 @@
             showTimeData(param){
                 console.log(param);
                 this.$refs.timeContainer.searchData(param.id,param.type);
+            },
+            setDataList(type,list){
+                this.$refs.dataContainer.setDataList(type,list);
+            },
+            setDataShow(){
+                this.$refs.dataContainer.showData();
+            },
+            removeDataList(type){
+                this.$refs.dataContainer.removeDataList(type);
+            },
+            setDetailData(obj,type){
+                this.$refs.timeContainer.setShowObj(obj,type);
+                this.$refs.dataContainer.hideData();
             }
         }
     }
@@ -840,10 +856,12 @@
     }
     .poputools {
         text-align: right;
+        border-top: 1px solid #383838;
+        padding-top: 7px;
     }
     .poputools button {
         border: none;
-        padding: 5px;
+        padding: 3px 5px;
         border-radius: 3px;
         background-color: #409eff;
         color: #fff;
@@ -851,5 +869,47 @@
         margin-left: 5px;
         font-size: 12px;
     }
-
+    .leaflet-popup-content-wrapper, .leaflet-popup-tip {
+        background: rgba(0, 0, 0, 0.59);
+        color: #fff;
+        box-shadow: 0 3px 14px rgba(0,0,0,0.4);
+        border-radius: 3px;
+    }
+    ::-webkit-scrollbar {
+        width: 6px;
+        height: 6px
+    }
+    ::-webkit-scrollbar-button {
+        height: 0;
+        width: 0
+    }
+    ::-webkit-scrollbar-track {
+        background-color: #0F274B;
+        border-radius: 2px;
+    }
+    ::-webkit-scrollbar-thumb {
+        background: #3E6CBC;
+        border-radius: 2px;
+    }
+    ::-webkit-input-placeholder {
+        color: #aaa;
+        font-size: 14px
+    }
+    ::-moz-placeholder {
+        color: #aaa;
+        font-size: 14px
+    }
+    :-ms-input-placeholder {
+        color: #aaa;
+        font-size: 14px
+    }
+    * {
+        scrollbar-base-color: #ccc;
+        scrollbar-3dlight-color: #ccc;
+        scrollbar-highlight-color: #ccc;
+        scrollbar-track-color: #f1f1f1;
+        scrollbar-arrow-color: #000;
+        scrollbar-shadow-color: #ccc;
+        scrollbar-dark-shadow-color: #ccc
+    }
 </style>

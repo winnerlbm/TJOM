@@ -101,7 +101,7 @@ const mapUtil = {
 
         let cfg = {
             // radius should be small ONLY if scaleRadius is true (or small radius is intended)
-            "radius": .27,
+            "radius": .07,
             "maxOpacity": .65,
             // scales the radius based on map zoom
             "scaleRadius": true,
@@ -228,6 +228,15 @@ const mapUtil = {
                 this.layerTemps.slice(i,1);
             }
         });
+    },
+    getTempLayer(layerId){
+        let layerGroup = null;
+        this.layerTemps.some((item,i) =>{
+            if(item.layerId == layerId){
+                layerGroup = item.layer;
+            }
+        });
+        return layerGroup;
     }
 
 }

@@ -6,6 +6,7 @@
             <button class="searchBtn" @click="searchData"><img  class="switch" src="../../assets/image/menu/search.png" alt="" ></button>
         </div>
         <div class="resultDiv" v-show="showResult == true">
+            div.
             <div class="resultTitle">
                 <span>废水排放重点企业</span>
                 <img class="plusImg" src="../../assets/image/menu/plus.png" alt="">
@@ -15,7 +16,7 @@
                 <img class="plusImg" src="../../assets/image/menu/plus.png" alt="">
             </div>
             <div class="resultTitle">
-                <span>废渣排放重点企业</span>
+                <span>废水排放重点企业</span>
                 <img class="plusImg" src="../../assets/image/menu/plus.png" alt="">
             </div>
 

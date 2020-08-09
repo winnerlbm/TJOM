@@ -62,8 +62,8 @@
             return {
                 factoryList:[
                   //  {type:"wry",name:"污染源",checked:false,image:require("../../assets/image/icon/wry.png")},
-                    {type:"factory",name:"企业信息",checked:false,image:require("../../assets/image/icon/gkxx.png")},
-                    {type:"mine",name:"工况企业信息",checked:false,image:require("../../assets/image/icon/gkxx.png")},
+                    {type:"factory",name:"在线监控企业信息",checked:false,image:require("../../assets/image/icon/gkxx.png")},
+                    {type:"mine",name:"工况监控企业信息",checked:false,image:require("../../assets/image/icon/gkxx.png")},
                     {type:"ww",name:"废气排污口",checked:false,image:require("../../assets/image/icon/wry.png")},
                     {type:"wg",name:"废水排污口",checked:false,image:require("../../assets/image/icon/wry.png")},
                     /*{type:"gk",name:"入河海污口",checked:false,image:require("../../assets/image/icon/wry.png")},
@@ -71,7 +71,7 @@
                 ],
                 moniList:[
                     {type:"sttp_normal",name:"常规监测站",checked:false,image:require("../../assets/image/icon/cgz.png")},
-                    {type:"sttp_yd",name:"移动监测站",checked:false,image:require("../../assets/image/icon/ydz.png")},
+                   // {type:"sttp_yd",name:"移动监测站",checked:false,image:require("../../assets/image/icon/ydz.png")},
                     {type:"sttp_wz",name:"微站",checked:false,image:require("../../assets/image/icon/wz.png")}
                 ],
                 airList:[
@@ -93,13 +93,8 @@
         mounted(){
             console.log(appCfg.map.gisApiUrl);
             let _self = this;
-            window.getMineTime = function(id,type){
-                let param = {
-                    id:id,
-                    type:type
-                };
-               // _self.$emit('showTimeData', param);
-                _self.$parent.showTimeData(param)
+            window.getMineTime = function(model,type){
+                _self.$parent.setDetailData(model,type);
             };
         },
         methods: {
@@ -112,7 +107,7 @@
                     }else if(item.type == "wry"){
                         this.getWry(item.type);
                     }else if(item.type == "wg"){
-                        this.getPwk(item.type);
+                        this.getWry(item.type);
                     }else if(item.type == "sttp_normal"){
                         this.getNormalSttp(item.type);
                     }else if(item.type == "sttp_wz"){
@@ -130,6 +125,7 @@
                     }
                 }else{
                     this.$mapUtil.removeTemLayer(item.type);
+                    this.$parent.removeDataList(item.type);
                 }
             },
             setHeatMap(val,item){
@@ -183,6 +179,7 @@
                         model.longitude =  this.DegreeConvertBack(model.lngDegree,model.lngMinute,model.lngSecond);
                         model.latitude = this.DegreeConvertBack(model.latDegree,model.latMinute,model.latSecond);
                         let marker = this.$mapUtil.createPointMarker(model,wzIcon);
+                        marker.id = model.dataId;
                         if(marker){
                             let html = this.createHtml(model);
                             marker.bindPopup(html);
@@ -191,6 +188,7 @@
                     }
                     this.$mapUtil.lMap.addLayer(facLayer);
                     this.$mapUtil.addTemLayer(layerId,facLayer);
+                    this.$parent.setDataList(layerId,list);
                 })
             },
             getMineData(layerId){
@@ -227,6 +225,7 @@
                     let facLayer = L.markerClusterGroup();
                     for(let model of list) {
                         let marker = this.$mapUtil.createPointMarker(model,wzIcon);
+                        marker.id = model.enterpriseNo;
                         if(marker){
                             let html = this.createMineHtml(model);
                             marker.bindPopup(html);
@@ -235,6 +234,7 @@
                     }
                     this.$mapUtil.lMap.addLayer(facLayer);
                     this.$mapUtil.addTemLayer(layerId,facLayer);
+                    this.$parent.setDataList(layerId,list);
                 })
             },
             getWry(layerId){
@@ -272,6 +272,7 @@
                     let facLayer = L.layerGroup(markers);
                     this.$mapUtil.lMap.addLayer(facLayer);
                     this.$mapUtil.addTemLayer(layerId,facLayer);
+                    this.$parent.setDataList(layerId,list);
                 })
             },
             getPwk(layerId){
@@ -309,6 +310,7 @@
                     let facLayer = L.layerGroup(markers);
                     this.$mapUtil.lMap.addLayer(facLayer);
                     this.$mapUtil.addTemLayer(layerId,facLayer);
+                    this.$parent.setDataList(layerId,list);
                 })
             },
             getSttp(layerId){
@@ -429,6 +431,7 @@
                     let facLayer = L.layerGroup(markers);
                     this.$mapUtil.lMap.addLayer(facLayer);
                     this.$mapUtil.addTemLayer(layerId,facLayer);
+                    this.$parent.setDataList(layerId,list);
                 })
             },
             getWzSttp(layerId){
@@ -464,6 +467,7 @@
                     let facLayer = L.layerGroup(markers);
                     this.$mapUtil.lMap.addLayer(facLayer);
                     this.$mapUtil.addTemLayer(layerId,facLayer);
+                    this.$parent.setDataList(layerId,list);
                 })
             },
             getSttpAll(layerId){
@@ -512,6 +516,9 @@
                 html.push('<div class="popuDiv"><span>企业地址：</span>'+model.operationAddress+'</div>');
                 html.push('<div class="popuDiv"><span>企业类型：</span>'+model.industryType+'</div>');
                 html.push('<div class="popuDiv"><span>排污许可证号：</span>'+model.permitLicence+'</div>');
+                html.push('<div class="poputools">');
+                html.push('<button onclick="getMineTime('+JSON.stringify(model).replace(/"/g, '&quot;')+',\'factory\')">详情</button>');
+                html.push('</div>');
                 return html.join('');
             },
             createMineHtml(model){
@@ -520,7 +527,7 @@
                 html.push('<div class="popuDiv"><span>企业地址：</span>'+model.address+'</div>');
                 html.push('<div class="popuDiv"><span>排污许可证号：</span>'+model.permitLicence+'</div>');
                 html.push('<div class="poputools">');
-                html.push('<button onclick="getMineTime(\''+model.enterpriseNo+'\',\'mine\')">实时工况信息</button>');
+                html.push('<button onclick="getMineTime('+JSON.stringify(model).replace(/"/g, '&quot;')+',\'mine\')">详情</button>');
                 html.push('</div>');
                 return html.join('');
             },
@@ -537,8 +544,8 @@
             },
             createPwkHtml(model){
                 let html = [];
+                html.push('<div class="popuDiv"><span>排口名称：</span>'+model.portName+'</div>');
                 html.push('<div class="popuDiv"><span>公司名称：</span>'+model.companyName+'</div>');
-                html.push('<div class="popuDiv"><span>排口类型：</span>'+model.portName+'</div>');
                 html.push('<div class="popuDiv"><span>使用状态：</span>'+model.useStatusName+'</div>');
                 html.push('<div class="popuDiv"><span>排污许可证：</span>'+model.permitLicence+'</div>');
                 return html.join('');
