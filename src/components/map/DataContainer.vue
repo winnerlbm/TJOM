@@ -15,7 +15,7 @@
                                 <p  class="describe text-ell">{{item.divisionProvince}}{{item.divisionArea}}</p>
                                 <p  class="describe text-ell">{{item.operationAddress}}</p>
                                 <p  class="describe text-ell">排污许可证号：{{item.permitLicence}}</p>
-                                <button  type="button" class="el-button el-button--primary"><span>污染源</span></button>
+                                <!--<button  type="button" class="el-button el-button&#45;&#45;primary"><span>污染源</span></button>-->
                                 <button  type="button" class="el-button el-button--success" @click="zoomToMap(item,'factory')"><span>详情</span></button>
                             </div>
                         </div>
@@ -29,7 +29,6 @@
                                 <div class="company_type">行业类别：{{item.industryType}}</div>
                                 <p  class="describe text-ell">{{item.address}}</p>
                                 <p  class="describe text-ell">排污许可证号：{{item.permitLicence}}</p>
-                                <button  type="button" class="el-button el-button--primary"><span>生产线</span></button>
                                 <button  type="button" class="el-button el-button--success"  @click="zoomToMap(item,'mine')"><span>详情</span></button>
                             </div>
                         </div>
@@ -43,8 +42,7 @@
                                 <div class="company_type">所属企业：{{item.companyName}}</div>
                                 <p  class="describe text-ell">排口地址：{{item.portAddress}}</p>
                                 <p  class="describe text-ell">排污许可证号：{{item.permitLicence}}</p>
-                                <button  type="button" class="el-button el-button--primary"><span>监测数据</span></button>
-                                <button  type="button" class="el-button el-button--success"><span>详情</span></button>
+                                <button  type="button" class="el-button el-button--success"  @click="zoomToMap(item,'wg')"><span>详情</span></button>
                             </div>
                         </div>
                     </div>
@@ -57,8 +55,7 @@
                                 <div class="company_type">所属企业：{{item.companyName}}</div>
                                 <p  class="describe text-ell">排口地址：{{item.portAddress}}</p>
                                 <p  class="describe text-ell">排污许可证号：{{item.permitLicence}}</p>
-                                <button  type="button" class="el-button el-button--primary"><span>监测数据</span></button>
-                                <button  type="button" class="el-button el-button--success"><span>详情</span></button>
+                                <button  type="button" class="el-button el-button--success"  @click="zoomToMap(item,'ww')"><span>详情</span></button>
                             </div>
                         </div>
                     </div>
@@ -70,8 +67,7 @@
                                 <div class="company_name text-ell">{{item.stationName}}</div>
                                 <div class="company_type">测站类型：{{item.stationType=='1'?'常规监测站':'传感器监测站'}}</div>
                                 <p  class="describe text-ell">测站地址：{{item.portAddress}}</p>
-                                <button  type="button" class="el-button el-button--primary"><span>监测数据</span></button>
-                                <button  type="button" class="el-button el-button--success"><span>详情</span></button>
+                                <button  type="button" class="el-button el-button--success"  @click="zoomToMap(item,'sttp_normal')"><span>详情</span></button>
                             </div>
                         </div>
                     </div>
@@ -83,8 +79,7 @@
                                 <div class="company_name text-ell">{{item.stationName}}</div>
                                 <div class="company_type">测站类型：{{item.stationType=='1'?'常规监测站':'传感器监测站'}}</div>
                                 <p  class="describe text-ell">测站地址：{{item.portAddress}}</p>
-                                <button  type="button" class="el-button el-button--primary"><span>监测数据</span></button>
-                                <button  type="button" class="el-button el-button--success"><span>详情</span></button>
+                                <button  type="button" class="el-button el-button--success"  @click="zoomToMap(item,'sttp_wz')"><span>详情</span></button>
                             </div>
                         </div>
                     </div>
@@ -223,6 +218,15 @@
                             layer.openPopup();
                         }
                     });
+                }else if(type == "sttp_normal"||type == "sttp_wz") {
+                    this.$mapUtil.lMap.flyTo([item.lat, item.lng], 16,{ animate:false});
+                    let layerGroup = this.$mapUtil.getTempLayer(type);
+                    layerGroup.eachLayer(function (layer){
+                        if (layer.id === item.stationId){
+                            layer.openPopup();
+                        }
+                    });
+                    type = "sttp";
                 }
                 this.$parent.setDetailData(item,type);
 

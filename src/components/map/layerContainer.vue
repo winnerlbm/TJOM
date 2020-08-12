@@ -263,6 +263,7 @@
                     let markers = [];
                     for(let model of list) {
                         let marker = this.$mapUtil.createPointMarker(model,wzIcon);
+                        marker.id == model.id;
                         if(marker){
                             let html = this.createPwkHtml(model);
                             marker.bindPopup(html);
@@ -301,6 +302,7 @@
                     let markers = [];
                     for(let model of list) {
                         let marker = this.$mapUtil.createPointMarker(model,wzIcon);
+                        marker.id == model.id;
                         if(marker){
                             let html = this.createPwkHtml(model);
                             marker.bindPopup(html);
@@ -422,6 +424,7 @@
                     let markers = [];
                     for(let model of list) {
                         let marker = this.$mapUtil.createPointMarkerByLgnt(model,wzIcon);
+                        marker.id = model.stationId;
                         if(marker){
                             let html = this.createSttpHtml(model);
                             marker.bindPopup(html);
@@ -458,6 +461,7 @@
                     let markers = [];
                     for(let model of list) {
                         let marker = this.$mapUtil.createPointMarkerByLgnt(model,wzIcon);
+                        marker.id = model.stationId;
                         if(marker){
                             let html = this.createSttpHtml(model);
                             marker.bindPopup(html);
@@ -536,9 +540,12 @@
                 html.push('<div class="popuDiv"><span>站点名称：</span>'+model.stationName+'</div>');
                 html.push('<div class="popuDiv"><span>站点类型：</span>'+this.getStationTypeNm(model.stationType)+'</div>');
                 html.push('<div class="popuDiv"><span>监测参数：</span>'+model.param+'</div>');
-                html.push('<div class="poputools">');
+               /* html.push('<div class="poputools">');
                 html.push('<button onclick="getMineTime(\''+model.stationId+'\',\'stpmine\')">分钟数据</button>');
                 html.push('<button onclick="getMineTime(\''+model.stationId+'\',\'stphour\')">小时数据</button>');
+                html.push('</div>');*/
+                html.push('<div class="poputools">');
+                html.push('<button onclick="getMineTime('+JSON.stringify(model).replace(/"/g, '&quot;')+',\'sttp\')">详情</button>');
                 html.push('</div>');
                 return html.join('');
             },

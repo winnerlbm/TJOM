@@ -15,6 +15,7 @@ import appUtil from './utils/AppUtil'
 import md5Util from './utils/Md5Util'
 import echarts from 'echarts'
 import mapUtil from './utils/MapUtil'
+import loadUtil from './utils/LoadUtil'
 
 /*字体库 fa4*/
 import 'font-awesome/css/font-awesome.css'
@@ -54,6 +55,7 @@ Vue.prototype.$appUtil = appUtil;
 Vue.prototype.$md5Util = md5Util;
 Vue.prototype.$charts = echarts;
 Vue.prototype.$mapUtil = mapUtil;
+Vue.prototype.$loadUtil = loadUtil;
 
 new Vue({
     router: AppRouter,
