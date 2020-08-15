@@ -167,8 +167,8 @@
                 this.$refs.markRef.initDraw();
                 this.$refs.dataContainer.initDraw();
                 this.hourShow = false;
-                this.$mapUtil.wmsLayer('NPWS:TjMap').addTo(this.$mapUtil.lMap);
-              //  this.queryFeatureByClick('NPWS:TjMap', 2000, 'the_geom', this.$mapUtil.lMap)
+                this.$mapUtil.wmsLayer('NPWS:hxtjmap').addTo(this.$mapUtil.lMap);
+              //  this.queryFeatureByClick('NPWS:hxtjmap', 2000, 'the_geom', this.$mapUtil.lMap)
                // this.$mapUtil.heatmapLayer(this.$mapUtil.lMap)
                // this.$mapUtil.removeLayer("layeri",this.$mapUtil.lMap)
                 this.$mapUtil.lMap.on('click', (evt) => {
@@ -183,7 +183,7 @@
                                 .openOn(this.$mapUtil.lMap);
 
                         }else{
-                            this.queryFeatureByClick('NPWS:TjMap', 2000, 'the_geom', this.$mapUtil.lMap,evt)
+                            this.queryFeatureByClick('NPWS:hxtjmap', 2000, 'the_geom', this.$mapUtil.lMap,evt)
                         }
                     }
                 });
