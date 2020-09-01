@@ -18,9 +18,9 @@
             this.resizeHtmlFontSize();
         },
         mounted() {
-            this.$nextTick(() => {
-                this.$router.push('/');
-            });
+            /*this.$nextTick(() => {
+                this.$router.push('/login');
+            });*/
         },
         methods: {
             resizeHtmlFontSize() {

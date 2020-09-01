@@ -1,10 +1,11 @@
 <template>
-    <div class="dataTimeDiv" v-show="showResult">
+    <div class="dataTimeDiv" v-show="showResult" v-loading="loading">
+
         <div class="etitle">
             <span>{{showName}}</span>
             <i class="el-icon-close" @click="hideData"></i>
         </div>
-        <div class="containers">
+        <div class="containers" >
             <div class="detailDiv" v-if="showType=='factory'">
                 <div class="baseDiv">
                     <div class="company_name text-ell">{{showObj.companyName}}</div>
@@ -15,56 +16,67 @@
                 </div>
                 <div class="dataConts">
                     <el-collapse v-model="activeNames" accordion>
-                        <el-collapse-item title="废水排污口" name="wg" class="leftBox">
-                            <div v-for="(item,key) in wgList" class="container" :key="key"  @mouseenter="showWgPoint(item)" @mouseleave="clearMap()">
+                        <el-collapse-item :title="'废水排污口('+wgList.length+')'" name="wg" class="leftBox">
+                            <div v-for="(item,key) in wgList" class="container" :key="key">
                                 <div class="source">
                                     <div class="content">
                                         <div class="company_name text-ell">{{item.portName}}</div>
                                         <div class="company_type">所属企业：{{item.companyName}}</div>
                                         <p  class="describe text-ell">排口地址：{{item.portAddress}}</p>
                                         <p  class="describe text-ell">排污许可证号：{{item.permitLicence}}</p>
-                                        <button  type="button" class="el-button el-button--success"><span>详情</span></button>
+                                        <button  type="button" class="el-button el-button--success"   @click="zoomToMap(item,'wg')"><span>详情</span></button>
                                     </div>
                                 </div>
                             </div>
+                            <div class="nodata" v-if="wgList.length==0">
+                                <span>未查询到相关数据</span>
+                            </div>
                         </el-collapse-item>
-                        <el-collapse-item title="废气排污口" name="ww" class="leftBox">
-                            <div v-for="(item,key) in wwList" class="container" :key="key"  @mouseenter="showWwPoint(item)" @mouseleave="clearMap()">
+                        <el-collapse-item :title="'废气排污口('+wwList.length+')'" name="ww" class="leftBox">
+                            <div v-for="(item,key) in wwList" class="container" :key="key">
                                 <div class="source">
                                     <div class="content">
                                         <div class="company_name text-ell">{{item.portName}}</div>
                                         <div class="company_type">所属企业：{{item.companyName}}</div>
                                         <p  class="describe text-ell">排口地址：{{item.portAddress}}</p>
                                         <p  class="describe text-ell">排污许可证号：{{item.permitLicence}}</p>
-                                        <button  type="button" class="el-button el-button--success"><span>详情</span></button>
+                                        <button  type="button" class="el-button el-button--success"   @click="zoomToMap(item,'ww')"><span>详情</span></button>
                                     </div>
                                 </div>
                             </div>
+                            <div class="nodata" v-if="wwList.length==0">
+                                <span>未查询到相关数据</span>
+                            </div>
                         </el-collapse-item>
-                        <el-collapse-item title="行政处罚" name="xxcf" class="leftBox">
-                            <div v-for="(item,key) in xxcfList" class="container" :key="key"  @mouseenter="showWgPoint(item)" @mouseleave="clearMap()">
+                        <el-collapse-item :title="'行政处罚('+xzcfList.length+')'" name="xxcf" class="leftBox">
+                            <div v-for="(item,key) in xzcfList" class="container" :key="key" >
                                 <div class="source">
                                     <div class="content">
-                                        <div class="company_name text-ell">{{item.portName}}</div>
-                                        <div class="company_type">所属企业：{{item.companyName}}</div>
-                                        <p  class="describe text-ell">排口地址：{{item.portAddress}}</p>
-                                        <p  class="describe text-ell">排污许可证号：{{item.permitLicence}}</p>
-                                        <button  type="button" class="el-button el-button--success"><span>详情</span></button>
+                                        <div class="company_name text-ell">{{item.caseReason}}</div>
+                                        <p  class="describe text-ell">案件来源：{{item.caseSourceName}}</p>
+                                        <p  class="describe text-ell">立案时间：{{item.filingTime}}</p>
+                                        <p  class="describe text-ell">案件状态：{{item.currentNode}}</p>
                                     </div>
                                 </div>
                             </div>
+                            <div class="nodata" v-if="xzcfList.length==0">
+                                <span>未查询到相关数据</span>
+                            </div>
                         </el-collapse-item>
-                        <el-collapse-item title="环境信访" name="xf" class="leftBox">
-                            <div v-for="(item,key) in xfList" class="container" :key="key"  @mouseenter="showWwPoint(item)" @mouseleave="clearMap()">
+                        <el-collapse-item :title="'环境信访('+xfList.length+')'" name="xf" class="leftBox">
+                            <div v-for="(item,key) in xfList" class="container" :key="key">
                                 <div class="source">
                                     <div class="content">
-                                        <div class="company_name text-ell">{{item.portName}}</div>
-                                        <div class="company_type">所属企业：{{item.companyName}}</div>
-                                        <p  class="describe text-ell">排口地址：{{item.portAddress}}</p>
-                                        <p  class="describe text-ell">排污许可证号：{{item.permitLicence}}</p>
-                                        <button  type="button" class="el-button el-button--success"><span>详情</span></button>
+                                        <div class="company_name text-ell">{{item.companyName}}</div>
+
+                                        <p  class="describe text-ell">案件来源：{{item.sourceName}}</p>
+                                        <p  class="describe text-ell">创建时间：{{item.createTime}}</p>
+                                        <p  class="describe text-ell">案件状态：{{item.currentNode}}</p>
                                     </div>
                                 </div>
+                            </div>
+                            <div class="nodata" v-if="xfList.length==0">
+                                <span>未查询到相关数据</span>
                             </div>
                         </el-collapse-item>
                     </el-collapse>
@@ -77,31 +89,226 @@
                     <p  class="describe text-ell">排污许可证号：{{showObj.permitLicence}}</p>
                 </div>
                 <div class="dataConts">
-
+                    <div v-for="(item,key) in lineList" class="container" :key="key"   @click="showMineline(item,'mineprop')">
+                        <div class="source">
+                            <div class="content">
+                                <div class="company_name text-ell">{{item.productLineName}}</div>
+                                <div class="company_type">所属企业：{{item.enterpriseName}}</div>
+                                <p  class="describe text-ell">地址：{{item.address}}</p>
+                                <p  class="describe text-ell">排污许可证号：{{item.permitLicence}}</p>
+                               <!-- <button  type="button" class="el-button el-button&#45;&#45;success"   @click="showMineline(item,'mineprop')"><span>详情</span></button>-->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="nodata" v-if="lineList.length==0">
+                        <span>未查询到相关数据</span>
+                    </div>
+                </div>
+            </div>
+            <div class="detailDiv" v-if="showType=='mineline'">
+                <div class="baseDiv">
+                    <div class="company_name text-ell">{{showObj.productLineName}}</div>
+                    <div class="company_type">所属企业：{{showObj.enterpriseName}}</div>
+                    <p  class="describe text-ell">排污许可证号：{{showObj.permitLicence}}</p>
+                </div>
+                <div class="dataConts">
+                    <div v-for="(item,key) in propList" class="container" :key="key"    @click="showMineline(item,'mineprop')">
+                        <div class="source">
+                            <div class="content">
+                                <div class="company_name text-ell">{{item.deviceName}}</div>
+                                <div class="company_type">所属企业：{{showObj.enterpriseName}}</div>
+                                <p  class="describe text-ell">地址：{{showObj.address}}</p>
+                                <!--<button  type="button" class="el-button el-button&#45;&#45;success"   @click="showMineline(item,'mineprop')"><span>详情</span></button>-->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="nodata" v-if="propList.length==0">
+                        <span>未查询到相关数据</span>
+                    </div>
                 </div>
             </div>
             <div class="detailDiv" v-if="showType=='ww'">
-                <div class="baseDiv">
-                    <div class="company_name text-ell">{{showObj.enterpriseName}}</div>
-                    <div class="company_type">行业类别：{{showObj.industryType}}</div>
-                    <p  class="describe text-ell">排污许可证号：{{showObj.permitLicence}}</p>
+                <div :class="currentCls">
+                    <div class="eleft">
+                        <div class="company_name text-ell">{{showObj.portName}}</div>
+                        <div class="company_type">所属企业：{{showObj.companyName}}</div>
+                        <p  class="describe text-ell">排口地址：{{showObj.portAddress}}</p>
+                    </div>
+                    <div class="eright">
+                        <div class="indexName">{{newData.indexName}}</div>
+                        <div class="indexVal">{{newData.indexVal==null?'-':parseFloat(newData.indexVal).toFixed(3)}}</div>
+                        <div class="indexTime">{{newData.indexTime}}</div>
+                    </div>
                 </div>
                 <div class="dataConts">
+                    <div class="queryDiv">
+                        <div class="queryTitle">数据查询</div>
+                        <div class="queryCont">
+                            <div class="itime">
+                                <el-date-picker
+                                        v-model="stime"
+                                        type="daterange"
+                                        align="right"
+                                        unlink-panels
+                                        @change="changeWryQuery('ww')"
+                                        value-format="yyyy-MM-dd"
+                                        range-separator=""
+                                        start-placeholder="开始日期"
+                                        end-placeholder="结束日期"
+                                        :picker-options="pickerOptions">
+                                </el-date-picker>
+                            </div>
+                        </div>
+                        <div class="queryCont">
+                            <div class="iptw-60 mgr-8">
+                                <el-select v-model="queryWryTimeType" @change="changeWryQuery('ww')" placeholder="请选择">
+                                    <el-option
+                                            v-for="item in queryWryOptions"
+                                            :key="item.value"
+                                            :label="item.label"
+                                            :value="item.value">
+                                    </el-option>
+                                </el-select>
+                            </div>
+                            <div class="iptw-60 mgr-8">
+                                <el-select v-model="queryWryIndex"  @change="changeWryQuery('ww')" placeholder="请选择">
+                                    <el-option
+                                            v-for="item in queryWryIndexOptions"
+                                            :key="item.columnCode"
+                                            :label="item.pollutantName"
+                                            :value="item.columnCode">
+                                    </el-option>
+                                </el-select>
+                            </div>
+                            <div class="iptw-60 mgr-8">
+                                <el-select v-model="showIndex"   @change="changeShowCont" placeholder="请选择">
+                                    <el-option
+                                            v-for="item in showIndexOptions"
+                                            :key="item.value"
+                                            :label="item.label"
+                                            :value="item.value">
+                                    </el-option>
+                                </el-select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="timeDatas">
+                        <div class="tables" v-show="showIndex==1">
+                            <ul class="ulTitle">
+                                <li>
+                                    <span class="ename">监测状态</span>
+                                    <span class="eval">监测值</span>
+                                    <span class="etime">监测时间</span>
+                                </li>
+                            </ul>
+                            <ul class="dataList">
+                                <li v-for="(item,key) in resultList" :key="key" >
+                                    <span class="ename">{{item.status}}</span>
+                                    <span class="eval">{{item.value==null?'-':parseFloat(item.value).toFixed(3)}}</span>
+                                    <span class="etime">{{item.recordTime}}</span>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="echarts" v-show="showIndex==2">
+                            <div id="linewwchart">
 
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="detailDiv" v-if="showType=='wg'">
-                <div class="baseDiv">
-                    <div class="company_name text-ell">{{showObj.enterpriseName}}</div>
-                    <div class="company_type">行业类别：{{showObj.industryType}}</div>
-                    <p  class="describe text-ell">排污许可证号：{{showObj.permitLicence}}</p>
+                <div :class="currentCls">
+                    <div class="eleft">
+                        <div class="company_name text-ell">{{showObj.portName}}</div>
+                        <div class="company_type">所属企业：{{showObj.companyName}}</div>
+                        <p  class="describe text-ell">排口地址：{{showObj.portAddress}}</p>
+                    </div>
+                    <div class="eright">
+                        <div class="indexName">{{newData.indexName}}</div>
+                        <div class="indexVal">{{newData.indexVal==null?'-':parseFloat(newData.indexVal).toFixed(3)}}</div>
+                        <div class="indexTime">{{newData.indexTime}}</div>
+                    </div>
                 </div>
                 <div class="dataConts">
+                    <div class="queryDiv">
+                        <div class="queryTitle">数据查询</div>
+                        <div class="queryCont">
+                            <div class="itime">
+                                <el-date-picker
+                                        v-model="stime"
+                                        type="daterange"
+                                        align="right"
+                                        unlink-panels
+                                        @change="changeWryQuery('wg')"
+                                        value-format="yyyy-MM-dd"
+                                        range-separator=""
+                                        start-placeholder="开始日期"
+                                        end-placeholder="结束日期"
+                                        :picker-options="pickerOptions">
+                                </el-date-picker>
+                            </div>
+                        </div>
+                        <div class="queryCont">
+                            <div class="iptw-60 mgr-8">
+                                <el-select v-model="queryWryTimeType" @change="changeWryQuery('wg')" placeholder="请选择">
+                                    <el-option
+                                            v-for="item in queryWryOptions"
+                                            :key="item.value"
+                                            :label="item.label"
+                                            :value="item.value">
+                                    </el-option>
+                                </el-select>
+                            </div>
+                            <div class="iptw-60 mgr-8">
+                                <el-select v-model="queryWryIndex"  @change="changeWryQuery('wg')" placeholder="请选择">
+                                    <el-option
+                                            v-for="item in queryWryIndexOptions"
+                                            :key="item.columnCode"
+                                            :label="item.pollutantName"
+                                            :value="item.columnCode">
+                                    </el-option>
+                                </el-select>
+                            </div>
+                            <div class="iptw-60 mgr-8">
+                                <el-select v-model="showIndex"   @change="changeShowCont" placeholder="请选择">
+                                    <el-option
+                                            v-for="item in showIndexOptions"
+                                            :key="item.value"
+                                            :label="item.label"
+                                            :value="item.value">
+                                    </el-option>
+                                </el-select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="timeDatas">
+                        <div class="tables" v-show="showIndex==1">
+                            <ul class="ulTitle">
+                                <li>
+                                    <span class="ename">监测状态</span>
+                                    <span class="eval">监测值</span>
+                                    <span class="etime">监测时间</span>
+                                </li>
+                            </ul>
+                            <ul class="dataList">
+                                <li v-for="(item,key) in resultList" :key="key" >
+                                    <span class="ename">{{item.status}}</span>
+                                    <span class="eval">{{item.value==null?'-':parseFloat(item.value).toFixed(3)}}</span>
+                                    <span class="etime">{{item.recordTime}}</span>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="echarts" v-show="showIndex==2">
+                            <div id="linewgchart">
 
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="detailDiv" v-if="showType=='sttp'">
-                <div class="baseDiv">
+                <div :class="currentCls">
                     <div class="company_name text-ell">{{showObj.stationName}}</div>
                     <div class="company_type">测站类型：{{showObj.stationType=='1'?'常规监测站':'传感器监测站'}}</div>
                     <p  class="describe text-ell">测站地址：{{showObj.address}}</p>
@@ -162,14 +369,14 @@
                         <div class="tables" v-show="showIndex==1">
                             <ul class="ulTitle">
                                 <li>
-                                    <span class="ename">监测因子</span>
+                                    <span class="ename">监测状态</span>
                                     <span class="eval">监测值</span>
                                     <span class="etime">监测时间</span>
                                 </li>
                             </ul>
                             <ul class="dataList">
                                 <li v-for="(item,key) in resultList" :key="key" >
-                                    <span class="ename">{{item.itemName}}</span>
+                                    <span class="ename">{{item.status}}</span>
                                     <span class="eval">{{item.value==null?'-':parseFloat(item.value).toFixed(3)}}</span>
                                     <span class="etime">{{item.recordTime}}</span>
                                 </li>
@@ -180,6 +387,247 @@
 
                             </div>
                         </div>
+                    </div>
+                </div>
+            </div>
+            <div class="detailDiv" v-if="showType=='air'">
+                <div :class="currentCls">
+                    <div class="eleft">
+                        <div class="company_name text-ell">{{showObj.pointName}}</div>
+                        <div class="company_type">测站类型：{{showObj.manageLevelName}}</div>
+                        <p  class="describe text-ell">测站地址：{{showObj.address}}</p>
+                    </div>
+                    <div class="eright">
+                        <div class="indexName">{{newData.indexName}}</div>
+                        <div class="indexVal">{{newData.indexVal==null?'-':parseFloat(newData.indexVal).toFixed(3)}}</div>
+                        <div class="indexTime">{{newData.indexTime}}</div>
+                    </div>
+                </div>
+                <div class="dataConts">
+                    <div class="queryDiv">
+                        <div class="queryTitle">数据查询</div>
+                        <div class="queryCont">
+                            <div class="itime">
+                                <el-date-picker
+                                        v-model="stime"
+                                        type="daterange"
+                                        align="right"
+                                        unlink-panels
+                                        @change="changeAirQuery"
+                                        value-format="yyyy-MM-dd"
+                                        range-separator=""
+                                        start-placeholder="开始日期"
+                                        end-placeholder="结束日期"
+                                        :picker-options="pickerOptions">
+                                </el-date-picker>
+                            </div>
+                        </div>
+                        <div class="queryCont">
+                            <div class="iptw-60 mgr-8">
+                                <el-select v-model="queryAirTimeType" @change="changeAirQuery" placeholder="请选择">
+                                    <el-option
+                                            v-for="item in queryAirOptions"
+                                            :key="item.value"
+                                            :label="item.label"
+                                            :value="item.value">
+                                    </el-option>
+                                </el-select>
+                            </div>
+                            <div class="iptw-60 mgr-8">
+                                <el-select v-model="queryAirIndex"  @change="changeAirQuery" placeholder="请选择">
+                                    <el-option
+                                            v-for="item in queryAirIndexOptions"
+                                            :key="item.columnCode"
+                                            :label="item.name"
+                                            :value="item.columnCode">
+                                    </el-option>
+                                </el-select>
+                            </div>
+                            <div class="iptw-60 mgr-8">
+                                <el-select v-model="showIndex"   @change="changeShowCont" placeholder="请选择">
+                                    <el-option
+                                            v-for="item in showIndexOptions"
+                                            :key="item.value"
+                                            :label="item.label"
+                                            :value="item.value">
+                                    </el-option>
+                                </el-select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="timeDatas">
+                        <div class="tables" v-show="showIndex==1">
+                            <ul class="ulTitle">
+                                <li>
+                                    <span class="ename">空气质量</span>
+                                    <span class="eval">监测值</span>
+                                    <span class="etime">监测时间</span>
+                                </li>
+                            </ul>
+                            <ul class="dataList">
+                                <li v-for="(item,key) in resultList" :key="key" >
+                                    <span class="ename">{{item.status}}</span>
+                                    <span class="eval">{{item.value==null?'-':parseFloat(item.value).toFixed(3)}}</span>
+                                    <span class="etime">{{item.recordTime}}</span>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="echarts" v-show="showIndex==2">
+                            <div id="lineairchart">
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="detailDiv" v-if="showType=='mineprop'">
+                <div class="baseDiv">
+                    <div class="company_name text-ell">{{showObj.productLineName}}</div>
+                    <div class="company_type">所属企业：{{showObj.enterpriseName}}</div>
+                    <p  class="describe text-ell">排污许可证号：{{showObj.permitLicence}}</p>
+                </div>
+                <div class="dataConts">
+                    <div class="queryDiv">
+                        <div class="queryTitle">数据查询</div>
+                        <div class="queryCont">
+                            <div class="itime">
+                                <el-date-picker
+                                        v-model="stime"
+                                        type="daterange"
+                                        align="right"
+                                        unlink-panels
+                                        @change="changeMineQuery"
+                                        value-format="yyyy-MM-dd"
+                                        range-separator=""
+                                        start-placeholder="开始日期"
+                                        end-placeholder="结束日期"
+                                        :picker-options="pickerOptions">
+                                </el-date-picker>
+                            </div>
+                        </div>
+                        <div class="queryCont">
+                            <div class="iptw-60 mgr-8">
+                                <el-select v-model="queryMineTimeType" @change="changeMineQuery" placeholder="请选择">
+                                    <el-option
+                                            v-for="item in queryMineOptions"
+                                            :key="item.value"
+                                            :label="item.label"
+                                            :value="item.value">
+                                    </el-option>
+                                </el-select>
+                            </div>
+                            <div class="iptw-60 mgr-8">
+                                <el-select v-model="queryLineIndex"  @change="changeMineQuery()" placeholder="请选择">
+                                    <el-option
+                                            v-for="item in queryLineOptions"
+                                            :key="item.deviceId"
+                                            :label="item.deviceName"
+                                            :value="item.deviceId">
+                                    </el-option>
+                                </el-select>
+                            </div>
+                            <div class="iptw-60 mgr-8">
+                                <el-select v-model="showIndex"   @change="changeMineShowCont" placeholder="请选择">
+                                    <el-option
+                                            v-for="item in showIndexOptions"
+                                            :key="item.value"
+                                            :label="item.label"
+                                            :value="item.value">
+                                    </el-option>
+                                </el-select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="timeDatas" v-show="queryMineTimeType=='1'">
+                        <div class="tables" v-show="showIndex==1">
+                            <ul class="ulTitle">
+                                <li>
+                                    <span class="ename">序号</span>
+                                    <span class="eval">监测值</span>
+                                    <span class="etime">监测时间</span>
+                                </li>
+                            </ul>
+                            <ul class="dataList">
+                                <li v-for="(item,key) in resultList" :key="key" >
+                                    <span class="ename">{{key}}</span>
+                                    <span class="eval">{{item.dataValue==null?'-':parseFloat(item.dataValue).toFixed(3)}}</span>
+                                    <span class="etime">{{item.dataTime}}</span>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="echarts" v-show="showIndex==2">
+                            <div id="lineminechart">
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="timeDatas" v-show="queryMineTimeType!='1'">
+                        <div class="tables" v-show="showIndex==1">
+                            <ul class="ulTitle">
+                                <li>
+                                    <span class="eval">最大值</span>
+                                    <span class="eval">最小值</span>
+                                    <span class="eval">平均值</span>
+                                    <span class="etime">监测时间</span>
+                                </li>
+                            </ul>
+                            <ul class="dataList">
+                                <li v-for="(item,key) in resultList" :key="key" >
+                                    <span class="eval2">{{item.maxValue==null?'-':parseFloat(item.maxValue).toFixed(2)}}</span>
+                                    <span class="eval2">{{item.minValue==null?'-':parseFloat(item.minValue).toFixed(2)}}</span>
+                                    <span class="eval2">{{item.avgValue==null?'-':parseFloat(item.avgValue).toFixed(2)}}</span>
+                                    <span class="etime">{{item.dataTime}}</span>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="echarts" v-show="showIndex==2">
+                            <div id="linedaychart">
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="detailDiv" v-if="showType=='xzcf'">
+                <div class="baseDiv">
+                    <div class="company_name text-ell">{{showObj.companyName}}</div>
+                    <p  class="describe text-ell">排污许可证号：{{showObj.permitLicence}}</p>
+                </div>
+                <div class="dataConts">
+                    <div v-for="(item,key) in xzcfList" class="container" :key="key" >
+                        <div class="source">
+                            <div class="content">
+                                <div class="company_name text-ell">案由：{{item.caseReason}}</div>
+                                <p  class="describe text-ell">案件来源：{{item.caseSourceName}}</p>
+                                <p  class="describe text-ell">立案时间：{{item.filingTime}}</p>
+                                <p  class="describe text-ell">案件状态：{{item.currentNode}}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="nodata" v-if="xzcfList.length==0">
+                        <span>未查询到相关数据</span>
+                    </div>
+                </div>
+            </div>
+            <div class="detailDiv" v-if="showType=='hjxf'">
+                <div class="baseDiv">
+                    <div class="company_name text-ell">{{showObj.companyName}}</div>
+                    <p  class="describe text-ell">排污许可证号：{{showObj.permitLicence}}</p>
+                </div>
+                <div class="dataConts">
+                    <div v-for="(item,key) in xfList" class="container" :key="key">
+                        <div class="source">
+                            <div class="content">
+                                <div class="company_name text-ell">编号名称：{{item.petitionNoName}}</div>
+                                <p  class="describe text-ell">案件分类：{{item.classifyName}}</p>
+                                <p  class="describe text-ell">案件来源：{{item.sourceName}}</p>
+                                <p  class="describe text-ell">创建时间：{{item.createTime}}</p>
+                                <p  class="describe text-ell">案件状态：{{item.currentNode}}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="nodata" v-if="xfList.length==0">
+                        <span>未查询到相关数据</span>
                     </div>
                 </div>
             </div>
@@ -197,8 +645,15 @@
         data(){
             return{
                 showResult:false,
+                loading:false,
+                newData:{},
                 showName:"",
+                currentCls:"baseDiv",
                 activeNames:"",
+                activeMineNames:"mineline",
+                activeMineLineNames:"mineprop",
+                lineList:[],
+                propList:[],
                 showObj:{},
                 searchVal:"",
                 showType:"",
@@ -206,7 +661,7 @@
                 wgList:[],
                 wwList:[],
                 xfList:[],
-                xxcfList:[],
+                xzcfList:[],
                 queryTimeType:"1",
                 queryOptions: [{
                     value: '1',
@@ -214,6 +669,39 @@
                 }, {
                     value: '2',
                     label: '小时'
+                }],
+                queryWryTimeType:"3",
+                queryWryOptions: [{
+                    value: '1',
+                    label: '分钟'
+                }, {
+                    value: '2',
+                    label: '小时'
+                }, {
+                    value: '3',
+                    label: '天'
+                }],
+                queryMineTimeType:"3",
+                queryMineOptions: [{
+                    value: '1',
+                    label: '分钟'
+                }, {
+                    value: '2',
+                    label: '小时'
+                }, {
+                    value: '3',
+                    label: '天'
+                }],
+                queryAirTimeType:"3",
+                queryAirOptions: [{
+                    value: '1',
+                    label: '分钟'
+                }, {
+                    value: '2',
+                    label: '小时'
+                }, {
+                    value: '3',
+                    label: '天'
                 }],
                 showIndex:"2",
                 showIndexOptions: [{
@@ -283,6 +771,13 @@
                     }]
                 },
                 stime:[this.initETime(7),this.initSTime()],
+                queryWryIndex:'',
+                queryWryIndexOptions:[],
+                queryLineOptions:[],
+                queryLineIndex:'',
+                queryAirIndex:'',
+                queryAirIndexOptions:[],
+                chartDOM:"linechart"
             }
         },
         methods:{
@@ -312,28 +807,58 @@
                 this.showObj = obj;
                 this.showResult = true;
                 this.showType = type;
+                this.resultList = [];
+                this.currentCls = "baseDiv";
+                this.newData = {};
                 if(type == "factory"){
                     this.showName = obj.companyName;
-                    this.queryFactoryData(obj.dataId);
+                    this.queryFactoryData(obj.companyName);
+                    this.queryFactoryXZData(obj.companyName);
                 }else if(type == "mine"){
                     this.showName = obj.enterpriseName;
-                }else if(type == "ww"){
+                    this.queryMineData(obj.enterpriseNo);
+                }else if(type == "ww"){//废水
                     this.showName = obj.portName;
-                }else if(type == "wg"){
+                    this.chartDOM = "linewwchart";
+                    this.getWrgIndexOptions(obj.id,type);
+                }else if(type == "wg"){//废气
                     this.showName = obj.portName;
+                    this.chartDOM = "linewgchart";
+                    this.getWrgIndexOptions(obj.id,type);
                 }else if(type == "sttp"){
                     this.showName = obj.stationName;
+                    this.chartDOM = "linechart";
                     this.changeStationQuery();
+                }else if(type == "air"){
+                    this.showName = obj.pointName;
+                    this.chartDOM = "lineairchart";
+                    this.getAirIndexOptions(obj.id);
+                }else if(type == "mineline"){
+                    this.showName = obj.productLineName;
+                    this.queryLineData(obj.productLineNo);
+                    this.chartDOM = "lineminechart";
+                }else if(type == "mineprop"){
+                    this.showName = obj.productLineName;
+                    this.chartDOM = "lineminechart";
+                    this.queryLineData(obj.productLineNo);
+                }else if(type == "xzcf"){
+                    this.showName = obj.companyName;
+                    this.queryXzcf(obj.permitLicence);
+                }else if(type == "hjxf"){
+                    this.showName = obj.companyName;
+                    this.queryHjxf(obj.permitLicence);
                 }
             },
-            queryFactoryData(dataId){
+            queryFactoryData(companyname){
                 let body = {
                     "conditions":[
                         {
                             "operator":"AND",
-                            "field":"T_Poms_GasOutlet.company",
+                            "field":"companyName",
                             "match":"equal",
-                            "value":dataId,//普通站
+                            "value":companyname,
+                            "maxValue":"",
+                            "minValue":""
                         }
                     ],
                     "page":{
@@ -347,7 +872,7 @@
                     }
                 };
                 this.$axios({
-                    url: appCfg.map.gisApiUrl+"api/share/data/2c9a818f73768e6501737696cc1e0021?userKey="+appCfg.map.userKey,
+                    url: appCfg.map.gisApiUrl+"api/share/data/2c9a818f73768e6501737695b208001e?userKey="+appCfg.map.userKey,
                     method: "post",
                     data: body,
                     header:{'Content-type': 'application/json'}
@@ -364,13 +889,16 @@
                     let list = res.data.data.list;
                     this.wgList = list;
                 });
-                let xfbody = {
+
+            },
+            queryFactoryXZData(companyname){
+                let xzcfbody = {
                     "conditions":[
                         {
                             "operator":"AND",
-                            "field":"companyId",
+                            "field":"companyName",
                             "match":"equal",
-                            "value":dataId,
+                            "value":companyname,
                             "maxValue":"",
                             "minValue":""
                         }
@@ -382,18 +910,126 @@
                         "pageSize": 10
                     },
                     "sort":{
-                        "field": "",
+                        "field": "filingTime",
                         "order": "DESC"
                     }
-                }
+                };
+
                 this.$axios({
                     url: appCfg.map.gisApiUrl+"api/share/data/2c9a818f738f38bf017390247cbf035d?userKey="+appCfg.map.userKey,
+                    method: "post",
+                    data: xzcfbody,
+                    header:{'Content-type': 'application/json'}
+                }).then(res => {
+                    let list = res.data.data.list;
+                    this.xzcfList = list;
+                });
+
+                let xfbody = {
+                    "conditions":[
+                        {
+                            "operator":"AND",
+                            "field":"companyName",
+                            "match":"equal",
+                            "value":companyname,
+                            "maxValue":"",
+                            "minValue":""
+                        }
+
+                    ],
+                    "page":{
+                        "pageable": false,
+                        "currentPage": 1,
+                        "pageSize": 10
+                    },
+                    "sort":{
+                        "field": "createTime",
+                        "order": "DESC"
+                    }
+                };
+
+                this.$axios({
+                    url: appCfg.map.gisApiUrl+"api/share/data/2c9a818f738f38bf01739024196c035a?userKey="+appCfg.map.userKey,
                     method: "post",
                     data: xfbody,
                     header:{'Content-type': 'application/json'}
                 }).then(res => {
                     let list = res.data.data.list;
-                    this.xxcfList = list;
+                    this.xfList = list;
+                });
+            },
+            queryMineData(enterpriseNo){
+                let body = {
+                    "conditions":[
+                        {
+                            "operator":"AND",
+                            "field":"T_Knt_ProductLine.enterpriseNo",
+                            "match":"equal",
+                            "value":enterpriseNo,
+                            "maxValue":"",
+                            "minValue":""
+                        }
+                    ],
+                    "page":{
+                        "pageable": false,
+                        "currentPage": 1,
+                        "pageSize": 10
+                    },
+                    "sort":{
+                        "field": "",
+                        "order": "DESC"
+                    }
+                };
+                this.$axios({
+                    url: appCfg.map.gisApiUrl+"api/share/data/2c9a818f73768e6501737afbac58009f?userKey="+appCfg.map.userKey,
+                    method: "post",
+                    data: body,
+                    header:{'Content-type': 'application/json'}
+                }).then(res => {
+                    let list = res.data.data.list;
+                    if(list.length>0){
+                        this.lineList = list;
+                    }else{
+                        this.$message.error("未查询到企业生产线数据");
+                    }
+                });
+            },
+            queryLineData(productLineNo){
+                let body = {
+                    "conditions":[
+                        {
+                            "operator":"AND",
+                            "field":"productLineNo",
+                            "match":"equal",
+                            "value":productLineNo,
+                            "maxValue":"",
+                            "minValue":""
+                        }
+                    ],
+                    "page":{
+                        "pageable": false,
+                        "currentPage": 1,
+                        "pageSize": 10
+                    },
+                    "sort":{
+                        "field": "",
+                        "order": "DESC"
+                    }
+                };
+                this.$axios({
+                    url: appCfg.map.gisApiUrl+"api/share/data/2c9a818f73768e6501737b00ab1000b0?userKey="+appCfg.map.userKey,
+                    method: "post",
+                    data: body,
+                    header:{'Content-type': 'application/json'}
+                }).then(res => {
+                    let list = res.data.data.list;
+                    if(list.length>0){
+                        this.queryLineOptions = list;
+                        this.queryLineIndex = list[0].deviceId;
+                        this.changeMineQuery()
+                    }else{
+                        this.$message.error("未查询到企业生产线设备数据");
+                    }
                 });
             },
             searchSttpHour(stationId,stime,column){
@@ -430,17 +1066,17 @@
                         "order": "DESC"
                     }
                 };
-                this.$loadUtil.showLoading();
+                this.loading = true;
                 this.$axios({
                     url: appCfg.map.gisApiUrl+"api/share/data/2c9a818f73768e65017376b7df800042?userKey="+appCfg.map.userKey,
                     method: "post",
                     data: body,
                     header:{'Content-type': 'application/json'}
                 }).then(res => {
-                    this.$loadUtil.hideLoading();
+                    this.loading = false;
                     let list = res.data.data.list;
                     if(list.length == 0){
-                        this.$message("未查询到相关数据！");
+                        this.$message.error("未查询到相关数据！");
                         return;
                     }
                     let obj = {};
@@ -451,10 +1087,46 @@
                     this.resultList = [];
                     for(let i=0;i<list.length;i++){
                         list[i].itemName = itemName;
+                        list[i].status = this.getLevel(list[i].level);
                     }
+                    this.currentCls = this.getLevelCls(list[0].level);
                     this.resultList = list;
                     this.changeShowCont();
                 })
+            },
+            getLevel(level){
+                if(level==1){
+                    return "优";
+                }else if(level == 2){
+                    return "良";
+                }else if(level == 3){
+                    return "轻度污染";
+                }else if(level == 4){
+                    return "中度污染";
+                }else if(level == 5){
+                    return "重度污染";
+                }else if(level == 6){
+                    return "严重污染";
+                }else{
+                    return "-";
+                }
+            },
+            getLevelCls(level){
+                if(level==1){
+                    return "sucDiv";
+                }else if(level == 2){
+                    return "goodDiv";
+                }else if(level == 3){
+                    return "warnDiv";
+                }else if(level == 4){
+                    return "errDiv";
+                }else if(level == 5){
+                    return "errDiv";
+                }else if(level == 6){
+                    return "errDiv";
+                }else{
+                    return "baseDiv";
+                }
             },
             searchSttpMine(stationId,stime,column){
                 let body = {
@@ -484,18 +1156,18 @@
                         "order": "DESC"
                     }
                 };
-                this.$loadUtil.showLoading();
+                this.loading = true;
                 this.$axios({
                     url: appCfg.map.gisApiUrl+"api/share/data/2c9a818f73768e65017376b73fcf003f?userKey="+appCfg.map.userKey,
                     method: "post",
                     data: body,
                     header:{'Content-type': 'application/json'}
                 }).then(res => {
-                    this.$loadUtil.hideLoading();
+                    this.loading = false;
                     let list = res.data.data.list;
 
                     if(list.length == 0){
-                        this.$message("未查询到相关数据！");
+                        this.$message.error("未查询到相关数据！");
                         return;
                     }
                     let obj = {};
@@ -506,10 +1178,12 @@
                     this.resultList = [];
                     for(let i=0;i<list.length;i++){
                         list[i].itemName = itemName;
+                        list[i].status = this.getIndexStatus(list[i][this.queryIndex+"_FLAG"]);
                         list[i].value = list[i][this.queryIndex];
                     }
+                    this.currentCls = this.getIndexCls(list[0][this.queryIndex+"_FLAG"]);
                     this.resultList = list;
-                    this.changeShowCont();
+                    this.changeShowCont("linechart");
                 })
             },
             changeStationQuery(){
@@ -536,12 +1210,13 @@
                 }
             },
             createLintChart(chartObj){
-                let lineChart = this.$charts.init(document.getElementById('linechart'));
+                let lineChart = this.$charts.init(document.getElementById(this.chartDOM));
+                lineChart.resize();
                 lineChart.clear();
                 lineChart.setOption({
                     color: ['#51B1E6', '#51B1E6'],
                     title: {
-                        text: '监测因子变化趋势',
+                        text: '监测数据变化趋势',
                         top: '2',
                         left: '10',
                         textStyle: {
@@ -608,6 +1283,748 @@
                         }
                     ]
                 });
+            },
+            getWrgIndexOptions(nodeId,type){
+                let body = {
+                    "conditions":[
+                        {
+                            "operator":"AND",
+                            "field":"nodeId",
+                            "match":"equal",
+                            "value":nodeId,//查询因子
+                        }
+                    ],
+                    "page":{
+                        "pageable": false,
+                        "currentPage": 1,
+                        "pageSize": 10
+                    },
+                    "sort":{
+                        "field": "",
+                        "order": "DESC"
+                    }
+                };
+                this.$axios({
+                    url: appCfg.map.gisApiUrl+"api/share/data/2c9a818f73768e650173769bb3c40024?userKey="+appCfg.map.userKey,
+                    method: "post",
+                    data: body,
+                    header:{'Content-type': 'application/json'}
+                }).then(res => {
+                    let list = res.data.data.list;
+                    if(list.length>0){
+                        this.queryWryIndexOptions = list;
+                        this.queryWryIndex = list[0].columnCode;
+                        this.changeWryQuery(type);
+                    }else{
+                        this.$message.error("未查询到该排口监测因子！");
+                    }
+                });
+            },
+            changeWryQuery(type){
+                if(type == "ww"){
+                    this.searchWwData(this.showObj.id,this.stime,this.queryWryTimeType);
+                }else if(type == "wg"){
+                    this.searchWgData(this.showObj.id,this.stime,this.queryWryTimeType);
+                }
+            },
+            searchWgData(stationId,stime,type){
+                let apiUk = "";
+                let filed = "";
+                if(type == 1){
+                    apiUk = "2c9a818f73768e65017376b526a50036";
+                    filed = "T_Poms_GasOutlet.id";
+                }else if(type == 2){
+                    apiUk = "2c9a818f73768e65017376b3ad710030";
+                    filed = "T_Poms_GasOutlet.id";
+                }else{
+                    apiUk = "2c9a818f73768e65017376b4935d0033";
+                    filed = "T_Poms_GasOutlet.id";
+                }
+                let body = {
+                    "conditions":[
+                        {
+                            "operator":"AND",
+                            "field":filed,
+                            "match":"equal",
+                            "value":stationId
+                        },
+                        {
+                            "operator":"AND",
+                            "match":"range",
+                            "field":"recordTime",
+                            "value":"",
+                            "maxValue":stime[1],
+                            "minValue":stime[0]
+                        }
+                    ],
+                    "page":{
+                        "pageable": false,
+                        "currentPage": 1,
+                        "pageSize": 10
+                    },
+                    "sort":{
+                        "field": "recordTime",
+                        "order": "DESC"
+                    }
+                };
+                this.loading = true;
+                this.$axios({
+                    url: appCfg.map.gisApiUrl+"api/share/data/"+apiUk+"?userKey="+appCfg.map.userKey,
+                    method: "post",
+                    data: body,
+                    header:{'Content-type': 'application/json'}
+                }).then(res => {
+                    this.loading = false;
+                    if(res.data.code== "200"){
+                        let list = res.data.data.list;
+                        if(list.length == 0){
+                            this.$message.error("未查询到相关数据！");
+                            return;
+                        }
+                        let obj = {};
+                        obj = this.queryWryIndexOptions.find((item)=>{
+                            return item.columnCode === this.queryWryIndex;
+                        });
+                        let itemName =  obj.pollutantName;
+                        this.resultList = [];
+                        for(let i=0;i<list.length;i++){
+                            list[i].itemName = itemName;
+                            list[i].status = this.getIndexStatus(list[i][this.queryWryIndex+"_FLAG"]);
+                            list[i].value = list[i][this.queryWryIndex];
+                            list[i].recordTime = this.$appUtil.formatDate("yyyy-MM-dd HH:mm:ss",new Date(list[i].recordTime))
+                        }
+                        this.currentCls = this.getIndexCls(list[0][this.queryWryIndex+"_FLAG"]);
+                        this.newData = {
+                            indexName:itemName,
+                            indexVal:list[0][this.queryWryIndex],
+                            indexTime:list[0].recordTime
+                        };
+                        this.resultList = list;
+                        this.changeShowCont();
+                    }
+                })
+            },
+            searchWwData(stationId,stime,type){
+                let apiUk = "";
+                let filed = "";
+                if(type == 1){
+                    apiUk = "2c9a818f73768e65017376b2f8a9002d";
+                    filed = "T_Poms_WaterOutlet.id";
+                }else if(type == 2){
+                    apiUk = "2c9a818f73768e65017376b1e8cc0027";
+                    filed = "T_Poms_WaterOutlet.id";
+                }else{
+                    apiUk = "2c9a818f73768e65017376b268ae002a";
+                    filed = "T_Poms_WaterOutlet.id";
+                }
+                let body = {
+                    "conditions":[
+                        {
+                            "operator":"AND",
+                            "field":filed,
+                            "match":"equal",
+                            "value":stationId
+                        },
+                        {
+                            "operator":"AND",
+                            "match":"range",
+                            "field":"recordTime",
+                            "value":"",
+                            "maxValue":stime[1],
+                            "minValue":stime[0]
+                        }
+                    ],
+                    "page":{
+                        "pageable": false,
+                        "currentPage": 1,
+                        "pageSize": 10
+                    },
+                    "sort":{
+                        "field": "recordTime",
+                        "order": "DESC"
+                    }
+                };
+                this.loading = true;
+                this.$axios({
+                    url: appCfg.map.gisApiUrl+"api/share/data/"+apiUk+"?userKey="+appCfg.map.userKey,
+                    method: "post",
+                    data: body,
+                    header:{'Content-type': 'application/json'}
+                }).then(res => {
+                    this.loading = false;
+                    if(res.data.code== "200"){
+                        let list = res.data.data.list;
+                        this.resultList = [];
+                        if(list.length == 0){
+                            this.$message.error("未查询到相关数据！");
+                            return;
+                        }
+                        let obj = {};
+                        obj = this.queryWryIndexOptions.find((item)=>{
+                            return item.columnCode === this.queryWryIndex;
+                        });
+                        let itemName =  obj.pollutantName;
+                        for(let i=0;i<list.length;i++){
+                            list[i].itemName = itemName;
+                            list[i].status = this.getIndexStatus(list[i][this.queryWryIndex+"_FLAG"]);
+                            list[i].value = list[i][this.queryWryIndex];
+                        }
+                        this.currentCls = this.getIndexCls(list[0][this.queryWryIndex+"_FLAG"]);
+                        this.resultList = list;
+                        this.newData = {
+                            indexName:itemName,
+                            indexVal:list[0][this.queryWryIndex],
+                            indexTime:list[0].recordTime
+                        };
+                        this.changeShowCont();
+                    }
+                })
+            },
+            getAirIndexOptions(nodeId,type){
+                let body = {
+                    "conditions":[
+
+                    ],
+                    "page":{
+                        "pageable": false,
+                        "currentPage": 1,
+                        "pageSize": 10
+                    },
+                    "sort":{
+                        "field": "",
+                        "order": "DESC"
+                    }
+                };
+                this.$axios({
+                    url: appCfg.map.gisApiUrl+"api/share/data/2c9a818f73768e65017376ba12a0004b?userKey="+appCfg.map.userKey,
+                    method: "post",
+                    data: body,
+                    header:{'Content-type': 'application/json'}
+                }).then(res => {
+                    let list = res.data.data.list;
+                    if(list.length>0){
+                        for(let i=0;i<list.length;i++){
+                            list[i].columnCode = "F_"+list[i].columnCode;
+                        }
+                        this.queryAirIndexOptions = list;
+
+                        this.queryAirIndex = list[0].columnCode;
+                        this.changeAirQuery();
+                    }else{
+                        this.$message.error("未查询到该排口监测因子！");
+                    }
+                });
+            },
+            changeAirQuery(){
+                this.searchAirData(this.showObj.id,this.stime,this.queryAirTimeType);
+            },
+            searchAirData(stationId,stime,type){
+                let apiUk = "";
+                let filed = "";
+                if(type == 1){
+                    apiUk = "2c9a818f73768e65017376bb0e13004e";
+                    filed = "T_Aqms_Min.nodeId";
+                }else if(type == 2){
+                    apiUk = "2c9a818f73768e65017376bd2fd50054";
+                    filed = "T_Aqms_Hour.nodeId";
+                }else{
+                    apiUk = "2c9a818f73768e65017376bb95470051";
+                    filed = "T_Aqms_Day.nodeId";
+                }
+                let body = {
+                    "conditions":[
+                        {
+                            "operator":"AND",
+                            "field":filed,
+                            "match":"equal",
+                            "value":stationId
+                        },
+                        {
+                            "operator":"AND",
+                            "match":"range",
+                            "field":"recordTime",
+                            "value":"",
+                            "maxValue":stime[1],
+                            "minValue":stime[0]
+                        }
+                    ],
+                    "page":{
+                        "pageable": false,
+                        "currentPage": 1,
+                        "pageSize": 10
+                    },
+                    "sort":{
+                        "field": "recordTime",
+                        "order": "DESC"
+                    }
+                };
+                this.loading = true;
+                this.$axios({
+                    url: appCfg.map.gisApiUrl+"api/share/data/"+apiUk+"?userKey="+appCfg.map.userKey,
+                    method: "post",
+                    data: body,
+                    header:{'Content-type': 'application/json'}
+                }).then(res => {
+                    this.loading = false;
+                    if(res.data.code== "200"){
+                        let list = res.data.data.list;
+                        if(list.length == 0){
+                            this.$message.error("未查询到相关数据！");
+                            return;
+                        }
+                        let obj = {};
+                        obj = this.queryAirIndexOptions.find((item)=>{
+                            return item.columnCode === this.queryAirIndex;
+                        });
+                        let itemName =  obj.name;
+                        this.resultList = [];
+                        for(let i=0;i<list.length;i++){
+                            list[i].itemName = itemName;
+                            list[i].status = this.getAirStatus(list[i][this.queryAirIndex+"_FLAG"]);
+                            list[i].value = list[i][this.queryAirIndex];
+                            list[i].recordTime = this.$appUtil.formatDate("yyyy-MM-dd HH:mm:ss",new Date(list[i].recordTime))
+                        }
+                        this.currentCls = this.getAirCls(list[0][this.queryAirIndex+"_FLAG"]);
+                        this.newData = {
+                            indexName:itemName,
+                            indexVal:list[0][this.queryAirIndex],
+                            indexTime:list[0].recordTime
+                        };
+                        this.resultList = list;
+                        this.changeShowCont();
+                    }
+                })
+            },
+            getAirStatus(indexVal){
+                if(null==indexVal){
+                    return "-";
+                }else if(indexVal.substring(1,3).indexOf("00")>=0){
+                    return "正常";
+                }else if(indexVal.substring(1,3).indexOf("01")>=0){
+                    return "修约有效";
+                }else if(indexVal.substring(1,3).indexOf("02")>=0){
+                    return "倒挂";
+                }else if(indexVal.substring(1,3).indexOf("09")>=0){
+                    return "补录";
+                }else if(indexVal.substring(1,3).indexOf("10")>=0){
+                    return "离群";
+                }else if(indexVal.substring(1,3).indexOf("14")>=0){
+                    return "有效数据不足";
+                }else if(indexVal.substring(1,3).indexOf("16")>=0){
+                    return "连续数";
+                }else if(indexVal.substring(1,3).indexOf("17")>=0){
+                    return "低于下限";
+                }else if(indexVal.substring(1,3).indexOf("18")>=0){
+                    return "超出上限";
+                }else if(indexVal.substring(1,3).indexOf("19")>=0){
+                    return "修约空白";
+                }else if(indexVal.substring(1,3).indexOf("20")>=0){
+                    return "无效";
+                }else{
+                    return "无效";
+                }
+            },
+            getAirCls(indexVal){
+                if(null==indexVal){
+                    return "baseDiv";
+                }else if(indexVal.substring(1,3).indexOf("00")>=0){
+                    return "sucDiv";
+                }else if(indexVal.substring(1,3).indexOf("01")>=0){
+                    return "sucDiv";
+                }else if(indexVal.substring(1,3).indexOf("02")>=0){
+                    return "warnDiv";
+                }else if(indexVal.substring(1,3).indexOf("09")>=0){
+                    return "warnDiv";
+                }else if(indexVal.substring(1,3).indexOf("10")>=0){
+                    return "warnDiv";
+                }else if(indexVal.substring(1,3).indexOf("14")>=0){
+                    return "warnDiv";
+                }else if(indexVal.substring(1,3).indexOf("16")>=0){
+                    return "sucDiv";
+                }else if(indexVal.substring(1,3).indexOf("17")>=0){
+                    return "warnDiv";
+                }else if(indexVal.substring(1,3).indexOf("18")>=0){
+                    return "errDiv";
+                }else if(indexVal.substring(1,3).indexOf("19")>=0){
+                    return "errDiv";
+                }else if(indexVal.substring(1,3).indexOf("20")>=0){
+                    return "errDiv";
+                }else {
+                    return "errDiv";
+                }
+            },
+            getIndexStatus(indexVal){
+                if(null==indexVal){
+                    return "-";
+                }else if(indexVal.indexOf("ZC")>=0){
+                    return "正常";
+                }else if(indexVal.indexOf("YC")>=0){
+                    return "异常";
+                }else if(indexVal.indexOf("CB")>=0){
+                    return "超标";
+                }else if(indexVal.indexOf("DX")>=0){
+                    return "断线";
+                }else if(indexVal.indexOf("TY")>=0){
+                    return "停用";
+                }
+            },
+            getIndexCls(indexVal){
+                if(null==indexVal){
+                    return "baseDiv";
+                }else if(indexVal.indexOf("ZC")>=0){
+                    return "sucDiv";
+                }else if(indexVal.indexOf("YC")>=0){
+                    return "errDiv";
+                }else if(indexVal.indexOf("CB")>=0){
+                    return "warnDiv";
+                }else if(indexVal.indexOf("DX")>=0){
+                    return "errDiv";
+                }else if(indexVal.indexOf("TY")>=0){
+                    return "warnDiv";
+                }
+            },
+            zoomToMap(item,type){
+                if(item.latitude&&item.longitude){
+                    this.$mapUtil.lMap.flyTo([item.latitude, item.longitude], 16,{ animate:false});
+                    let layerGroup = this.$mapUtil.getTempLayer(type);
+                    layerGroup.eachLayer(function (layer){
+                        if (layer.id === item.id){
+                            layer.openPopup();
+                        }
+                    });
+                }
+                this.setShowObj(item,type);
+            },
+            createLineHtml(model){
+                let html = [];
+                html.push('<div class="popuDiv"><span>生产线：</span>'+model.productLineName+'</div>');
+                html.push('<div class="popuDiv"><span>公司名称：</span>'+model.enterpriseName+'</div>');
+                html.push('<div class="popuDiv"><span>地址：</span>'+model.address+'</div>');
+                html.push('<div class="popuDiv"><span>排污许可证：</span>'+model.permitLicence+'</div>');
+                html.push('<div class="poputools">');
+                html.push('<button onclick="getMineTime('+JSON.stringify(model).replace(/"/g, '&quot;')+',\'mineline\')">详情</button>');
+                html.push('</div>');
+                return html.join('');
+            },
+            showMineline(item,type){
+                this.setShowObj(item,type);
+            },
+            changeMineQuery(){
+                if(this.queryMineTimeType == "1"){
+                    this.searchMineData(this.queryLineIndex,this.stime);
+                }else{
+                    this.searchDayAndHour(this.queryLineIndex,this.stime)
+                }
+            },
+            searchMineData(id,stime){
+                let body = {
+                    "conditions":[
+                        {
+                            "operator":"AND",
+                            "field":"deviceId",
+                            "match":"equal",
+                            "value":id
+                        },
+                        {
+                            "operator":"AND",
+                            "match":"range",
+                            "field":"dataTime",
+                            "value":"",
+                            "maxValue":stime[1],
+                            "minValue":stime[0]
+                        }
+                    ],
+                    "page":{
+                        "pageable": false,
+                        "currentPage": 1,
+                        "pageSize": 10
+                    },
+                    "sort":{
+                        "field": "dataTime",
+                        "order": "DESC"
+                    }
+                };
+                this.loading = true;
+                this.$axios({
+                    url: appCfg.map.gisApiUrl+"api/share/data/2c9a818f73768e6501737b02822e00b6?userKey="+appCfg.map.userKey,
+                    method: "post",
+                    data: body,
+                    header:{'Content-type': 'application/json'}
+                }).then(res => {
+                    this.loading = false;
+                    let list = res.data.data.list;
+                    if(list.length == 0){
+                        this.$message.error("未查询到相关数据！");
+                        return;
+                    }
+                    this.resultList = list;
+                    this.changeMineShowCont("lineminechart");
+                })
+            },
+            searchDayAndHour(id,stime){
+                let body = {
+                    "conditions":[
+                        {
+                            "operator":"AND",
+                            "field":"deviceId",
+                            "match":"equal",
+                            "value":id
+                        },
+                        {
+                            "operator":"AND",
+                            "field":"timeType",
+                            "match":"equal",
+                            "value":this.queryMineTimeType
+                        },
+
+                        {
+                            "operator":"AND",
+                            "match":"range",
+                            "field":"dataTime",
+                            "value":"",
+                            "maxValue":stime[1],
+                            "minValue":stime[0]
+                        }
+                    ],
+                    "page":{
+                        "pageable": false,
+                        "currentPage": 1,
+                        "pageSize": 10
+                    },
+                    "sort":{
+                        "field": "dataTime",
+                        "order": "DESC"
+                    }
+                };
+                this.loading = true;
+                this.$axios({
+                    url: appCfg.map.gisApiUrl+"api/share/data/2c9a818f73768e6501737b019dfc00b3?userKey="+appCfg.map.userKey,
+                    method: "post",
+                    data: body,
+                    header:{'Content-type': 'application/json'}
+                }).then(res => {
+                    this.loading = false;
+                    let list = res.data.data.list;
+                    if(list.length == 0){
+                        this.$message.error("未查询到相关数据！");
+                        return;
+                    }
+                    this.resultList = list;
+                    this.changeMineShowCont();
+                })
+            },
+            changeMineShowCont(){
+                if(this.showIndex == 2&&this.queryMineTimeType=="1"){
+                    let list = this.resultList;
+                    let xdata = [];
+                    let ydata = [];
+                    let chartObj = {};
+                    for(let i=0;i<list.length;i++){
+                        xdata.push(list[i].dataTime);
+                        let yda = list[i].dataValue==null?0:parseFloat(list[i].dataValue).toFixed(3);
+                        ydata.push(yda);
+                    }
+                    chartObj.xdata = xdata;
+                    chartObj.ydata = ydata;
+                    this.chartDOM = "lineminechart";
+                    this.createLintChart(chartObj);
+                }else if(this.showIndex == 2&&this.queryMineTimeType!="1"){
+                    let list = this.resultList;
+                    let xdata = [];
+                    let ydata = [];
+                    let maxData = [];
+                    let minData = [];
+                    let chartObj = {};
+                    for(let i=0;i<list.length;i++){
+                        xdata.push(list[i].dataTime);
+                        let max = list[i].maxValue==null?0:parseFloat(list[i].maxValue).toFixed(3);
+                        let min = list[i].minValue==null?0:parseFloat(list[i].minValue).toFixed(3);
+                        let avg = list[i].avgValue==null?0:parseFloat(list[i].avgValue).toFixed(3);
+                        ydata.push(avg);
+                        maxData.push(max);
+                        minData.push(min);
+                    }
+                    chartObj.xdata = xdata;
+                    chartObj.ydata = ydata;
+                    chartObj.maxData = maxData;
+                    chartObj.minData = minData;
+                    this.chartDOM = "linedaychart";
+                    this.createAvgLintChart(chartObj);
+                }
+            },
+            createAvgLintChart(chartObj){
+                let lineChart = this.$charts.init(document.getElementById(this.chartDOM));
+                lineChart.resize();
+                lineChart.clear();
+                lineChart.setOption({
+                    color: ['#51B1E6', '#9BA527', '#A52727'],
+                    title: {
+                        text: '',
+                        top: '2',
+                        left: '10',
+                        textStyle: {
+                            fontSize: '13',
+                            color: '#F1EAEC'
+                        }
+                    },
+                    tooltip : {
+                        trigger: 'axis',
+                        axisPointer : {
+                            type : 'shadow'
+                        }
+                    },
+                    legend: {
+                        right: '10',
+                        top: '5',
+                        itemWidth: 15,
+                        itemHeight: 8,
+                        textStyle: {
+                            fontSize: '9',
+                            color: '#FFF'
+                        },
+                        data:['最大值','最小值','平均值']
+                    },
+                    grid: {
+                        left: '2%',
+                        right: '2%',
+                        top: '20%',
+                        bottom: '2%',
+                        containLabel: true
+                    },
+                    xAxis : [
+                        {
+                            type : 'category',
+                            axisLabel: {
+                                rotate: '0',
+                                textStyle: {
+                                    color:'#ffffff'
+                                }
+                            },
+                            name: '',
+                            axisLine: {
+                                lineStyle:{
+                                    color:'#ffffff',
+                                    width: '1'
+                                },
+                            },
+                            nameLocation: 'end',
+                            nameTextStyle: {
+                                color: '#ffffff'
+                            },
+                            data : chartObj.xdata
+                        }
+                    ],
+                    yAxis : [
+                        {
+                            type : 'value',
+                            splitLine: {
+                                lineStyle: {
+                                    color: '#ffffff',
+                                }
+                            },
+                            axisLabel: {
+                                textStyle: {
+                                    color:'#ffffff'
+                                }
+                            },
+                        }
+                    ],
+                    series : [
+                        {
+                            name:'最大值',
+                            type:'line',
+                            data:chartObj.maxData
+                        },
+                        {
+                            name:'最小值',
+                            type:'line',
+                            data:chartObj.minData
+                        },
+                        {
+                            name:'平均值',
+                            type:'line',
+                            data:chartObj.ydata
+                        }
+                    ]
+                });
+            },
+            queryXzcf(permitLicence){
+                let xzcfbody = {
+                    "conditions":[
+                        {
+                            "operator":"AND",
+                            "field":"permitLicence",
+                            "match":"equal",
+                            "value":permitLicence,
+                            "maxValue":"",
+                            "minValue":""
+                        }
+
+                    ],
+                    "page":{
+                        "pageable": false,
+                        "currentPage": 1,
+                        "pageSize": 10
+                    },
+                    "sort":{
+                        "field": "filingTime",
+                        "order": "DESC"
+                    }
+                };
+
+                this.$axios({
+                    url: appCfg.map.gisApiUrl+"api/share/data/2c9a818f738f38bf017390247cbf035d?userKey="+appCfg.map.userKey,
+                    method: "post",
+                    data: xzcfbody,
+                    header:{'Content-type': 'application/json'}
+                }).then(res => {
+                    let list = res.data.data.list;
+                    this.xzcfList = list;
+                });
+            },
+            queryHjxf(permitLicence){
+                let xfbody = {
+                    "conditions":[
+                        {
+                            "operator":"AND",
+                            "field":"permitLicence",
+                            "match":"equal",
+                            "value":permitLicence,
+                            "maxValue":"",
+                            "minValue":""
+                        }
+
+                    ],
+                    "page":{
+                        "pageable": false,
+                        "currentPage": 1,
+                        "pageSize": 10
+                    },
+                    "sort":{
+                        "field": "createTime",
+                        "order": "DESC"
+                    }
+                };
+
+                this.$axios({
+                    url: appCfg.map.gisApiUrl+"api/share/data/2c9a818f738f38bf01739024196c035a?userKey="+appCfg.map.userKey,
+                    method: "post",
+                    data: xfbody,
+                    header:{'Content-type': 'application/json'}
+                }).then(res => {
+                    let list = res.data.data.list;
+                    this.xfList = list;
+                });
+            },
+            drawMapEchart(){
+                let cMark1 = L.marker([110.66,40.77],
+                        {icon:L.divIcon({
+                            className:'leaflet-echart-icon',
+                            iconSize:[160,160],
+                            html:'<div id="cm1" style="width:160px;height:160px;position:relative;background-color:transparent;">asd</div>'
+                        })}).addTo(map);
+
+
             }
         }
     }
@@ -621,7 +2038,7 @@
         width: 300px;
         z-index: 999;
         border-radius: 3px;
-        background-color: rgba(0, 0, 0, 0.72);
+        background-color: rgba(0, 0, 0, 0.82);
         color: #fff;
         height: calc(100% - 140px);
     }
@@ -633,6 +2050,13 @@
         border-bottom: 1px solid #102856;
         font-size: 13px;
     }
+    .etitle span {
+        display: inline-block;
+        max-width: 85%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
     .etitle i {
         float: right;
         margin-top: 8px;
@@ -640,7 +2064,7 @@
         cursor: pointer;
     }
     .dataConts {
-        height:calc(100% - 100px);
+        height:calc(100% - 120px);
     }
     .timeDatas{
         height: calc(100% - 75px);
@@ -651,11 +2075,69 @@
 
     .baseDiv {
         cursor: pointer;
-        padding: 10px 20px;
+        padding: 10px 10px;
         margin: 0;
         -webkit-box-shadow: inset 0 -1px 0 0 hsla(0,0%,98%,.2);
         box-shadow: inset 0 -1px 0 0 hsla(0,0%,98%,.2);
-        background-color: rgba(255, 255, 255, 0.17);
+        background-color: rgba(3, 169, 244, 0.29);
+        position: relative;
+    }
+
+    .sucDiv {
+        cursor: pointer;
+        padding: 10px 10px;
+        margin: 0;
+        -webkit-box-shadow: inset 0 -1px 0 0 hsla(0,0%,98%,.2);
+        box-shadow: inset 0 -1px 0 0 hsla(0,0%,98%,.2);
+        background-color: rgba(0, 150, 25, 0.58);
+        position: relative;
+    }
+    .warnDiv {
+        cursor: pointer;
+        padding: 10px 10px;
+        margin: 0;
+        -webkit-box-shadow: inset 0 -1px 0 0 hsla(0,0%,98%,.2);
+        box-shadow: inset 0 -1px 0 0 hsla(0,0%,98%,.2);
+        background-color: rgba(176, 174, 10,0.57);
+        position: relative;
+    }
+    .goodDiv {
+        cursor: pointer;
+        padding: 10px 10px;
+        margin: 0;
+        -webkit-box-shadow: inset 0 -1px 0 0 hsla(0,0%,98%,.2);
+        box-shadow: inset 0 -1px 0 0 hsla(0,0%,98%,.2);
+        background-color: rgba(14, 255, 127,0.57);
+        position: relative;
+    }
+    .errDiv {
+        cursor: pointer;
+        padding: 10px 10px;
+        margin: 0;
+        -webkit-box-shadow: inset 0 -1px 0 0 hsla(0,0%,98%,.2);
+        box-shadow: inset 0 -1px 0 0 hsla(0,0%,98%,.2);
+        background-color: rgba(255, 0, 0,0.57);
+        position: relative;
+    }
+    .eleft {
+        width: 200px;
+    }
+    .eright {
+        width: 100px;
+        float: right;
+        position: absolute;
+        top: 10px;
+        right: 0;
+    }
+    .indexName {
+        font-size: 13px;
+    }
+    .indexVal {
+        font-size: 17px;
+        margin: 5px;
+    }
+    .indexTime {
+        font-size: 12px;
     }
     .company_name {
         height: 22px;
@@ -669,20 +2151,23 @@
         text-overflow: ellipsis;
         white-space: nowrap;
     }
-    .baseDiv .company_address, .baseDiv .company_type{
+    .baseDiv .company_address, .baseDiv .company_type,.company_type{
         min-height: 22px;
         line-height: 22px;
         font-size: 12px;
-        color: hsla(0,0%,98%,.6);
+        color: hsla(0,0%,98%,.9);
         text-align: left;
     }
     .describe {
-        color: hsla(0,0%,98%,.6);
+        color: hsla(0,0%,98%,.9);
         font-size: 12px;
         line-height: 22px;
         min-height: 22px;
         text-align: left;
         margin: 0;
+    }
+    .content {
+        text-align: right;
     }
     .el-button {
         font-weight: 300;
@@ -764,7 +2249,9 @@
     .iptw-60 .el-select, .iptw-60 .el-select>.el-input {
         width: 86px;
     }
-
+    .iptw-80 .el-select, .iptw-80 .el-select>.el-input {
+        width: 130px;
+    }
     .mgr-8 {
         margin-right: 5px;
     }
@@ -831,11 +2318,21 @@
         min-width: 20%;
         width: auto;
     }
+    .timeDatas li .eval2{
+        min-width: 17%;
+        width: auto;
+    }
     .timeDatas li .etime {
         width: 120px !important;
     }
-    #linechart {
-        width: 100%;
+    #linechart,#linewwchart,#linewgchart ,#lineairchart,#lineminechart ,#linedaychart{
+        width: 300px;
         height: 260px;
+    }
+    .nodata {
+        font-size: 14px;
+        padding: 5px;
+        color: #ef1313;
+        font-weight: 600;
     }
 </style>

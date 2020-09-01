@@ -1,17 +1,18 @@
-<script src="../../../public/libs/heatmap/leaflet-heatmap.js"></script>
+<!--<script src="../../../public/libs/heatmap/leaflet-heatmap.js"></script>
+<script src="../../../public/libs/turf/truf.min.js"></script>-->
 <template>
     <div style="flex: 1">
         <div id="map">
             <!--数据统计面板-->
             <info-container v-show="false" class="map-info-cls"/>
             <!--图层管理面板-->
-            <layer-container class="layerClass" v-show="layersShow"></layer-container>
+            <layer-container ref="layerContains" class="layerClass" v-show="layersShow"  @click.stop="doSomething($event)" ></layer-container>
 
-            <marker-container ref="markRef" class="layerClass" v-show="markerShow"></marker-container>
+            <marker-container ref="markRef" class="layerClass" v-show="markerShow"  @click.stop="doSomething($event)" ></marker-container>
             <!--搜索面板-->
-            <search-container class="searchClass"></search-container>
+            <search-container class="searchClass"  @click.stop="doSomething($event)" ></search-container>
             <!--工具条面板-->
-            <div class="mapTools">
+            <div class="mapTools"  @click.stop="doSomething($event)" >
                 <ul>
                     <li @click="setWindy" :class="{'spanSel':windySelect == true}">
                         <img :src="toolImg.windyImg" alt="">
@@ -21,7 +22,11 @@
                         <img :src="toolImg.roadImg" alt="">
                         <span>路况</span>
                     </li>
-                    <li @click="setMarkMap"  :class="{'spanSel':markSelect == true}" style="border-right: 1px solid rgba(12, 60, 119, 0.64);">
+                    <li @click="setManager"  :class="{'spanSel':managerSelect == true}" style="border-right: 1px solid rgba(12, 60, 119, 0.64);">
+                        <img :src="toolImg.managerImg" alt="">
+                        <span>管理清单</span>
+                    </li>
+                    <li @click="setMarkMap"  :class="{'spanSel':markerShow == true}" style="border-right: 1px solid rgba(12, 60, 119, 0.64);">
                         <img :src="toolImg.markImg" style="margin-right: 5px;" alt="">
                         <span>标记</span>
                     </li>
@@ -34,12 +39,24 @@
                         <img :src="toolImg.layerImg" alt=""  style="margin-right: 5px;">
                         <span>图层</span>
                     </li>
+                    <li @click="clearMap" >
+                        <img :src="toolImg.clearImg" alt=""  style="margin-right: 5px;">
+                        <span>清除</span>
+                    </li>
                 </ul>
             </div>
-            <div class="mapboxs" v-show="mapboxShow == true">
+            <div class="mapboxs" @click.stop="doSomething($event)"  v-show="mapboxShow == true">
                 <ul>
                     <li  v-for="(item,key) in toolList" :key="key" @click="queryMap(item,key)"  @click.stop="doSomething($event)" >
                         <img :src="item.image" alt="">
+                        <span>{{item.name}}</span>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="managerbox" @click.stop="doSomething($event)" v-show="managerShow == true">
+                <ul>
+                    <li  v-for="(item,key) in managerList"  :class="{'active':menuSel == item.id}" :key="key" @click="queryManagerFac(item,key)"  @click.stop="doSomething($event)" >
                         <span>{{item.name}}</span>
                     </li>
                 </ul>
@@ -52,7 +69,7 @@
                     </li>
                 </ul>
             </div>
-            <div class="baseMap"  v-show="showClass == 'baseMap'">
+            <div class="baseMap" @click.stop="doSomething($event)"  v-show="showClass == 'baseMap'">
                 <ul>
                     <li v-for="(item,key) in mapList" :key="key" @click="changeMap(item,key)" :class="{'active':selecteMapIndex == key}">
                         <img :src="item.image" alt="">
@@ -61,7 +78,7 @@
                 </ul>
             </div>
 
-            <div class="themeLayer" v-show="showClass == 'themeMap'">
+            <div class="themeLayer" @click.stop="doSomething($event)" v-show="showClass == 'themeMap'">
                 <ul>
                     <li v-for="(item,key) in themeList" @click="addTemLayer(item)" :class="{'active':item.selected===true}">
                         <span class="bgspan"></span>
@@ -75,14 +92,28 @@
 
         </div>
         <hour-line ref="hourline" v-show="hourShow" @onTimeChange="onTimeChange"></hour-line>
-
         <time-container ref="timeContainer"></time-container>
         <data-container ref="dataContainer"></data-container>
+
+        <!--缓冲区设置-->
+        <div class="bufferWindow" v-show="bufferShow">
+            <div class="bufftitle">缓冲区设置</div>
+            <div class="bufferDiv">
+                <span>缓冲距离：</span>
+                <input type="text" v-model="bufferVal"><span>米</span>
+            </div>
+            <div class="buffertools">
+                <button @click="bufferCalc">确定</button>
+                <button @click="hideBuffer">取消</button>
+            </div>
+        </div>
+
     </div>
 </template>
 
 <script>
     import L from "leaflet";
+    import {buffer,point,booleanContains} from "_@turf_turf@5.1.6@@turf/turf/turf.js"
     import appCfg from "@config/AppCfg"
     import {getWindyData, getWfsFeature} from '@api/api'
     import InfoContainer from "./InfoContainer";
@@ -106,6 +137,9 @@
                 roadSelect:false,
                 markSelect:false,
                 markerShow:false,
+                managerSelect:false,
+                managerShow:false,
+                managerList:[],
                 showClass:"baseMap",
                 hourShow:true,
                 mapboxShow:false,
@@ -123,7 +157,7 @@
                     {id:"tdtLayer",name:"蓝黑版",type:"PurplishBlue",image:require("../../assets/image/map/mapblue.jpg")},
                     {id:"tdtLayer",name:"影像图",type:"tdtimg",image:require("../../assets/image/map/mapimg.jpg")},
                     {id:"tdtLayer",name:"矢量图",type:"tdtvec",image:require("../../assets/image/map/mapvec.jpg")},
-                    {id:"tdtLayer",name:"地形图",type:"tdtter",image:require("../../assets/image/map/mapter.jpg")}
+                    /*{id:"tdtLayer",name:"地形图",type:"tdtter",image:require("../../assets/image/map/mapter.jpg")}*/
                 ],
                 themeList:[
                     {id:"theme_road",name:"路况",type:"road",selected:false},
@@ -145,8 +179,8 @@
                     {name:"点查询",type:"queryPoint",image:require("../../assets/image/menu/queryPoint.png")},
                     {name:"线查询",type:"queryLine",image:require("../../assets/image/menu/queryLine.png")},
                     {name:"面查询",type:"queryPolygon",image:require("../../assets/image/menu/queryPolygon.png")},
-                    {name:"缓冲区",type:"queryBuffer",image:require("../../assets/image/menu/queryBuffer.png")},
-                    {name:"多点导航",type:"mulPoint",image:require("../../assets/image/menu/mulPoint.png")}
+                   /* {name:"缓冲区",type:"queryBuffer",image:require("../../assets/image/menu/queryBuffer.png")},
+                    {name:"清除",type:"mulPoint",image:require("../../assets/image/menu/clearMap.png")}*/
                 ],
                 toolImg:{
                     windyImg:require("../../assets/image/menu/wind.png"),
@@ -154,20 +188,39 @@
                     mapboxImg:require("../../assets/image/menu/toolbox.png"),
                     layerImg:require("../../assets/image/menu/layers.png"),
                     updowImg:require("../../assets/image/menu/up.png"),
-                    markImg:require("../../assets/image/menu/marks.png")
+                    markImg:require("../../assets/image/menu/marks.png"),
+                    managerImg:require("../../assets/image/menu/manager.png"),
+                    clearImg:require("../../assets/image/clear.png")
                 },
                 layerTemps:[],
-                drawControl:null
+                drawControl:null,
+                menuSel:"",
+                allFactory:[],
+                bufferPolygon:null,
+                drawLayer:null,
+                drawGroup:null,
+                bufferQuery:false,
+                bufferVal:1000,
+                bufferShow:false,
+                deleteTool:null,
+                editTool:null
             };
         },
         //需要页面加载完执行的方法,可以写在$nextTick中
         mounted() {
+            let _self = this;
+            window.queryContains = function(){
+                _self.polygonContains();
+            };
             this.$nextTick(() => {
+
+                this.queryManager();
                 this.$mapUtil.initMap('map');
-                this.$refs.markRef.initDraw();
+               // this.$refs.markRef.initDraw();
                 this.$refs.dataContainer.initDraw();
                 this.hourShow = false;
-                this.$mapUtil.wmsLayer('NPWS:TjMap').addTo(this.$mapUtil.lMap);
+                this.$mapUtil.wmsLayer('NPWS:hxtjmap').addTo(this.$mapUtil.lMap);
+                this.getAllFactory();
               //  this.queryFeatureByClick('NPWS:TjMap', 2000, 'the_geom', this.$mapUtil.lMap)
                // this.$mapUtil.heatmapLayer(this.$mapUtil.lMap)
                // this.$mapUtil.removeLayer("layeri",this.$mapUtil.lMap)
@@ -176,33 +229,91 @@
                         if(this.$mapUtil.lMap.hasLayer(this.windyLayer)){
                             let lat = evt.latlng.lat, lng = evt.latlng.lng;
                             let details = this.getWindyDetail([lng,lat]);
-                            let winHtml = this.createWinyHtml(details)
+                            let winHtml = this.createWinyHtml(details);
                             L.popup()
                                 .setLatLng([lat,lng])
                                 .setContent(winHtml)
                                 .openOn(this.$mapUtil.lMap);
 
                         }else{
-                            this.queryFeatureByClick('NPWS:TjMap', 2000, 'the_geom', this.$mapUtil.lMap,evt)
+                            this.queryFeatureByClick('NPWS:hxtjmap', 2000, 'the_geom', this.$mapUtil.lMap,evt)
                         }
                     }
                 });
-
-                var drawnItems = new L.FeatureGroup();
-                this.$mapUtil.lMap.addLayer(drawnItems);
-                this.drawControl = new L.Control.Draw({
-                    edit: {
-                        featureGroup: drawnItems
-                    }
-                });
-               // this.$mapUtil.lMap.addControl(drawControl);
-                this.$mapUtil.lMap.on(L.Draw.Event.CREATED, function (event) {
-                    var layer = event.layer;
-                    drawnItems.addLayer(layer);
-                });
+                this.initMapDraws();
             });
         },
         methods: {
+            initMapDraws(){
+                this.drawGroup = new L.FeatureGroup();
+                this.$mapUtil.lMap.addLayer(this.drawGroup);
+                let MyCustomMarker = L.Icon.extend({
+                    options: {
+                        shadowUrl: null,
+                        iconAnchor: new L.Point(12, 12),
+                        iconSize: new L.Point(24, 24),
+                        iconUrl: require("../../assets/image/marker/point_ered.png")
+                    }
+                });
+                this.drawControl = new L.Control.Draw({
+                    draw:{
+                        marker:{icon:MyCustomMarker}
+                    },
+                    edit: {
+                        featureGroup: this.drawGroup
+                    }
+                });
+                let _self = this;
+                this.$mapUtil.lMap.on(L.Draw.Event.CREATED, function (event) {
+                    console.log("11111");
+                    let layer = event.layer;
+                    if(_self.bufferQuery){
+                        let pointIcon = L.icon({
+                            iconUrl: require("../../assets/image/marker/point_ered.png"),
+                            iconSize: [20, 20],
+                            iconAnchor: [10, 20],
+                            popupAnchor: [0, 0],
+                            shadowSize: [68, 95],
+                            shadowAnchor: [22, 94]
+                        });
+                        if(event.layerType == "marker"){
+                            layer.setIcon(pointIcon);
+                        }
+                        _self.drawLayer = layer;
+                        _self.bufferShow = true;
+                        _self.drawGroup.addLayer(layer);
+                    }else{
+                        if(event.layerType == "marker"){
+                            layer.setIcon(_self.$refs.markRef.pointIcon);
+                        }else{
+                            layer.setStyle(_self.$refs.markRef.lineStyle);
+                        }
+                        _self.drawGroup.addLayer(layer);
+                    }
+                });
+            },
+            drawTool(item){
+                if(item.type == "delete"){
+                    if(!this.deleteTool) {
+                        this.deleteTool = new L.EditToolbar.Delete(this.$mapUtil.lMap, {featureGroup: this.drawGroup});
+                    }
+                    this.deleteTool.enable();
+                }else if(item.type == "clear"){
+                    this.drawGroup.clearLayers();
+                }else if(item.type == "edit"){
+                    if(!this.editTool){
+                        this.editTool = new L.EditToolbar.Edit(this.$mapUtil.lMap,{featureGroup: this.drawGroup});
+                    }
+                    this.editTool.enable();
+                }else {
+                    if(this.editTool){
+                        this.editTool.disable();
+                    }
+                    if(this.deleteTool){
+                        this.deleteTool.disable();
+                    }
+                }
+            },
             /*加载风场数据*/
             getWindyData(date) {
                 getWindyData(date).then((data) => {
@@ -226,17 +337,22 @@
                         }
                         if (data && data.features && data.features.length > 0) {
                             //获取要素属性
-                            this.featureProps = data.features["0"].properties
+                            this.featureProps = data.features["0"].properties;
                             this.highLayer = L.geoJSON(data, {
                                 style: function (feature) {
                                     return {color: appCfg.common.hColor}
                                 }
-                            })
-                            this.highLayer.addTo(map)
-                            let winHtml = '<div class="popuDiv"><span>区域名称：</span>'+this.featureProps.MAP_NAME+'</div>';
+                            });
+                            this.highLayer.addTo(map);
+                            this.bufferPolygon =  data.features[0];
+                            this.bufferPolygon.geometry.type = "Polygon";
+                            let winHtml = ['<div class="popuDiv"><span>区域名称：</span>'+this.featureProps.MAP_NAME+'</div>'];
+                            winHtml.push('<div class="poputools">');
+                            winHtml.push('<button onclick="queryContains()">区域查询</button>');
+                            winHtml.push('</div>');
                             L.popup()
                                 .setLatLng([lat,lng])
-                                .setContent(winHtml)
+                                .setContent(winHtml.join(''))
                                 .openOn(this.$mapUtil.lMap);
                             this.highLayer.bindPopup();
                         } else {
@@ -304,18 +420,38 @@
                     this.toolImg.roadImg = require("../../assets/image/menu/roadSel.png");
                 }
             },
+            setManager(){
+                this.managerSelect = !this.managerSelect;
+                if(!this.managerSelect){
+                    this.toolImg.managerImg = require("../../assets/image/menu/manager.png");
+                    this.managerShow = false;
+                }else{
+                    this.toolImg.managerImg = require("../../assets/image/menu/managerSel.png");
+                    this.managerShow = true;
+                }
+            },
             setMarkMap(){
-                this.markSelect = !this.markSelect;
-                if(!this.markSelect){
+                this.markerShow = !this.markerShow;
+                this.bufferQuery = false;
+                if(!this.markerShow){
                     this.toolImg.markImg = require("../../assets/image/menu/marks.png");
                     this.markerShow = false;
                 }else{
                     this.toolImg.markImg = require("../../assets/image/menu/markSel.png");
                     this.markerShow = true;
+
+                    this.mapboxShow = false;
+                    this.toolImg.mapboxImg = require("../../assets/image/menu/toolbox.png");
+
+                    this.layersShow = false;
+                    this.toolImg.updowImg = require("../../assets/image/menu/up.png");
+                    this.toolImg.layerImg = require("../../assets/image/menu/layers.png");
+
                 }
             },
             setMapBox(){
                 this.mapboxShow = !this.mapboxShow;
+                this.bufferQuery = true;
                 if(!this.mapboxShow){
                     this.toolImg.mapboxImg = require("../../assets/image/menu/toolbox.png");
                     this.toolImg.updowImg = require("../../assets/image/menu/up.png");
@@ -324,6 +460,8 @@
                     this.toolImg.mapboxImg = require("../../assets/image/menu/mapboxSel.png");
                     this.toolImg.updowImg = require("../../assets/image/menu/down.png");
                     this.toolImg.layerImg = require("../../assets/image/menu/layers.png");
+                    this.toolImg.markImg = require("../../assets/image/menu/marks.png");
+                    this.markerShow = false;
                 }
             },
             setLayers(){
@@ -334,6 +472,8 @@
                     this.mapboxShow = false;
                     this.toolImg.mapboxImg = require("../../assets/image/menu/toolbox.png");
                     this.toolImg.layerImg = require("../../assets/image/menu/layerSel.png");
+                    this.toolImg.markImg = require("../../assets/image/menu/marks.png");
+                    this.markerShow = false;
                 }
             },
             setLayerToMap(selected,layerId,layerName){
@@ -360,20 +500,150 @@
                 this.$mapUtil.changeBaseMap(this.$mapUtil.lMap,item.type);
             },
             queryMap(item,key){
+                this.clearMap();
                 if(item.type == "queryPoint"){
-                    new L.Draw.Marker(this.$mapUtil.lMap ,this.drawControl.options.marker).enable();
+                    this.bufferQuery = true;
+                    this.enableDrawOption("marker");
                 }else if(item.type == "queryLine"){
-                    new L.Draw.Polyline(this.$mapUtil.lMap,this.drawControl.options.polyline).enable();
+                    this.bufferQuery = true;
+                    this.enableDrawOption("line");
                 }else if(item.type == "queryPolygon"){
-                    new L.Draw.Polygon(this.$mapUtil.lMap,this.drawControl.options.polygon).enable();
+                    this.bufferQuery = true;
+                    this.enableDrawOption("polygon");
                 }else if(item.type == "queryBuffer"){
 
                 }else {
-
+                    this.bufferQuery = false;
+                    this.clearMap();
                 }
+            },
+            enableDrawOption(type){
+                if(type == "marker"){
+                    new L.Draw.Marker(this.$mapUtil.lMap ,this.drawControl.options.marker).enable();
+                }else if(type == "line"){
+                    new L.Draw.Polyline(this.$mapUtil.lMap,this.drawControl.options.polyline).enable();
+                }else if(type == "polygon"){
+                    new L.Draw.Polygon(this.$mapUtil.lMap,this.drawControl.options.polygon).enable();
+                }else if(type == "circle"){
+                    new L.Draw.Circle(this.$mapUtil.lMap,this.drawControl.options.circle).enable();
+                }else if(type == "rectangle"){
+                    new L.Draw.Rectangle(this.$mapUtil.lMap,this.drawControl.options.rectangle).enable();
+                }
+            },
+            clearMap(){
+                this.$mapUtil.removeTemLayer("factory");
+                this.removeDataList("factory");
+                this.drawGroup.clearLayers();
+            },
+            queryManager(){
+                let body = {
+                    "conditions":[
 
+                    ],
+                    "page":{
+                        "pageable": false,
+                        "currentPage": 1,
+                        "pageSize": 10
+                    },
+                    "sort":{
+                        "field": "",
+                        "order": "DESC"
+                    }
+                };
+                this.$axios({
+                    url: appCfg.map.gisApiUrl+"api/share/data/2c9a818f73b31b5e0173bd364a1f4f4f?userKey="+appCfg.map.userKey,
+                    method: "post",
+                    data: body,
+                    header:{'Content-type': 'application/json'}
+                }).then(res => {
+                    let list = res.data.data.list;
+                    this.managerList = list;
+                })
+            },
+            queryManagerFac(item,key){
+                let layerId = "menulist";
+                if(this.menuSel == item.id){
+                    this.menuSel = "";
+                    this.$mapUtil.removeTemLayer(layerId);
+                    this.removeDataList(layerId);
+                }else{
+                    this.menuSel = item.id;
 
-
+                    let body = {
+                        "conditions":[
+                            {
+                                "operator":"AND",
+                                "match":"equal",
+                                "field":"templateId",
+                                "value":item.id
+                            }
+                        ],
+                        "page":{
+                            "pageable": false,
+                            "currentPage": 1,
+                            "pageSize": 10
+                        },
+                        "sort":{
+                            "field": "",
+                            "order": "DESC"
+                        }
+                    };
+                    this.$axios({
+                        url: appCfg.map.gisApiUrl+"api/share/data/2c9a818f73b31b5e0173bd38cf7f4f5a?userKey="+appCfg.map.userKey,
+                        method: "post",
+                        data: body,
+                        header:{'Content-type': 'application/json'}
+                    }).then(res => {
+                        let wzIcon = require("../../assets/image/map/map_fac.png");
+                        let list = res.data.data;
+                        let facLayer = L.markerClusterGroup();
+                        for(let model of list) {
+                            model.longitude =  this.DegreeConvertBack(model.lngDegree,model.lngMinute,model.lngSecond);
+                            model.latitude = this.DegreeConvertBack(model.latDegree,model.latMinute,model.latSecond);
+                            let marker = this.$mapUtil.createPointMarker(model,wzIcon);
+                            marker.id = model.dataId;
+                            if(marker){
+                                let html = this.createHtml(model);
+                                marker.bindPopup(html);
+                                facLayer.addLayer(marker);
+                            }
+                        }
+                        this.$mapUtil.lMap.addLayer(facLayer);
+                        this.$mapUtil.addTemLayer(layerId,facLayer);
+                        this.setDataList(layerId,list);
+                    })
+                }
+            },
+            getAllFactory(){
+                let body = {
+                    "conditions":[
+                        {
+                            "operator":"AND",
+                            "field":"",
+                            "match":"contain",
+                            "value":"",
+                            "maxValue":"",
+                            "minValue":""
+                        }
+                    ],
+                    "page":{
+                        "pageable": false,
+                        "currentPage": 1,
+                        "pageSize": 10
+                    },
+                    "sort":{
+                        "field": "",
+                        "order": "DESC"
+                    }
+                };
+                this.$axios({
+                    url: appCfg.map.gisApiUrl+"api/share/data/2c9a818f7371258f01737666a9c811af?userKey="+appCfg.map.userKey,
+                    method: "post",
+                    data: body,
+                    header:{'Content-type': 'application/json'}
+                }).then(res => {
+                    this.allFactory = res.data.data.list;
+                })
             },
             analysisWindyData(windydata) {
                 var p = 0;
@@ -550,8 +820,12 @@
                 console.log(param);
                 this.$refs.timeContainer.searchData(param.id,param.type);
             },
+            hideTimeData(){
+                this.$refs.timeContainer.showResult = false;
+            },
             setDataList(type,list){
                 this.$refs.dataContainer.setDataList(type,list);
+                this.$refs.timeContainer.showResult = false;
             },
             setDataShow(){
                 this.$refs.dataContainer.showData();
@@ -562,7 +836,87 @@
             setDetailData(obj,type){
                 this.$refs.timeContainer.setShowObj(obj,type);
                 this.$refs.dataContainer.hideData();
+            },
+            queryHjxfData(type,stime,etime){
+                this.$refs.layerContains.getHjxfData(type,stime,etime);
+            },
+            queryXzcfData(type,stime,etime){
+                this.$refs.layerContains.getXzcfData(type,stime,etime);
+            },
+            queryFspkData(type,stime,etime){
+                this.$refs.layerContains.getWaterData(type,stime,etime);
+            },
+            queryFqpkData(type,stime,etime){
+                this.$refs.layerContains.getAirData(type,stime,etime);
+            },
+            DegreeConvertBack(deg,min,sec){ ///<summary>度分秒转换成为度</summary>
+                return Math.abs(deg) + (Math.abs(min)/60 + Math.abs(sec)/3600);
+            },
+            createHtml(model){
+                let html = [];
+                html.push('<div class="popuDiv"><span>企业名称：</span>'+model.companyName+'</div>');
+                html.push('<div class="popuDiv"><span>企业地址：</span>'+model.operationAddress+'</div>');
+                html.push('<div class="popuDiv"><span>企业类型：</span>'+model.industryType+'</div>');
+                html.push('<div class="popuDiv"><span>排污许可证号：</span>'+model.permitLicence+'</div>');
+                html.push('<div class="poputools">');
+                html.push('<button onclick="getMineTime('+JSON.stringify(model).replace(/"/g, '&quot;')+',\'factory\')">详情</button>');
+                html.push('</div>');
+                return html.join('');
+            },
+            polygonContains(){//计算点与面的相关关联
+                console.log(this.bufferPolygon);
+                let conList = [];
+                let layerId = "factory";
+                let wzIcon = require("../../assets/image/map/map_fac.png");
+                let facLayer = L.markerClusterGroup();
+                for(let i=0;i<this.allFactory.length;i++){
+                    let model = this.allFactory[i];
+                    model.longitude =  this.DegreeConvertBack(model.lngDegree,model.lngMinute,model.lngSecond);
+                    model.latitude = this.DegreeConvertBack(model.latDegree,model.latMinute,model.latSecond);
+                    let po = point([model.longitude,model.latitude]);
+                    if(booleanContains(this.bufferPolygon,po)){
+                        let marker = this.$mapUtil.createPointMarker(model,wzIcon);
+                        marker.id = model.dataId;
+                        if(marker){
+                            let html = this.createHtml(model);
+                            marker.bindPopup(html);
+                            facLayer.addLayer(marker);
+                        }
+                        conList.push(model);
+                    }
+                }
+                this.$mapUtil.lMap.addLayer(facLayer);
+                this.$mapUtil.addTemLayer(layerId,facLayer);
+                this.setDataList(layerId,conList);
+            },
+            bufferCalc(){
+                let buffMeter = 0;
+                if(this.bufferVal == ""){
+                    this.$message("缓冲距离设置异常！");
+                    return;
+                }else if(this.bufferVal=="0"){
+                    buffMeter = 0.1;
+                }else{
+                    buffMeter = this.bufferVal;
+                }
+                const buffered = buffer(this.drawLayer.toGeoJSON(), buffMeter, {
+                    units: 'meters'
+                });
+                this.bufferPolygon = buffered;
+                L.geoJSON(buffered, {
+                    style: function(feature) {
+                        return {
+                            color: 'red'
+                        };
+                    }
+                }).addTo(this.drawGroup);
+                this.polygonContains();
+                this.bufferShow = false;
+            },
+            hideBuffer(){
+                this.bufferShow = false;
             }
+
         }
     }
 </script>
@@ -632,7 +986,7 @@
         width: 110px;
     }
     .baseMap:hover {
-        width: 410px;
+        width: 310px;
         -webkit-transition-property: width,background-color;
         transition-property: width,background-color;
         -webkit-transition-duration: .4s;
@@ -810,7 +1164,7 @@
     .mapboxs {
         position: absolute;
         top: 126px;
-        right: 100px;
+        right: 180px;
         z-index: 999;
         width: 115px;
         display: flex;
@@ -839,6 +1193,87 @@
     }
     .mapboxs ul li span {
         vertical-align: middle;
+    }
+
+    .managerbox {
+        position: absolute;
+        top: 126px;
+        right: 375px;
+        z-index: 999;
+        width: 115px;
+        display: flex;
+        border-radius: 3px;
+        background-color: rgba(0, 0, 0, 0.7)
+    }
+    .managerbox ul {
+        list-style: none;
+        margin: 0;
+        padding: 5px;
+        width: 100%;
+    }
+    .managerbox ul li {
+        height: 30px;
+        width: auto;
+        line-height: 30px;
+        color: #fff;
+        font-size: 13px;
+        text-align: center;
+    }
+    .managerbox ul li:hover,.managerbox ul li.active {
+        color: #3071e9;
+    }
+    .managerbox ul li img{
+        vertical-align: middle;
+        height: 15px;
+        margin-right: 8px;
+    }
+    .managerbox ul li span {
+        vertical-align: middle;
+    }
+
+    .bufferWindow {
+        position: absolute;
+        top: 200px;
+        width: 260px;
+        height: 140px;
+        color: #fff;
+        z-index: 9999;
+        left: calc(50% - 100px);
+        background-color: #000;
+        border: 1px solid #112c5a;
+        border-radius: 3px;
+    }
+    .bufftitle {
+        height: 28px;
+        line-height: 28px;
+        padding: 0 15px;
+        text-align: left;
+        background-color: #112c5a;
+    }
+    .bufferDiv {
+        padding: 10px 15px;
+        text-align: left;
+        margin: 10px 0;
+    }
+    .bufferDiv input {
+        width: 140px;
+        margin: 0 5px;
+        background: rgba(17, 44, 90, 0.33);
+        border: 1px solid #0c87c6;
+        color: #fff;
+        height: 20px;
+        line-height: 20px;
+        border-radius: 3px;
+    }
+    .buffertools button {
+        border: none;
+        width: 70px;
+        margin: 5px;
+        background-color: #3190ff;
+        color: #fff;
+        padding: 3px;
+        font-size: 13px;
+        cursor: pointer;
     }
 </style>
 <style>

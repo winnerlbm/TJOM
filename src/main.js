@@ -61,4 +61,4 @@ new Vue({
     router: AppRouter,
     store: AppStore,
     render: h => h(App),
-}).$mount('#app')
+}).$mount('#app');

@@ -28,13 +28,11 @@
         position: absolute;
         z-index: 999;
         top: 0;
-        height: 65px;
-        overflow: hidden;
-        /* background-color: #1B1B1B; */
-        background-image: url("../../assets/image/title.png");
+        height: 60px;
+       /* background-image: url("../../assets/image/title.png");
         background-repeat: no-repeat;
-        background-size: 100% 100%;
-        /* background-color: transparent; */
+        background-size: 100% 100%;*/
         left: 0;
+        background-color: rgb(11, 21, 33);
     }
 </style>

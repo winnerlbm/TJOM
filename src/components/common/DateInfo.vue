@@ -5,15 +5,20 @@
 				  style="color: #e2e9e9;font-size: 25px;font-family: lcd,serif;margin-right: 10px;">
 			{{nowTime}}
 			</span>
-			<span style="font-family: lcd;font-size: 14px;color: #e2e9e9;">{{nowDate}}</span>
+			<!--<span  style="font-family: lcd;font-size: 14px;color: #e2e9e9;">{{nowDate}}</span>-->
 			<!--<span style="font-family: MicrosoftYaHei,serif;font-size: 16px;color: #e2e9e9;">{{nowWeek}}</span>-->
 		</span>
 		<span class="line"></span>
 		<span class="user">
 			<span style="color: #e2e9e9;font-size: 16px;font-family: lcd,serif;margin-right: 16px;">
-			{{userName}}
+				<img style="width: 25px;vertical-align: middle;margin-right: 5px;" src="../../assets/image/user.png" alt="">{{userName}}
+				<!--<i @click="showLog" class="el-icon-arrow-down loicon"></i>-->
+				<img @click="logOut" style="width: 15px;vertical-align: middle;margin-left: 5px;cursor: pointer" src="../../assets/image/exit.png" alt="">
 			</span>
-			<span style="font-family: lcd;font-size: 14px;color: #e2e9e9;">退出</span>
+
+			<div class="logDiv" v-show="logShow">
+				<div class="items" @click="logOut"><img style="width: 15px;vertical-align: middle;margin-right: 5px" src="../../assets/image/exit.png" alt=""><span>退出</span></div>
+			</div>
 		</span>
     </div>
 </template>
@@ -30,6 +35,7 @@
             return {
                 isshow: true,
                 loginName: '',
+                logShow:false,
                 user: {
                     name: null,
                     avatar: "https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1585729224054&di=0b2bf77dd00652b438d01127449acaf9&imgtype=0&src=http%3A%2F%2Fwww.17qq.com%2Fimg_qqtouxiang%2F47789512.jpeg",
@@ -101,11 +107,20 @@
                     // console.log(this.loginName)
                 } else {
                 }
-            }
+            },
+            showLog(){
+                this.logShow = true;
+			},
+			logOut(){
+                this.logShow = false;
+                this.$router.push('/login');
+                sessionStorage.removeItem('username');
+			}
         },
         created() {
-            this.timeFormate()
-            this.nowTimes()
+            this.timeFormate();
+            this.nowTimes();
+            this.userName = sessionStorage.getItem("username");
         },
         computed: {}
     }
@@ -144,5 +159,27 @@
 		flex-direction: column;
 		justify-content: center;
 		align-items: flex-start;
+	}
+	.loicon {
+		cursor: pointer;
+
+	}
+	.logDiv {
+		position: absolute;
+		top: 65px;
+		right: 10px;
+		width: 130px;
+		padding: 10px;
+		background-color: #000000;
+		z-index: 9999;
+		color: #fff;
+		border: 1px solid #0b315e;
+	}
+	.items {
+		padding: 0 10px;
+		cursor: pointer;
+	}
+	.items span {
+		font-size: 14px;
 	}
 </style>

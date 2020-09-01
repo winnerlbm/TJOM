@@ -2,7 +2,7 @@
     <div class="weatherContainerCls">
         <img :src="weatherImg" class="weather"/>
         <span class="week">{{cityName}}</span>
-       <!-- <span class="week">{{weather}}</span>-->
+        <span class="week">{{weather}}</span>
     </div>
 </template>
 
@@ -28,7 +28,7 @@
             queryWeatherInfo() {
                 getWeatherInfo("https://www.tianqiapi.com/api?version=v6&city=天津&appid=39927915&appsecret=Ws83rr3o").then(
                     (result) => {
-                        this.weather = result['tem1'] + "℃ ~ " + result['tem2'] + "℃"
+                        this.weather = result['tem2'] + "℃ ~ " + result['tem1'] + "℃";
                         this.weatherImg = require('@/assets/image/weather/' + result['wea_img'] + '.png')
                     }
                 )

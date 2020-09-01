@@ -1,5 +1,5 @@
 <template>
-    <div class="layerDiv">
+    <div class="layerDiv" v-loading="loading">
         <div class="etitle" v-show="false">
             <i class="el-icon-s-operation" style="margin-right:5px"></i> 业务数据图层
         </div>
@@ -61,13 +61,11 @@
         data(){
             return {
                 factoryList:[
-                  //  {type:"wry",name:"污染源",checked:false,image:require("../../assets/image/icon/wry.png")},
-                    {type:"factory",name:"在线监控企业信息",checked:false,image:require("../../assets/image/icon/gkxx.png")},
+                    {type:"factory",name:"所有企业信息",checked:false,image:require("../../assets/image/icon/gkxx.png")},
+                    {type:"wryFac",name:"在线监控企业信息",checked:false,image:require("../../assets/image/icon/gkxx.png")},
                     {type:"mine",name:"工况监控企业信息",checked:false,image:require("../../assets/image/icon/gkxx.png")},
-                    {type:"ww",name:"废气排污口",checked:false,image:require("../../assets/image/icon/wry.png")},
-                    {type:"wg",name:"废水排污口",checked:false,image:require("../../assets/image/icon/wry.png")},
-                    /*{type:"gk",name:"入河海污口",checked:false,image:require("../../assets/image/icon/wry.png")},
-                    {type:"gk",name:"污水处理设施",checked:false,image:require("../../assets/image/icon/wry.png")}*/
+                    {type:"wg",name:"废气排污口",checked:false,image:require("../../assets/image/icon/wry.png")},
+                    {type:"ww",name:"废水排污口",checked:false,image:require("../../assets/image/icon/wry.png")}
                 ],
                 moniList:[
                     {type:"sttp_normal",name:"常规监测站",checked:false,image:require("../../assets/image/icon/cgz.png")},
@@ -84,7 +82,8 @@
                     {type:"xzcf",name:"行政处罚热力图",checked:false,image:require("../../assets/image/icon/rlt_2.png")},
                     {type:"fqpk",name:"废气排口超标热力图",checked:false,image:require("../../assets/image/icon/rlt_1.png")},
                     {type:"fspk",name:"废水排口超标热力图",checked:false,image:require("../../assets/image/icon/rlt_1.png")}
-                ]
+                ],
+                loading:false
             }
         },
         props:{
@@ -98,6 +97,15 @@
             };
         },
         methods: {
+            initSTime(){
+                const end = new Date();
+                return this.$appUtil.formatDate("yyyy-MM-dd",end);
+            },
+            initETime(day){
+                const start = new Date();
+                start.setTime(start.getTime() - 3600 * 1000 * 24 * day);
+                return this.$appUtil.formatDate("yyyy-MM-dd",start);
+            },
             setFactory(val,item){
                 if(val){
                     if(item.type == "factory"){
@@ -130,20 +138,24 @@
             },
             setHeatMap(val,item){
                 if(val){
+                    let stime = this.initETime(365);
+                    let etime = this.initSTime();
                     if(item.type == "xzcf"){
-                        this.getXzcfData(item.type);
+                        this.getXzcfData(item.type,stime,etime);
                     }else if(item.type == "hjxf"){
-                        this.getHjxfData(item.type);
+                        this.getHjxfData(item.type,stime,etime);
                     }else if(item.type == "fspk"){
-                        this.getWaterData(item.type);
+                        this.getWaterData(item.type,stime,etime);
                     }else if(item.type == "fqpk"){
-                        this.getAirData(item.type);
+                        this.getAirData(item.type,stime,etime);
                     }
                 }else{
                     this.$mapUtil.removeTemLayer(item.type);
+                    this.$parent.removeDataList(item.type);
                 }
             },
             getFactory(layerId){
+                this.loading = true;
                 let wzIcon = require("../../assets/image/map/map_fac.png");
                 let body = {
                     "conditions":[
@@ -172,7 +184,7 @@
                     data: body,
                     header:{'Content-type': 'application/json'}
                 }).then(res => {
-
+                    this.loading = false;
                     let list = res.data.data.list;
                     let facLayer = L.markerClusterGroup();
                     for(let model of list) {
@@ -263,9 +275,9 @@
                     let markers = [];
                     for(let model of list) {
                         let marker = this.$mapUtil.createPointMarker(model,wzIcon);
-                        marker.id == model.id;
                         if(marker){
-                            let html = this.createPwkHtml(model);
+                            marker.id = model.id;
+                            let html = this.createWryHtml(model);
                             marker.bindPopup(html);
                             markers.push(marker);
                         }
@@ -302,8 +314,8 @@
                     let markers = [];
                     for(let model of list) {
                         let marker = this.$mapUtil.createPointMarker(model,wzIcon);
-                        marker.id == model.id;
                         if(marker){
+                            marker.id = model.id;
                             let html = this.createPwkHtml(model);
                             marker.bindPopup(html);
                             markers.push(marker);
@@ -383,13 +395,14 @@
                 }).then(res => {
                     let list = res.data.data.list;
                     if(list.length == 0){
-                        this.$message("未查询到相关数据！");
+                        this.$message.error("未查询到相关数据！");
                         return;
                     }
                     let markers = [];
                     for(let model of list) {
                         let marker = this.$mapUtil.createPointMarker(model,wzIcon);
                         if(marker){
+                            marker.id = model.id;
                             let html = this.createGSttpHtml(model);
                             marker.bindPopup(html);
                             markers.push(marker);
@@ -398,6 +411,7 @@
                     let facLayer = L.layerGroup(markers);
                     this.$mapUtil.lMap.addLayer(facLayer);
                     this.$mapUtil.addTemLayer(layerId,facLayer);
+                    this.$parent.setDataList(layerId,list);
                 })
             },
             getNormalSttp(layerId){
@@ -463,6 +477,7 @@
                         let marker = this.$mapUtil.createPointMarkerByLgnt(model,wzIcon);
                         marker.id = model.stationId;
                         if(marker){
+                            marker.id = model.id;
                             let html = this.createSttpHtml(model);
                             marker.bindPopup(html);
                             markers.push(marker);
@@ -501,6 +516,7 @@
                     for(let model of list) {
                         let marker = this.$mapUtil.createPointMarker(model,wzIcon);
                         if(marker){
+                            marker.id = model.id;
                             let html = this.createGSttpHtml(model);
                             marker.bindPopup(html);
                             markers.push(marker);
@@ -509,6 +525,7 @@
                     let facLayer = L.layerGroup(markers);
                     this.$mapUtil.lMap.addLayer(facLayer);
                     this.$mapUtil.addTemLayer(layerId,facLayer);
+                    this.$parent.setDataList(layerId,list);
                 })
             },
             DegreeConvertBack(deg,min,sec){ ///<summary>度分秒转换成为度</summary>
@@ -555,6 +572,9 @@
                 html.push('<div class="popuDiv"><span>公司名称：</span>'+model.companyName+'</div>');
                 html.push('<div class="popuDiv"><span>使用状态：</span>'+model.useStatusName+'</div>');
                 html.push('<div class="popuDiv"><span>排污许可证：</span>'+model.permitLicence+'</div>');
+                html.push('<div class="poputools">');
+                html.push('<button onclick="getMineTime('+JSON.stringify(model).replace(/"/g, '&quot;')+',\'ww\')">详情</button>');
+                html.push('</div>');
                 return html.join('');
             },
             createGSttpHtml(model){
@@ -563,14 +583,20 @@
                 html.push('<div class="popuDiv"><span>站点类型：</span>'+model.manageLevelName+'</div>');
                 html.push('<div class="popuDiv"><span>站点编码：</span>'+model.pointCode+'</div>');
                 html.push('<div class="popuDiv"><span>站点地址：</span>'+model.address+'</div>');
+                html.push('<div class="poputools">');
+                html.push('<button onclick="getMineTime('+JSON.stringify(model).replace(/"/g, '&quot;')+',\'air\')">详情</button>');
+                html.push('</div>');
                 return html.join('');
             },
             createWryHtml(model){
                 let html = [];
                 html.push('<div class="popuDiv"><span>排污口名称：</span>'+model.portName+'</div>');
+                html.push('<div class="popuDiv"><span>公司名称：</span>'+model.companyName+'</div>');
                 html.push('<div class="popuDiv"><span>排污许可证：</span>'+model.permitLicence+'</div>');
                 html.push('<div class="popuDiv"><span>排污口类型：</span>废水排污口</div>');
-                html.push('<div class="popuDiv"><span>监测参数：</span>'+model.monitorType+'</div>');
+                html.push('<div class="poputools">');
+                html.push('<button onclick="getMineTime('+JSON.stringify(model).replace(/"/g, '&quot;')+',\'wg\')">详情</button>');
+                html.push('</div>');
                 return html.join('');
             },
             getStationTypeNm(type){
@@ -582,20 +608,20 @@
                     return "其它";
                 }
             },
-            getXzcfData(layerId){
+            getXzcfData(layerId,stime,etime){
                 let body = {
                     "conditions":[
                         {
                             "operator":"AND",
                             "match":"contain",
                             "field":"startDate",
-                            "value":"2010-01-01"
+                            "value":stime
                         },
                         {
                             "operator":"AND",
                             "match":"contain",
                             "field":"endDate",
-                            "value":"2020-01-01"
+                            "value":etime
                         }
                     ]
                 };
@@ -606,36 +632,38 @@
                     header:{'Content-type': 'application/json'}
                 }).then(res => {
                     let list = res.data.data;
-
-                    let data = [];
-                    for(let model of list) {
-                        model.lng =  this.DegreeConvertBack(model.lngDegree,model.lngMinute,model.lngSecond);
-                        model.lat = this.DegreeConvertBack(model.latDegree,model.latMinute,model.latSecond);
-                        let point = {lat: model.lat, lng: model.lng, count: Number(model.indexValue)};
-                        data.push(point)
+                    if(list.length>0){
+                        let data = [];
+                        for(let model of list) {
+                            model.lng =  this.DegreeConvertBack(model.lngDegree,model.lngMinute,model.lngSecond);
+                            model.lat = this.DegreeConvertBack(model.latDegree,model.latMinute,model.latSecond);
+                            let point = {lat: model.lat, lng: model.lng, count: Number(model.indexValue)};
+                            data.push(point)
+                        }
+                        let heatData = {
+                            max: 10,
+                            data: data
+                        };
+                        let heatLayer = this.$mapUtil.heatmapLayer(this.$mapUtil.lMap,heatData);
+                        this.$mapUtil.addTemLayer(layerId,heatLayer);
                     }
-                    let heatData = {
-                        max: 10,
-                        data: data
-                    };
-                    let heatLayer = this.$mapUtil.heatmapLayer(this.$mapUtil.lMap,heatData);
-                    this.$mapUtil.addTemLayer(layerId,heatLayer);
+                    this.$parent.setDataList(layerId,list);
                 })
             },
-            getHjxfData(layerId){
+            getHjxfData(layerId,stime,etime){
                 let body = {
                     "conditions":[
                         {
                             "operator":"AND",
                             "match":"contain",
                             "field":"startDate",
-                            "value":"2010-01-01"
+                            "value":stime
                         },
                         {
                             "operator":"AND",
                             "match":"contain",
                             "field":"endDate",
-                            "value":"2020-01-01"
+                            "value":etime
                         }
                     ]
                 };
@@ -646,35 +674,40 @@
                     header:{'Content-type': 'application/json'}
                 }).then(res => {
                     let list = res.data.data;
-                    let data = [];
-                    for(let model of list) {
-                        model.lng =  this.DegreeConvertBack(model.lngDegree,model.lngMinute,model.lngSecond);
-                        model.lat = this.DegreeConvertBack(model.latDegree,model.latMinute,model.latSecond);
-                        let point = {lat: model.lat, lng: model.lng, count: Number(model.indexValue)};
-                        data.push(point)
+                    if(list.length>0){
+                        let data = [];
+                        for(let model of list) {
+                            model.lng =  this.DegreeConvertBack(model.lngDegree,model.lngMinute,model.lngSecond);
+                            model.lat = this.DegreeConvertBack(model.latDegree,model.latMinute,model.latSecond);
+                            let point = {lat: model.lat, lng: model.lng, count: Number(model.indexValue)};
+                            data.push(point)
+                        }
+                        let heatData = {
+                            max: 10,
+                            data: data
+                        };
+                        let heatLayer = this.$mapUtil.heatmapLayer(this.$mapUtil.lMap,heatData);
+                        this.$mapUtil.addTemLayer(layerId,heatLayer);
+                    }else{
+                        this.$message.error("该时段无相关数据！");
                     }
-                    let heatData = {
-                        max: 10,
-                        data: data
-                    };
-                    let heatLayer = this.$mapUtil.heatmapLayer(this.$mapUtil.lMap,heatData);
-                    this.$mapUtil.addTemLayer(layerId,heatLayer);
+                    this.$parent.setDataList(layerId,list);
                 })
             },
-            getWaterData(layerId){
+            getWaterData(layerId,stime,etime){
                 let body = {
                     "conditions":[
                         {
                             "operator":"AND",
                             "match":"contain",
                             "field":"startDate",
-                            "value":"2010-01-01"
+                            "value":stime
                         },
                         {
                             "operator":"AND",
                             "match":"contain",
                             "field":"endDate",
-                            "value":"2020-01-01"
+                            "value":etime
                         }
                     ]
                 };
@@ -685,35 +718,38 @@
                     header:{'Content-type': 'application/json'}
                 }).then(res => {
                     let list = res.data.data;
-                    let data = [];
-                    for(let model of list) {
-                        if( model.latitude!="null"&&model.longitude!="null"){
-                            let point = {lat: model.latitude, lng: model.longitude, count: Number(model.indexValue)};
-                            data.push(point)
+                    if(list.length>0){
+                        let data = [];
+                        for(let model of list) {
+                            if( model.latitude!="null"&&model.longitude!="null"){
+                                let point = {lat: model.latitude, lng: model.longitude, count: Number(model.indexValue)};
+                                data.push(point)
+                            }
                         }
+                        let heatData = {
+                            max: 10,
+                            data: data
+                        };
+                        let heatLayer = this.$mapUtil.heatmapLayer(this.$mapUtil.lMap,heatData);
+                        this.$mapUtil.addTemLayer(layerId,heatLayer);
                     }
-                    let heatData = {
-                        max: 10,
-                        data: data
-                    };
-                    let heatLayer = this.$mapUtil.heatmapLayer(this.$mapUtil.lMap,heatData);
-                    this.$mapUtil.addTemLayer(layerId,heatLayer);
+                    this.$parent.setDataList(layerId,list);
                 })
             },
-            getAirData(layerId){
+            getAirData(layerId,stime,etime){
                 let body = {
                     "conditions":[
                         {
                             "operator":"AND",
                             "match":"contain",
                             "field":"startDate",
-                            "value":"2010-01-01"
+                            "value":stime
                         },
                         {
                             "operator":"AND",
                             "match":"contain",
                             "field":"endDate",
-                            "value":"2020-01-01"
+                            "value":etime
                         }
                     ]
                 };
@@ -724,19 +760,22 @@
                     header:{'Content-type': 'application/json'}
                 }).then(res => {
                     let list = res.data.data;
-                    let data = [];
-                    for(let model of list) {
-                        if( model.latitude!="null"&&model.longitude!="null"){
-                            let point = {lat: model.latitude, lng: model.longitude, count: Number(model.indexValue)};
-                            data.push(point)
+                    if(list.length>0){
+                        let data = [];
+                        for(let model of list) {
+                            if( model.latitude!="null"&&model.longitude!="null"){
+                                let point = {lat: model.latitude, lng: model.longitude, count: Number(model.indexValue)};
+                                data.push(point)
+                            }
                         }
+                        let heatData = {
+                            max: 10,
+                            data: data
+                        };
+                        let heatLayer = this.$mapUtil.heatmapLayer(this.$mapUtil.lMap,heatData);
+                        this.$mapUtil.addTemLayer(layerId,heatLayer);
                     }
-                    let heatData = {
-                        max: 10,
-                        data: data
-                    };
-                    let heatLayer = this.$mapUtil.heatmapLayer(this.$mapUtil.lMap,heatData);
-                    this.$mapUtil.addTemLayer(layerId,heatLayer);
+                    this.$parent.setDataList(layerId,list);
                 })
             },
             getMineTime(id){
@@ -754,7 +793,7 @@
         right: 10px;
         width: 250px;
         height: auto;
-        background-color: rgba(0, 0, 0, 0.49);
+        background-color: rgba(0, 0, 0, 0.89);
         z-index: 1090;
         border-radius: 5px;
     }

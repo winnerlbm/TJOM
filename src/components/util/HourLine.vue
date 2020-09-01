@@ -167,7 +167,9 @@
             calcWidth(){
                 let width_all = this.$refs.timeProgressBox.clientWidth;
                 this.hour_veg = width_all/24;//每一时刻长度
-                this.curr_x = (this.hour_veg/2) - 10;
+               // this.curr_x = (this.hour_veg/2) - 10;
+                this.curr_hour = new Date().getHours();
+                this.curr_x =  (this.curr_hour+1)*this.hour_veg - 10 - (this.hour_veg/2);
                 console.log(width_all);
             },
             dateClick(){

@@ -2,8 +2,8 @@
     <div class="sys-info-cls">
         <div class="sys-logo-cls"/>
         <span class="sys-title-cls">{{sysTitle}}</span>
-        <span class="pot">.</span>
-        <span class="gist">GIS平台</span>
+        <!--<span class="pot">.</span>
+        <span class="gist">GIS平台</span>-->
     </div>
 </template>
 

@@ -147,24 +147,24 @@ const mapUtil = {
             }).addTo(map);
         }else if(baseType == "tdtimg"){
             //初始化底图-天地图
-            this.baseMapLayer = L.tileLayer.chinaProvider('TianDiTu.Satellite.Map', {
+            this.baseMapLayer = L.tileLayer.chinaProvider('GaoDe.Satellite.Map', {
                 maxZoom: appCfg.map.maxZoom,
                 minZoom: appCfg.map.minZoom
             }).addTo(map);
-            this.annoMapLayer = L.tileLayer.chinaProvider('TianDiTu.Satellite.Annotion', {
+            this.annoMapLayer = L.tileLayer.chinaProvider('GaoDe.Satellite.Annotion', {
                 maxZoom: appCfg.map.maxZoom,
                 minZoom: appCfg.map.minZoom
             }).addTo(map);
         }else if(baseType == "tdtvec"){
             //初始化底图-天地图
-            this.baseMapLayer = L.tileLayer.chinaProvider('TianDiTu.Normal.Map', {
+            this.baseMapLayer = L.tileLayer.chinaProvider('GaoDe.Normal.Map', {
                 maxZoom: appCfg.map.maxZoom,
                 minZoom: appCfg.map.minZoom
             }).addTo(map);
-            this.annoMapLayer = L.tileLayer.chinaProvider('TianDiTu.Normal.Annotion', {
+            /*this.annoMapLayer = L.tileLayer.chinaProvider('TianDiTu.Normal.Annotion', {
                 maxZoom: appCfg.map.maxZoom,
                 minZoom: appCfg.map.minZoom
-            }).addTo(map);
+            }).addTo(map);*/
         }else if(baseType == "tdtter"){
             //初始化底图-天地图
             this.baseMapLayer = L.tileLayer.chinaProvider('TianDiTu.Terrain.Map', {
@@ -239,5 +239,5 @@ const mapUtil = {
         return layerGroup;
     }
 
-}
+};
 export default mapUtil

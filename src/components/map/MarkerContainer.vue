@@ -122,27 +122,34 @@
                     shadowSize: [68, 95],
                     shadowAnchor: [22, 94]
                 });
-                new L.Draw.Marker(this.$mapUtil.lMap ,this.markControl.options.marker).enable();
+                //new L.Draw.Marker(this.$mapUtil.lMap ,this.markControl.options.marker).enable();
+                this.$parent.enableDrawOption("marker");
             },
             drawLines(item){
                 this.selCls = item.cls;
                 this.lineStyle = {color:item.color};
-                new L.Draw.Polyline(this.$mapUtil.lMap,this.markControl.options.polyline).enable();
+
+                this.$parent.enableDrawOption("line");
+                //new L.Draw.Polyline(this.$mapUtil.lMap,this.markControl.options.polyline).enable();
             },
             drawPolygon(item){
                 this.selCls = item.cls;
                 this.lineStyle = {color:item.color};
                 if(item.type=="polygon"){
-                    new L.Draw.Polygon(this.$mapUtil.lMap,this.markControl.options.polygon).enable();
+                   // new L.Draw.Polygon(this.$mapUtil.lMap,this.markControl.options.polygon).enable();
+                    this.$parent.enableDrawOption("polygon");
                 }else if(item.type == "circle"){
-                    new L.Draw.Circle(this.$mapUtil.lMap,this.markControl.options.circle).enable();
+                  //  new L.Draw.Circle(this.$mapUtil.lMap,this.markControl.options.circle).enable();
+                    this.$parent.enableDrawOption("circle");
                 }else if(item.type == "rectangle"){
-                    new L.Draw.Rectangle(this.$mapUtil.lMap,this.markControl.options.rectangle).enable();
+                   // new L.Draw.Rectangle(this.$mapUtil.lMap,this.markControl.options.rectangle).enable();
+                    this.$parent.enableDrawOption("rectangle");
                 }
 
             },
             drawTool(item){
-              if(item.type == "delete"){
+                this.$parent.drawTool(item);
+             /* if(item.type == "delete"){
                   if(!this.deleteTool) {
                       this.deleteTool = new L.EditToolbar.Delete(this.$mapUtil.lMap, {featureGroup: this.featureGroup});
                   }
@@ -161,8 +168,7 @@
                   if(this.deleteTool){
                       this.deleteTool.disable();
                   }
-
-              }
+              }*/
             },
             initDraw(){
                 this.featureGroup = new L.FeatureGroup();
@@ -173,7 +179,6 @@
                     }
                 });
                 let _self = this;
-              //  this.$mapUtil.lMap.addControl(this.markControl);
                 this.$mapUtil.lMap.on(L.Draw.Event.CREATED, function (event) {
                     let layer = event.layer;
                     if(event.layerType == "marker"){
@@ -181,7 +186,6 @@
                     }else{
                         layer.setStyle(_self.lineStyle);
                     }
-                   // debugger;
                     _self.featureGroup.addLayer(layer);
                 });
             },
@@ -199,10 +203,10 @@
     .markerDiv {
         position: absolute;
         top: 130px;
-        right: 100px;
+        right: 180px;
         width: 200px;
         height: auto;
-        background-color: rgba(0, 0, 0, 0.49);
+        background-color: rgba(0, 0, 0, 0.89);
         z-index: 990;
         border-radius: 5px;
     }
