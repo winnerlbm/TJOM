@@ -6,12 +6,12 @@ const appCfg = {
         chartLabelFont: 0.26
     },
     map: {
-        mapRootUrl: 'http://114.116.231.97:7080/geoserver/NPWS/wms',
-        wfsRootUrl: 'http://114.116.231.97:7080/geoserver/NPWS/ows',
+        mapRootUrl: 'http://114.116.231.97:6060/geoserver/sf/wms',
+        wfsRootUrl: 'http://114.116.231.97:6060/geoserver/sf/ows',
         gisApiUrl: 'http://202.99.99.49:8100/dc-server/',
         userKey:"9b10ae3a-bf25-46db-ac20-c0e8963367e0",
         minZoom: 4,
-        maxZoom: 16,
+        maxZoom: 18,
         zoom: 10,
         center: [39.12, 117.20]
     },

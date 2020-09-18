@@ -33,7 +33,7 @@ const mapUtil = {
         }).addTo(map);*/
 
 
-        this.baseMapLayer = L.tileLayer.chinaProvider('Geoq.Normal.PurplishBlue', {
+        this.baseMapLayer = L.tileLayer.chinaProvider('Geoq.Tecent.Dark', {
             maxZoom: appCfg.map.maxZoom,
             minZoom: appCfg.map.minZoom
         }).addTo(map);
@@ -136,7 +136,7 @@ const mapUtil = {
             map.removeLayer(this.annoMapLayer);
         }
         if(baseType == "PurplishBlue"){//蓝色智图
-            this.baseMapLayer = L.tileLayer.chinaProvider('Geoq.Normal.PurplishBlue', {
+            this.baseMapLayer = L.tileLayer.chinaProvider('Geoq.Tecent.Dark', {
                 maxZoom: appCfg.map.maxZoom,
                 minZoom: appCfg.map.minZoom
             }).addTo(map);
@@ -214,6 +214,20 @@ const mapUtil = {
         }else{
             return null;
         }
+    },
+    createMarkerByLgnt(langs,img){
+        let mcIcon = L.icon({
+            iconUrl: img ,
+            iconSize: [25, 35],
+            iconAnchor: [10, 20],
+            popupAnchor: [6,-12],
+            shadowSize: [68, 95],
+            shadowAnchor: [22, 94]
+        });
+        return L.marker([langs[1],langs[0]],{
+            icon:mcIcon
+        });
+        
     },
     createLayerGroup(markers,map){
         return L.layerGroup(markers);

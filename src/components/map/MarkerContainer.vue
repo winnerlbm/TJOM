@@ -206,7 +206,7 @@
         right: 180px;
         width: 200px;
         height: auto;
-        background-color: rgba(0, 0, 0, 0.89);
+        background-color: rgba(0, 34, 68, 0.83);
         z-index: 990;
         border-radius: 5px;
     }

@@ -1,5 +1,6 @@
 <template>
-    <div class="layerDiv" v-loading="loading">
+    <div class="layerDiv" v-loading="loading"  element-loading-spinner="el-icon-loading"
+    element-loading-background="rgba(0, 0, 0, 0.8)">
         <div class="etitle" v-show="false">
             <i class="el-icon-s-operation" style="margin-right:5px"></i> 业务数据图层
         </div>
@@ -15,7 +16,7 @@
                 </li>
             </ul>
         </div>
-        <div class="layerTitle">
+        <!--<div class="layerTitle">
             监测站点
         </div>
         <div class="layerList">
@@ -26,7 +27,7 @@
                     <span>{{item.name}}</span>
                 </li>
             </ul>
-        </div>
+        </div>-->
         <div class="layerTitle">
             空气质量数据监测站
         </div>
@@ -61,11 +62,11 @@
         data(){
             return {
                 factoryList:[
-                    {type:"factory",name:"所有企业信息",checked:false,image:require("../../assets/image/icon/gkxx.png")},
-                    {type:"wryFac",name:"在线监控企业信息",checked:false,image:require("../../assets/image/icon/gkxx.png")},
-                    {type:"mine",name:"工况监控企业信息",checked:false,image:require("../../assets/image/icon/gkxx.png")},
-                    {type:"wg",name:"废气排污口",checked:false,image:require("../../assets/image/icon/wry.png")},
-                    {type:"ww",name:"废水排污口",checked:false,image:require("../../assets/image/icon/wry.png")}
+                    {type:"factory",name:"所有企业",checked:false,image:require("../../assets/image/icon/factory.png")},
+                    {type:"wryFac",name:"在线监控企业",checked:false,image:require("../../assets/image/icon/wryfac.png")},
+                    {type:"mine",name:"工况监控企业",checked:false,image:require("../../assets/image/icon/gkxx.png")},
+                   /* {type:"wg",name:"废气排污口",checked:false,image:require("../../assets/image/icon/wry.png")},
+                    {type:"ww",name:"废水排污口",checked:false,image:require("../../assets/image/icon/wry.png")}*/
                 ],
                 moniList:[
                     {type:"sttp_normal",name:"常规监测站",checked:false,image:require("../../assets/image/icon/cgz.png")},
@@ -73,16 +74,25 @@
                     {type:"sttp_wz",name:"微站",checked:false,image:require("../../assets/image/icon/wz.png")}
                 ],
                 airList:[
-                    {type:"sttp_all",name:"空气质量监测站点",checked:false,image:require("../../assets/image/icon/gkz.png")},
-                    {type:"sttp_gk",name:"国控站点",checked:false,image:require("../../assets/image/icon/gkz.png")},
-                    {type:"sttp_sk",name:"省(区)控站点",checked:false,image:require("../../assets/image/icon/skz.png")}
+                    {type:"sttp_all",name:"空气质量监测站",checked:false,image:require("../../assets/image/icon/sttp_air.png")},
+                    {type:"sttp_gk",name:"国控站",checked:false,image:require("../../assets/image/icon/sttp_gk.png")},
+                    /*{type:"sttp_sk",name:"省(区)控站",checked:false,image:require("../../assets/image/icon/skz.png")},*/
+                    {type:"sttp_normal",name:"常规监测站",checked:false,image:require("../../assets/image/icon/normal.png")},
+                    // {type:"sttp_yd",name:"移动监测站",checked:false,image:require("../../assets/image/icon/ydz.png")},
+                    {type:"sttp_wz",name:"微型站",checked:false,image:require("../../assets/image/icon/wz.png")}
                 ],
                 statisList:[
                     {type:"hjxf",name:"环境信访热力图",checked:false,image:require("../../assets/image/icon/rlt_1.png")},
                     {type:"xzcf",name:"行政处罚热力图",checked:false,image:require("../../assets/image/icon/rlt_2.png")},
-                    {type:"fqpk",name:"废气排口超标热力图",checked:false,image:require("../../assets/image/icon/rlt_1.png")},
-                    {type:"fspk",name:"废水排口超标热力图",checked:false,image:require("../../assets/image/icon/rlt_1.png")}
+                    {type:"fqpk",name:"废气排口超标热力图",checked:false,image:require("../../assets/image/icon/heat_air.png")},
+                    {type:"fspk",name:"废水排口超标热力图",checked:false,image:require("../../assets/image/icon/heat_water.png")}
                 ],
+                qy:require("@/assets/image/fa/fa-qy.png"),
+                addr:require("@/assets/image/fa/fa-addr.png"),
+                qtype:require("@/assets/image/fa/fa-type.png"),
+                lic:require("@/assets/image/fa/fa-lic.png"),
+                sttp:require("@/assets/image/fa/fa-sttp.png"),
+                par:require("@/assets/image/fa/fa-par.png"),
                 loading:false
             }
         },
@@ -95,6 +105,12 @@
             window.getMineTime = function(model,type){
                 _self.$parent.setDetailData(model,type);
             };
+            window.validNullStr = function(str){
+                if(str!=null&&str!="null"){
+                    return str;
+                }
+                return "-";
+            }
         },
         methods: {
             initSTime(){
@@ -117,9 +133,11 @@
                     }else if(item.type == "wg"){
                         this.getWry(item.type);
                     }else if(item.type == "sttp_normal"){
-                        this.getNormalSttp(item.type);
+                       // this.getNormalSttp(item.type);
+                        this.getSttpData(item.type,"1","AQI");
                     }else if(item.type == "sttp_wz"){
-                        this.getWzSttp(item.type);
+                       // this.getWzSttp(item.type);
+                        this.getSttpData(item.type,"2","AQI");
                     }else if(item.type == "mine"){
                         this.getMineData(item.type);
                     }else if(item.type == "sttp_all"){
@@ -130,6 +148,8 @@
                         this.getCsttp(item.type,2);
                     }else if(item.type == "ww"){
                         this.getPwk(item.type);
+                    }else if(item.type == "wryFac"){
+                        this.getWryFac(item.type);
                     }
                 }else{
                     this.$mapUtil.removeTemLayer(item.type);
@@ -138,7 +158,7 @@
             },
             setHeatMap(val,item){
                 if(val){
-                    let stime = this.initETime(365);
+                    let stime = this.initETime(30);
                     let etime = this.initSTime();
                     if(item.type == "xzcf"){
                         this.getXzcfData(item.type,stime,etime);
@@ -155,18 +175,45 @@
                 }
             },
             getFactory(layerId){
-                this.loading = true;
-                let wzIcon = require("../../assets/image/map/map_fac.png");
+                let _self = this;
+                setTimeout(function () {//延时0.1秒 解决卡顿问题
+                    _self.loading = true;
+                    let faclist =  _self.$parent.allFactory;
+                    if(faclist.length>0){
+                        _self.drawFactoryMap(layerId,faclist);
+                        _self.loading = false;
+                    }else{
+                        let body = {
+                            "conditions":[
+
+                            ],
+                            "page":{
+                                "pageable": false,
+                                "currentPage": 1,
+                                "pageSize": 10
+                            },
+                            "sort":{
+                                "field": "",
+                                "order": "DESC"
+                            }
+                        };
+                        _self.$axios({
+                            url: appCfg.map.gisApiUrl+"api/share/data/2c9a818f7371258f01737666a9c811af?userKey="+appCfg.map.userKey,
+                            method: "post",
+                            data: body,
+                            header:{'Content-type': 'application/json'}
+                        }).then(res => {
+                            _self.loading = false;
+                            let list = res.data.data.list;
+                            _self.drawFactoryMap(layerId,list);
+                        })
+                    }
+                }, 100);
+            },
+            getWryFac(layerId){
                 let body = {
                     "conditions":[
-                        {
-                            "operator":"AND",
-                            "field":"",
-                            "match":"contain",
-                            "value":"",
-                            "maxValue":"",
-                            "minValue":""
-                        }
+
                     ],
                     "page":{
                         "pageable": false,
@@ -179,32 +226,47 @@
                     }
                 };
                 this.$axios({
-                    url: appCfg.map.gisApiUrl+"api/share/data/2c9a818f7371258f01737666a9c811af?userKey="+appCfg.map.userKey,
+                    url: appCfg.map.gisApiUrl+"api/share/data/2c9a818f746c8ba001746d602ebd013d?userKey="+appCfg.map.userKey,
                     method: "post",
                     data: body,
                     header:{'Content-type': 'application/json'}
                 }).then(res => {
                     this.loading = false;
                     let list = res.data.data.list;
-                    let facLayer = L.markerClusterGroup();
-                    for(let model of list) {
-                        model.longitude =  this.DegreeConvertBack(model.lngDegree,model.lngMinute,model.lngSecond);
-                        model.latitude = this.DegreeConvertBack(model.latDegree,model.latMinute,model.latSecond);
-                        let marker = this.$mapUtil.createPointMarker(model,wzIcon);
-                        marker.id = model.dataId;
-                        if(marker){
-                            let html = this.createHtml(model);
-                            marker.bindPopup(html);
-                            facLayer.addLayer(marker);
-                        }
-                    }
-                    this.$mapUtil.lMap.addLayer(facLayer);
-                    this.$mapUtil.addTemLayer(layerId,facLayer);
-                    this.$parent.setDataList(layerId,list);
+                    this.drawFactoryMap(layerId,list);
                 })
             },
+            drawFactoryMap(layerId,list){
+                let wzIcon = null;
+                if(layerId == "factory"){
+                    wzIcon = require("../../assets/image/map/factory.png");
+                }else {
+                    wzIcon = require("../../assets/image/map/wryFac.png");
+                }
+                let _self = this;
+                let facLayer = L.markerClusterGroup({maxClusterRadius:40});
+                for(let model of list) {
+                   // model.longitude =  this.DegreeConvertBack(model.lngDegree,model.lngMinute,model.lngSecond);
+                   // model.latitude = this.DegreeConvertBack(model.latDegree,model.latMinute,model.latSecond);
+                    let marker = this.$mapUtil.createPointMarker(model,wzIcon);
+                    if(marker){
+                        marker.model = model;
+                        marker.on("click",function(e){
+                            let cmodel = e.target.model;
+                            _self.$parent.setDetailData(model,"factory");
+                        });
+                        marker.id = model.dataId;
+                        let html = this.createHtml(model);
+                        marker.bindPopup(html);
+                        facLayer.addLayer(marker);
+                    }
+                }
+                this.$mapUtil.lMap.addLayer(facLayer);
+                this.$mapUtil.addTemLayer(layerId,facLayer);
+                this.$parent.setDataList(layerId,list);
+            },
             getMineData(layerId){
-                let wzIcon = require("../../assets/image/map/map_gk.png");
+                let wzIcon = require("../../assets/image/map/mine.png");
                 let body = {
                     "conditions":[
                         {
@@ -232,13 +294,18 @@
                     data: body,
                     header:{'Content-type': 'application/json'}
                 }).then(res => {
-
+                    let _self = this;
                     let list = res.data.data.list;
                     let facLayer = L.markerClusterGroup();
                     for(let model of list) {
                         let marker = this.$mapUtil.createPointMarker(model,wzIcon);
-                        marker.id = model.enterpriseNo;
                         if(marker){
+                            marker.id = model.enterpriseNo;
+                            marker.model = model;
+                            marker.on("click",function(e){
+                                let cmodel = e.target.model;
+                                _self.$parent.setDetailData(model,layerId);
+                            });
                             let html = this.createMineHtml(model);
                             marker.bindPopup(html);
                             facLayer.addLayer(marker);
@@ -250,7 +317,7 @@
                 })
             },
             getWry(layerId){
-                let wzIcon = require("../../assets/image/map/map_water.png");
+                let wzIcon = require("../../assets/image/map/wry_water.png");
                 let body = {
                     "conditions":[
 
@@ -271,12 +338,19 @@
                     data: body,
                     header:{'Content-type': 'application/json'}
                 }).then(res => {
+                    let _self = this;
                     let list = res.data.data.list;
                     let markers = [];
                     for(let model of list) {
                         let marker = this.$mapUtil.createPointMarker(model,wzIcon);
                         if(marker){
                             marker.id = model.id;
+                            marker.model = model;
+                            marker.on("click",function(e){
+                                let cmodel = e.target.model;
+                                _self.$parent.setDetailData(model,layerId);
+                            });
+
                             let html = this.createWryHtml(model);
                             marker.bindPopup(html);
                             markers.push(marker);
@@ -289,7 +363,7 @@
                 })
             },
             getPwk(layerId){
-                let wzIcon = require("../../assets/image/map/map_water.png");
+                let wzIcon = require("../../assets/image/map/wry_air.png");
                 let body = {
                     "conditions":[
 
@@ -311,11 +385,17 @@
                     header:{'Content-type': 'application/json'}
                 }).then(res => {
                     let list = res.data.data.list;
+                    let _self = this;
                     let markers = [];
                     for(let model of list) {
                         let marker = this.$mapUtil.createPointMarker(model,wzIcon);
                         if(marker){
                             marker.id = model.id;
+                            marker.model = model;
+                            marker.on("click",function(e){
+                                let cmodel = e.target.model;
+                                _self.$parent.setDetailData(model,layerId);
+                            });
                             let html = this.createPwkHtml(model);
                             marker.bindPopup(html);
                             markers.push(marker);
@@ -365,7 +445,12 @@
                 })
             },
             getCsttp(layerId,type){
-                let wzIcon = require("../../assets/image/map/sttp_gk.png");
+                let wzIcon = null;
+                if(layerId == "sttp_gk"){
+                    wzIcon = require("../../assets/image/map/sttp_gk.png");
+                }else{
+                    wzIcon = require("../../assets/image/map/sttp_sk.png");
+                }
                 let body = {
                     "conditions":[
                         {
@@ -394,6 +479,7 @@
                     header:{'Content-type': 'application/json'}
                 }).then(res => {
                     let list = res.data.data.list;
+                    let _self = this;
                     if(list.length == 0){
                         this.$message.error("未查询到相关数据！");
                         return;
@@ -403,6 +489,11 @@
                         let marker = this.$mapUtil.createPointMarker(model,wzIcon);
                         if(marker){
                             marker.id = model.id;
+                            marker.model = model;
+                            marker.on("click",function(e){
+                                let cmodel = e.target.model;
+                                _self.$parent.setDetailData(model,"air");
+                            });
                             let html = this.createGSttpHtml(model);
                             marker.bindPopup(html);
                             markers.push(marker);
@@ -415,7 +506,7 @@
                 })
             },
             getNormalSttp(layerId){
-                let wzIcon = require("../../assets/image/map/fac.png");
+                let wzIcon = require("../../assets/image/map/normal.png");
                 let body = {
                     "conditions":[
                         {
@@ -435,11 +526,17 @@
                     header:{'Content-type': 'application/json'}
                 }).then(res => {
                     let list = res.data.data.list;
+                    let _self = this;
                     let markers = [];
                     for(let model of list) {
                         let marker = this.$mapUtil.createPointMarkerByLgnt(model,wzIcon);
-                        marker.id = model.stationId;
                         if(marker){
+                            marker.id = model.stationId;
+                            marker.model = model;
+                            marker.on("click",function(e){
+                                let cmodel = e.target.model;
+                                _self.$parent.setDetailData(model,"sttp");
+                            });
                             let html = this.createSttpHtml(model);
                             marker.bindPopup(html);
                             markers.push(marker);
@@ -452,14 +549,14 @@
                 })
             },
             getWzSttp(layerId){
-                let wzIcon = require("../../assets/image/map/map_wz2.png");
+                let wzIcon = require("../../assets/image/map/wz.png");
                 let body = {
                     "conditions":[
                         {
                             "operator":"AND",
                             "field":"stationType",
                             "match":"equal",
-                            "value":"2",//微通站
+                            "value":"2",//微站
                             "maxValue":"",
                             "minValue":""
                         }
@@ -472,12 +569,17 @@
                     header:{'Content-type': 'application/json'}
                 }).then(res => {
                     let list = res.data.data.list;
+                    let _self = this;
                     let markers = [];
                     for(let model of list) {
                         let marker = this.$mapUtil.createPointMarkerByLgnt(model,wzIcon);
-                        marker.id = model.stationId;
                         if(marker){
-                            marker.id = model.id;
+                            marker.id = model.stationId;
+                            marker.model = model;
+                            marker.on("click",function(e){
+                                let cmodel = e.target.model;
+                                _self.$parent.setDetailData(model,"sttp");
+                            });
                             let html = this.createSttpHtml(model);
                             marker.bindPopup(html);
                             markers.push(marker);
@@ -490,7 +592,7 @@
                 })
             },
             getSttpAll(layerId){
-                let wzIcon = require("../../assets/image/map/map_air.png");
+                let wzIcon = require("../../assets/image/map/sttp_air.png");
                 let body = {
                     "conditions":[
 
@@ -512,12 +614,77 @@
                     header:{'Content-type': 'application/json'}
                 }).then(res => {
                     let list = res.data.data.list;
+                    let _self = this;
                     let markers = [];
                     for(let model of list) {
                         let marker = this.$mapUtil.createPointMarker(model,wzIcon);
                         if(marker){
                             marker.id = model.id;
+                            marker.model = model;
+                            marker.on("click",function(e){
+                                let cmodel = e.target.model;
+                                _self.$parent.setDetailData(model,"air");
+                            });
                             let html = this.createGSttpHtml(model);
+                            marker.bindPopup(html);
+                            markers.push(marker);
+                        }
+                    }
+                    let facLayer = L.layerGroup(markers);
+                    this.$mapUtil.lMap.addLayer(facLayer);
+                    this.$mapUtil.addTemLayer(layerId,facLayer);
+                    this.$parent.setDataList(layerId,list);
+                })
+            },
+
+            getSttpData(layerId,type,item){
+               // let wzIcon = require("../../assets/image/map/wry_water.png");
+
+                let body = {
+                    "conditions":[
+                        {
+                            "operator":"AND",
+                            "field":"stationType",
+                            "match":"equal",
+                            "value":type,//1常规站 2微站
+                        },
+                        {
+                            "operator":"AND",
+                            "field":"itemName",
+                            "match":"equal",
+                            "value":item
+                        }
+                    ],
+                    "page":{
+                        "pageable": false,
+                        "currentPage": 1,
+                        "pageSize": 10
+                    },
+                    "sort":{
+                        "field": "value",
+                        "order": "DESC"
+                    }
+                };
+                this.$axios({
+                    url: appCfg.map.gisApiUrl+"api/share/data/2c9a818f7473169a017476eb0bb51102?userKey="+appCfg.map.userKey,
+                    method: "post",
+                    data: body,
+                    header:{'Content-type': 'application/json'}
+                }).then(res => {
+                    let _self = this;
+                    let list = res.data.data.list;
+                    let markers = [];
+                    for(let model of list) {
+                        let marker = this.createPointByLevel(model);
+                        if(marker){
+                            marker.id = model.id;
+                            marker.model = model;
+                            marker.on("click",function(e){
+                                let cmodel = e.target.model;
+                                _self.$parent.setDetailData(model,"sttp");
+                            });
+
+                            let html = this.createSttpHtml(model);
                             marker.bindPopup(html);
                             markers.push(marker);
                         }
@@ -533,70 +700,71 @@
             },
             createHtml(model){
                 let html = [];
-                html.push('<div class="popuDiv"><span>企业名称：</span>'+model.companyName+'</div>');
-                html.push('<div class="popuDiv"><span>企业地址：</span>'+model.operationAddress+'</div>');
-                html.push('<div class="popuDiv"><span>企业类型：</span>'+model.industryType+'</div>');
-                html.push('<div class="popuDiv"><span>排污许可证号：</span>'+model.permitLicence+'</div>');
-                html.push('<div class="poputools">');
+                
+                html.push('<div class="popuDiv"><img class="faicon" src="'+this.qy+'" />'+validNullStr(model.companyName)+'</div>');
+                html.push('<div class="popuDiv"><img class="faicon" src="'+this.addr+'" />'+validNullStr(model.operationAddress)+'</div>');
+                html.push('<div class="popuDiv"><img class="faicon" src="'+this.qtype+'" />'+validNullStr(model.industryType)+'</div>');
+                html.push('<div class="popuDiv"><img class="faicon" src="'+this.lic+'" />'+validNullStr(model.permitLicence)+'</div>');
+               /* html.push('<div class="poputools">');
                 html.push('<button onclick="getMineTime('+JSON.stringify(model).replace(/"/g, '&quot;')+',\'factory\')">详情</button>');
-                html.push('</div>');
+                html.push('</div>');*/
                 return html.join('');
             },
             createMineHtml(model){
                 let html = [];
-                html.push('<div class="popuDiv"><span>企业名称：</span>'+model.enterpriseName+'</div>');
-                html.push('<div class="popuDiv"><span>企业地址：</span>'+model.address+'</div>');
-                html.push('<div class="popuDiv"><span>排污许可证号：</span>'+model.permitLicence+'</div>');
-                html.push('<div class="poputools">');
+                html.push('<div class="popuDiv"><img class="faicon" src="'+this.qy+'" />'+validNullStr(model.enterpriseName)+'</div>');
+                html.push('<div class="popuDiv"><img class="faicon" src="'+this.addr+'" />'+validNullStr(model.address)+'</div>');
+                html.push('<div class="popuDiv"><img class="faicon" src="'+this.lic+'" />'+validNullStr(model.permitLicence)+'</div>');
+               /* html.push('<div class="poputools">');
                 html.push('<button onclick="getMineTime('+JSON.stringify(model).replace(/"/g, '&quot;')+',\'mine\')">详情</button>');
-                html.push('</div>');
+                html.push('</div>');*/
                 return html.join('');
             },
             createSttpHtml(model){
                 let html = [];
-                html.push('<div class="popuDiv"><span>站点名称：</span>'+model.stationName+'</div>');
-                html.push('<div class="popuDiv"><span>站点类型：</span>'+this.getStationTypeNm(model.stationType)+'</div>');
-                html.push('<div class="popuDiv"><span>监测参数：</span>'+model.param+'</div>');
+                html.push('<div class="popuDiv"><img class="faicon" src="'+this.sttp+'" />'+validNullStr(model.stationName)+'</div>');
+                html.push('<div class="popuDiv"><img class="faicon" src="'+this.qtype+'" />'+this.getStationTypeNm(model.stationType)+'</div>');
+                html.push('<div class="popuDiv"><img class="faicon" src="'+this.par+'" />'+validNullStr(model.param)+'</div>');
                /* html.push('<div class="poputools">');
                 html.push('<button onclick="getMineTime(\''+model.stationId+'\',\'stpmine\')">分钟数据</button>');
                 html.push('<button onclick="getMineTime(\''+model.stationId+'\',\'stphour\')">小时数据</button>');
-                html.push('</div>');*/
+                html.push('</div>');
                 html.push('<div class="poputools">');
                 html.push('<button onclick="getMineTime('+JSON.stringify(model).replace(/"/g, '&quot;')+',\'sttp\')">详情</button>');
-                html.push('</div>');
+                html.push('</div>');*/
                 return html.join('');
             },
             createPwkHtml(model){
                 let html = [];
-                html.push('<div class="popuDiv"><span>排口名称：</span>'+model.portName+'</div>');
-                html.push('<div class="popuDiv"><span>公司名称：</span>'+model.companyName+'</div>');
-                html.push('<div class="popuDiv"><span>使用状态：</span>'+model.useStatusName+'</div>');
-                html.push('<div class="popuDiv"><span>排污许可证：</span>'+model.permitLicence+'</div>');
-                html.push('<div class="poputools">');
+                html.push('<div class="popuDiv"><span>排口名称：</span>'+validNullStr(model.portName)+'</div>');
+                html.push('<div class="popuDiv"><span>公司名称：</span>'+validNullStr(model.companyName)+'</div>');
+                html.push('<div class="popuDiv"><span>使用状态：</span>'+validNullStr(model.useStatusName)+'</div>');
+                html.push('<div class="popuDiv"><span>排污许可证：</span>'+validNullStr(model.permitLicence)+'</div>');
+                /*html.push('<div class="poputools">');
                 html.push('<button onclick="getMineTime('+JSON.stringify(model).replace(/"/g, '&quot;')+',\'ww\')">详情</button>');
-                html.push('</div>');
+                html.push('</div>');*/
                 return html.join('');
             },
             createGSttpHtml(model){
                 let html = [];
-                html.push('<div class="popuDiv"><span>站点名称：</span>'+model.pointName+'</div>');
-                html.push('<div class="popuDiv"><span>站点类型：</span>'+model.manageLevelName+'</div>');
-                html.push('<div class="popuDiv"><span>站点编码：</span>'+model.pointCode+'</div>');
-                html.push('<div class="popuDiv"><span>站点地址：</span>'+model.address+'</div>');
-                html.push('<div class="poputools">');
+                html.push('<div class="popuDiv"><img class="faicon" src="'+this.sttp+'" />'+validNullStr(model.pointName)+'</div>');
+                html.push('<div class="popuDiv"><img class="faicon" src="'+this.qtype+'" />'+validNullStr(model.manageLevelName)+'</div>');
+                //html.push('<div class="popuDiv"><span>站点编码：</span>'+validNullStr(model.pointCode)+'</div>');
+                html.push('<div class="popuDiv"><img class="faicon" src="'+this.addr+'" />'+validNullStr(model.address)+'</div>');
+                /*html.push('<div class="poputools">');
                 html.push('<button onclick="getMineTime('+JSON.stringify(model).replace(/"/g, '&quot;')+',\'air\')">详情</button>');
-                html.push('</div>');
+                html.push('</div>');*/
                 return html.join('');
             },
             createWryHtml(model){
                 let html = [];
-                html.push('<div class="popuDiv"><span>排污口名称：</span>'+model.portName+'</div>');
-                html.push('<div class="popuDiv"><span>公司名称：</span>'+model.companyName+'</div>');
-                html.push('<div class="popuDiv"><span>排污许可证：</span>'+model.permitLicence+'</div>');
+                html.push('<div class="popuDiv"><span>排污口名称：</span>'+validNullStr(model.portName)+'</div>');
+                html.push('<div class="popuDiv"><span>公司名称：</span>'+validNullStr(model.companyName)+'</div>');
+                html.push('<div class="popuDiv"><span>排污许可证：</span>'+validNullStr(model.permitLicence)+'</div>');
                 html.push('<div class="popuDiv"><span>排污口类型：</span>废水排污口</div>');
-                html.push('<div class="poputools">');
+                /*html.push('<div class="poputools">');
                 html.push('<button onclick="getMineTime('+JSON.stringify(model).replace(/"/g, '&quot;')+',\'wg\')">详情</button>');
-                html.push('</div>');
+                html.push('</div>');*/
                 return html.join('');
             },
             getStationTypeNm(type){
@@ -606,6 +774,20 @@
                     return "传感器监测点";
                 }else {
                     return "其它";
+                }
+            },
+            createPointByLevel(model){
+                if(model.lat&&model.lng&&model.lat!=""&&model.lng!=""){
+                    let markCls = "gMarker_" + model.level;
+                    let divIcon = L.divIcon({
+                        className: markCls,
+                        //iconSize: [30, 30]
+                    });
+                    return L.marker([ model.lat,model.lng],{
+                        icon:divIcon
+                    });
+                }else{
+                    return null;
                 }
             },
             getXzcfData(layerId,stime,etime){
@@ -635,10 +817,12 @@
                     if(list.length>0){
                         let data = [];
                         for(let model of list) {
-                            model.lng =  this.DegreeConvertBack(model.lngDegree,model.lngMinute,model.lngSecond);
-                            model.lat = this.DegreeConvertBack(model.latDegree,model.latMinute,model.latSecond);
-                            let point = {lat: model.lat, lng: model.lng, count: Number(model.indexValue)};
-                            data.push(point)
+                            if(model.lngDegree!="null"){
+                                model.longitude =  this.DegreeConvertBack(model.lngDegree,model.lngMinute,model.lngSecond);
+                                model.latitude = this.DegreeConvertBack(model.latDegree,model.latMinute,model.latSecond);
+                                let point = {lat: model.latitude, lng: model.longitude, count: Number(model.indexValue)};
+                                data.push(point)
+                            }
                         }
                         let heatData = {
                             max: 10,
@@ -677,9 +861,9 @@
                     if(list.length>0){
                         let data = [];
                         for(let model of list) {
-                            model.lng =  this.DegreeConvertBack(model.lngDegree,model.lngMinute,model.lngSecond);
-                            model.lat = this.DegreeConvertBack(model.latDegree,model.latMinute,model.latSecond);
-                            let point = {lat: model.lat, lng: model.lng, count: Number(model.indexValue)};
+                            model.longitude =  this.DegreeConvertBack(model.lngDegree,model.lngMinute,model.lngSecond);
+                            model.latitude = this.DegreeConvertBack(model.latDegree,model.latMinute,model.latSecond);
+                            let point = {lat: model.latitude, lng: model.longitude, count: Number(model.indexValue)};
                             data.push(point)
                         }
                         let heatData = {
@@ -780,6 +964,12 @@
             },
             getMineTime(id){
                 console.log(id);
+            },
+            validNullStr(str){
+                if(str!=null&&str!="null"){
+                    return str;
+                }
+                return "-";
             }
         }
     }
@@ -793,7 +983,7 @@
         right: 10px;
         width: 250px;
         height: auto;
-        background-color: rgba(0, 0, 0, 0.89);
+        background-color: rgba(0, 34, 68, 0.83);
         z-index: 1090;
         border-radius: 5px;
     }
@@ -839,4 +1029,5 @@
         color:#fff;
         vertical-align: middle;
     }
+
 </style>

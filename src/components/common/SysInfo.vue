@@ -20,21 +20,20 @@
 
 <style scoped>
     .sys-logo-cls {
-        width: 83px;
+        width: 115px;
         height: 50px;
         margin-left: 20px;
         background-image: url("../../assets/image/logo.png");
         background-repeat: no-repeat;
         background-size: 100% 100%;
         -moz-background-size: 100% 100%;
-        display: none;
     }
 
     .sys-title-cls {
         color: #e2e9e9;
         font-size: 24px;
         font-weight: 500;
-        margin-left: 20px ;
+        margin-left: 10px ;
     }
     .pot {
         color: #e2e9e9;

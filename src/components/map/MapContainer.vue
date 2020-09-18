@@ -2,99 +2,100 @@
 <script src="../../../public/libs/turf/truf.min.js"></script>-->
 <template>
     <div style="flex: 1">
-        <div id="map">
-            <!--数据统计面板-->
-            <info-container v-show="false" class="map-info-cls"/>
-            <!--图层管理面板-->
-            <layer-container ref="layerContains" class="layerClass" v-show="layersShow"  @click.stop="doSomething($event)" ></layer-container>
+        <div id="map"></div>
+        <!--数据统计面板-->
+        <info-container v-show="false" class="map-info-cls"/>
+        <!--图层管理面板-->
+        <layer-container ref="layerContains" class="layerClass" v-show="layersShow" ></layer-container>
 
-            <marker-container ref="markRef" class="layerClass" v-show="markerShow"  @click.stop="doSomething($event)" ></marker-container>
-            <!--搜索面板-->
-            <search-container class="searchClass"  @click.stop="doSomething($event)" ></search-container>
-            <!--工具条面板-->
-            <div class="mapTools"  @click.stop="doSomething($event)" >
-                <ul>
-                    <li @click="setWindy" :class="{'spanSel':windySelect == true}">
-                        <img :src="toolImg.windyImg" alt="">
-                        <span>风场</span>
-                    </li>
-                    <li @click="setRoadMap"  :class="{'spanSel':roadSelect == true}" style="border-right: 1px solid rgba(12, 60, 119, 0.64);">
-                        <img :src="toolImg.roadImg" alt="">
-                        <span>路况</span>
-                    </li>
-                    <li @click="setManager"  :class="{'spanSel':managerSelect == true}" style="border-right: 1px solid rgba(12, 60, 119, 0.64);">
-                        <img :src="toolImg.managerImg" alt="">
-                        <span>管理清单</span>
-                    </li>
-                    <li @click="setMarkMap"  :class="{'spanSel':markerShow == true}" style="border-right: 1px solid rgba(12, 60, 119, 0.64);">
-                        <img :src="toolImg.markImg" style="margin-right: 5px;" alt="">
-                        <span>标记</span>
-                    </li>
-                    <li @click="setMapBox"  :class="{'spanSel':mapboxShow == true}"  style="padding-right: 5px;border-right: 1px solid rgba(12, 60, 119, 0.64);">
-                        <img :src="toolImg.mapboxImg" style="width: 15px;height: 15px;" alt="">
-                        <span>工具箱</span>
-                        <img class="openBox" :src="toolImg.updowImg" alt="">
-                    </li>
-                    <li @click="setLayers"  :class="{'spanSel':layersShow == true}">
-                        <img :src="toolImg.layerImg" alt=""  style="margin-right: 5px;">
-                        <span>图层</span>
-                    </li>
-                    <li @click="clearMap" >
-                        <img :src="toolImg.clearImg" alt=""  style="margin-right: 5px;">
-                        <span>清除</span>
-                    </li>
-                </ul>
+        <marker-container ref="markRef" class="layerClass" v-show="markerShow" ></marker-container>
+        <!--搜索面板-->
+        <search-container ref="searchConf" class="searchClass" ></search-container>
+        <!--工具条面板-->
+        <div class="mapTools" >
+            <div class="airIndexDiv" v-show="false">
+                <div class="iptw-130 mgr-8">
+                    <el-select v-model="queryIndex"  @change="changeStationQuery" placeholder="请选择">
+                        <el-option
+                                v-for="item in queryIndexOptions"
+                                :key="item.value"
+                                :label="item.label"
+                                :value="item.value">
+                        </el-option>
+                    </el-select>
+                </div>
             </div>
-            <div class="mapboxs" @click.stop="doSomething($event)"  v-show="mapboxShow == true">
-                <ul>
-                    <li  v-for="(item,key) in toolList" :key="key" @click="queryMap(item,key)"  @click.stop="doSomething($event)" >
-                        <img :src="item.image" alt="">
-                        <span>{{item.name}}</span>
-                    </li>
-                </ul>
-            </div>
-
-            <div class="managerbox" @click.stop="doSomething($event)" v-show="managerShow == true">
-                <ul>
-                    <li  v-for="(item,key) in managerList"  :class="{'active':menuSel == item.id}" :key="key" @click="queryManagerFac(item,key)"  @click.stop="doSomething($event)" >
-                        <span>{{item.name}}</span>
-                    </li>
-                </ul>
-            </div>
-            <div class="menusDiv">
-                <ul>
-                    <li  v-for="(item,key) in menuList" :key="key" @click="selectedMenu(item,key)" :class="{'active':selecteIndex == key}">
-                        <img :src="item.image" alt="">
-                        <span>{{item.name}}</span>
-                    </li>
-                </ul>
-            </div>
-            <div class="baseMap" @click.stop="doSomething($event)"  v-show="showClass == 'baseMap'">
-                <ul>
-                    <li v-for="(item,key) in mapList" :key="key" @click="changeMap(item,key)" :class="{'active':selecteMapIndex == key}">
-                        <img :src="item.image" alt="">
-                        <span>{{item.name}}</span>
-                    </li>
-                </ul>
-            </div>
-
-            <div class="themeLayer" @click.stop="doSomething($event)" v-show="showClass == 'themeMap'">
-                <ul>
-                    <li v-for="(item,key) in themeList" @click="addTemLayer(item)" :class="{'active':item.selected===true}">
-                        <span class="bgspan"></span>
-                        <span>{{item.name}}</span>
-                    </li>
-                </ul>
-            </div>
+            <ul>
+                <li @click="setWindy" :class="{'spanSel':windySelect == true}">
+                    <img :src="toolImg.windyImg" alt="">
+                    <span>风场</span>
+                </li>
+                <li @click="setRoadMap"  :class="{'spanSel':roadSelect == true}" style="border-right: 1px solid rgba(12, 60, 119, 0.64);">
+                    <img :src="toolImg.roadImg" alt="">
+                    <span>路况</span>
+                </li>
+                <li @click="setManager"  :class="{'spanSel':managerSelect == true}" style="border-right: 1px solid rgba(12, 60, 119, 0.64);">
+                    <img :src="toolImg.managerImg" alt="">
+                    <span>管理清单</span>
+                </li>
+                <li @click="setMarkMap"  :class="{'spanSel':markerShow == true}" style="border-right: 1px solid rgba(12, 60, 119, 0.64);">
+                    <img :src="toolImg.markImg" style="margin-right: 5px;" alt="">
+                    <span>标记</span>
+                </li>
+                <li @click="setMapBox"  :class="{'spanSel':mapboxShow == true}"  style="padding-right: 5px;border-right: 1px solid rgba(12, 60, 119, 0.64);">
+                    <img :src="toolImg.mapboxImg" style="width: 15px;height: 15px;" alt="">
+                    <span>工具箱</span>
+                    <img class="openBox" :src="toolImg.updowImg" alt="">
+                </li>
+                <li @click="setLayers"  :class="{'spanSel':layersShow == true}">
+                    <img :src="toolImg.layerImg" alt=""  style="margin-right: 5px;">
+                    <span>图层</span>
+                </li>
+                <li @click="clearMap" >
+                    <img :src="toolImg.clearImg" alt=""  style="margin-right: 5px;">
+                    <span>清除</span>
+                </li>
+            </ul>
         </div>
-        <!--业务图层-->
-        <div class="dataLayer">
-
+        <div class="mapboxs"  v-show="mapboxShow == true">
+            <ul>
+                <li  v-for="(item,key) in toolList" :key="key" @click="queryMap(item,key)"  @click.stop="doSomething($event)" >
+                    <img :src="item.image" alt="">
+                    <span>{{item.name}}</span>
+                </li>
+            </ul>
         </div>
+
+        <div class="managerbox" v-show="managerShow == true">
+            <ul>
+                <li  v-for="(item,key) in managerList"  :class="{'active':menuSel == item.id}" :key="key" @click="queryManagerFac(item,key)"  @click.stop="doSomething($event)" >
+                    <span>{{item.name}}</span>
+                </li>
+            </ul>
+        </div>
+        <div class="menusDiv">
+            <ul>
+                <li  v-for="(item,key) in menuList" :key="key" @click="selectedMenu(item,key)" :class="{'active':selecteIndex == key}">
+                    <img :src="item.image" alt="">
+                    <span>{{item.name}}</span>
+                </li>
+            </ul>
+        </div>
+        <div :class="['baseMap',{'upMap':upMap}]" v-show="showClass == 'baseMap'">
+            <ul>
+                <li v-for="(item,key) in mapList" :key="key" @click="changeMap(item,key)" :class="{'active':selecteMapIndex == key}">
+                    <img :src="item.image" alt="">
+                    <span>{{item.name}}</span>
+                </li>
+            </ul>
+        </div>
+        <div :class="['lengndDiv',{'uplegend':upMap}]"  v-show="airSelect">
+            <img src="../../assets/image/legend_b.png" />
+        </div> 
         <hour-line ref="hourline" v-show="hourShow" @onTimeChange="onTimeChange"></hour-line>
         <time-container ref="timeContainer"></time-container>
         <data-container ref="dataContainer"></data-container>
-
+        <route-container ref="routeContainer"></route-container>
         <!--缓冲区设置-->
         <div class="bufferWindow" v-show="bufferShow">
             <div class="bufftitle">缓冲区设置</div>
@@ -123,9 +124,10 @@
     import MarkerContainer from "./MarkerContainer";
     import TimeContainer from "./TimeContainer";
     import DataContainer from "./DataContainer";
+    import RouteContainer from "./RouteContainer";
     export default {
         name: "MapContainer",
-        components: {InfoContainer,layerContainer,SearchContainer,HourLine,MarkerContainer,TimeContainer,DataContainer},
+        components: {InfoContainer,layerContainer,SearchContainer,HourLine,MarkerContainer,TimeContainer,DataContainer,RouteContainer},
         data() {
             return {
                 highLayer: null,
@@ -142,6 +144,7 @@
                 managerList:[],
                 showClass:"baseMap",
                 hourShow:true,
+                upMap:false,
                 mapboxShow:false,
                 layersShow:false,
                 allgrid:[],//风力数据存储
@@ -179,8 +182,8 @@
                     {name:"点查询",type:"queryPoint",image:require("../../assets/image/menu/queryPoint.png")},
                     {name:"线查询",type:"queryLine",image:require("../../assets/image/menu/queryLine.png")},
                     {name:"面查询",type:"queryPolygon",image:require("../../assets/image/menu/queryPolygon.png")},
-                   /* {name:"缓冲区",type:"queryBuffer",image:require("../../assets/image/menu/queryBuffer.png")},
-                    {name:"清除",type:"mulPoint",image:require("../../assets/image/menu/clearMap.png")}*/
+                    /*{name:"路径规划",type:"routeAnaly",image:require("../../assets/image/menu/routeAny.png")},
+                     {name:"清除",type:"mulPoint",image:require("../../assets/image/menu/clearMap.png")}*/
                 ],
                 toolImg:{
                     windyImg:require("../../assets/image/menu/wind.png"),
@@ -196,6 +199,7 @@
                 drawControl:null,
                 menuSel:"",
                 allFactory:[],
+                facSnList:[],
                 bufferPolygon:null,
                 drawLayer:null,
                 drawGroup:null,
@@ -203,7 +207,39 @@
                 bufferVal:1000,
                 bufferShow:false,
                 deleteTool:null,
-                editTool:null
+                editTool:null,
+                airSelect:false,
+                queryIndex:"AQI",
+                queryIndexOptions: [{
+                    value: 'AQI',
+                    label: 'AQI'
+                },{
+                    value: 'PM25',
+                    label: 'PM2.5'
+                },{
+                    value: 'PM10',
+                    label: 'PM10'
+                },{
+                    value: 'SO2',
+                    label: 'SO2'
+                },{
+                    value: 'NO2',
+                    label: 'NO2'
+                },{
+                    value: 'O3',
+                    label: 'O3'
+                },{
+                    value: 'CO',
+                    label: 'CO'
+                }],
+                qy:require("@/assets/image/fa/fa-qy.png"),
+                addr:require("@/assets/image/fa/fa-addr.png"),
+                qtype:require("@/assets/image/fa/fa-type.png"),
+                lic:require("@/assets/image/fa/fa-lic.png"),
+                sttp:require("@/assets/image/fa/fa-sttp.png"),
+                par:require("@/assets/image/fa/fa-par.png"),
+                cbd:require("@/assets/image/fa/fa-cbd.png"),
+                pscode:require("@/assets/image/fa/fa-code.png")
             };
         },
         //需要页面加载完执行的方法,可以写在$nextTick中
@@ -212,16 +248,23 @@
             window.queryContains = function(){
                 _self.polygonContains();
             };
+            window.validNullStr = function(str){
+                if(str!=null&&str!="null"){
+                    return str;
+                }
+                return "-";
+            }
             this.$nextTick(() => {
                 this.queryManager();
                 this.$mapUtil.initMap('map');
                // this.$refs.markRef.initDraw();
                 this.$refs.dataContainer.initDraw();
                 this.hourShow = false;
-                this.$mapUtil.wmsLayer('NPWS:hxtjmap').addTo(this.$mapUtil.lMap);
+                this.$mapUtil.wmsLayer('sf:TjMap').addTo(this.$mapUtil.lMap);
                 this.getAllFactory();
-
-              //  this.queryFeatureByClick('NPWS:hxtjmap', 2000, 'the_geom', this.$mapUtil.lMap)
+               // this.getFactorySnList();
+               // this.drawMapEchart();
+              //  this.queryFeatureByClick('sf:TjMap', 2000, 'the_geom', this.$mapUtil.lMap)
                // this.$mapUtil.heatmapLayer(this.$mapUtil.lMap)
                // this.$mapUtil.removeLayer("layeri",this.$mapUtil.lMap)
                 this.$mapUtil.lMap.on('click', (evt) => {
@@ -236,7 +279,7 @@
                                 .openOn(this.$mapUtil.lMap);
 
                         }else{
-                            this.queryFeatureByClick('NPWS:hxtjmap', 2000, 'the_geom', this.$mapUtil.lMap,evt)
+                            this.queryFeatureByClick('sf:TjMap', 2000, 'the_geom', this.$mapUtil.lMap,evt)
                         }
                     }
                 });
@@ -344,17 +387,17 @@
                                 }
                             });
                             this.highLayer.addTo(map);
-                            this.bufferPolygon =  data.features[0];
-                            this.bufferPolygon.geometry.type = "Polygon";
-                            let winHtml = ['<div class="popuDiv"><span>区域名称：</span>'+this.featureProps.MAP_NAME+'</div>'];
-                            winHtml.push('<div class="poputools">');
-                            winHtml.push('<button onclick="queryContains()">区域查询</button>');
-                            winHtml.push('</div>');
-                            L.popup()
-                                .setLatLng([lat,lng])
-                                .setContent(winHtml.join(''))
-                                .openOn(this.$mapUtil.lMap);
-                            this.highLayer.bindPopup();
+                            if(this.featureProps.USCI){
+                                this.getFactoryByName(this.featureProps.USCI);
+                                let winHtml = [];
+                                winHtml.push('<div class="popuDiv"><img class="faicon" src="'+this.qy+'" />'+this.featureProps.FIRM_NAME+'</div>');
+                                winHtml.push('<div class="popuDiv"><img class="faicon" src="'+this.pscode+'" />'+this.featureProps.USCI+'</div>');
+                                L.popup()
+                                    .setLatLng([lat,lng])
+                                    .setContent(winHtml.join(''))
+                                    .openOn(this.$mapUtil.lMap);
+                                this.highLayer.bindPopup(winHtml.join(''));
+                            }
                         } else {
                             console.log("空间查询失败")
                         }
@@ -382,14 +425,17 @@
             },
             setWindy(){
                 this.windySelect = !this.windySelect;
+
                 if(!this.windySelect&&this.windyLayer){
                     this.$mapUtil.lMap.removeLayer(this.windyLayer);
                     this.toolImg.windyImg = require("../../assets/image/menu/wind.png");
                     this.hourShow = false;
+                    this.upMap = false;
                     this.$refs.hourline.stopPlay();
                 }else{
                     this.getWindyData();
                     this.hourShow = true;
+                    this.upMap = true;
                    // this.$refs.hourline.calcWidth();
                     this.toolImg.windyImg = require("../../assets/image/menu/windSel.png");
                 }
@@ -510,8 +556,8 @@
                 }else if(item.type == "queryPolygon"){
                     this.bufferQuery = true;
                     this.enableDrawOption("polygon");
-                }else if(item.type == "queryBuffer"){
-
+                }else if(item.type == "routeAnaly"){
+                    this.$refs.routeContainer.showPRoute();
                 }else {
                     this.bufferQuery = false;
                     this.clearMap();
@@ -568,7 +614,7 @@
                     this.removeDataList(layerId);
                 }else{
                     this.menuSel = item.id;
-
+                    let _self = this;
                     let body = {
                         "conditions":[
                             {
@@ -594,17 +640,22 @@
                         data: body,
                         header:{'Content-type': 'application/json'}
                     }).then(res => {
-                        let wzIcon = require("../../assets/image/map/map_fac.png");
+                        let wzIcon = require("../../assets/image/map/factory.png");
                         let list = res.data.data;
                         let facLayer = L.markerClusterGroup();
                         for(let model of list) {
-                            model.longitude =  this.DegreeConvertBack(model.lngDegree,model.lngMinute,model.lngSecond);
-                            model.latitude = this.DegreeConvertBack(model.latDegree,model.latMinute,model.latSecond);
+                            //model.longitude =  this.DegreeConvertBack(model.lngDegree,model.lngMinute,model.lngSecond);
+                           // model.latitude = this.DegreeConvertBack(model.latDegree,model.latMinute,model.latSecond);
                             let marker = this.$mapUtil.createPointMarker(model,wzIcon);
-                            marker.id = model.dataId;
                             if(marker){
+                                marker.id = model.dataId;
                                 let html = this.createHtml(model);
                                 marker.bindPopup(html);
+                                marker.model = model;
+                                marker.on("click",function(e){
+                                    let cmodel = e.target.model;
+                                    _self.setDetailData(model,"factory");
+                                });
                                 facLayer.addLayer(marker);
                             }
                         }
@@ -820,12 +871,22 @@
                 console.log(param);
                 this.$refs.timeContainer.searchData(param.id,param.type);
             },
+            clearRoute(){
+                this.$refs.routeContainer.hidePRoute();
+            },
+            openRoute(){//开启路径规划面板
+                this.$refs.routeContainer.showPRoute();
+            },
             hideTimeData(){
                 this.$refs.timeContainer.showResult = false;
             },
             setDataList(type,list){
                 this.$refs.dataContainer.setDataList(type,list);
                 this.$refs.timeContainer.showResult = false;
+                if(type.indexOf("sttp")>=0){
+                    this.setAirIndex(true);
+                }
+                this.clearRoute();
             },
             setDataShow(){
                 this.$refs.dataContainer.showData();
@@ -836,6 +897,7 @@
             setDetailData(obj,type){
                 this.$refs.timeContainer.setShowObj(obj,type);
                 this.$refs.dataContainer.hideData();
+                this.clearRoute();
             },
             queryHjxfData(type,stime,etime){
                 this.$refs.layerContains.getHjxfData(type,stime,etime);
@@ -849,40 +911,48 @@
             queryFqpkData(type,stime,etime){
                 this.$refs.layerContains.getAirData(type,stime,etime);
             },
+            queryCBdata(item,stime,etime){
+                this.$refs.timeContainer.queryCBdata(item,stime,etime);
+                this.$refs.dataContainer.hideData();
+            },
             DegreeConvertBack(deg,min,sec){ ///<summary>度分秒转换成为度</summary>
                 return Math.abs(deg) + (Math.abs(min)/60 + Math.abs(sec)/3600);
             },
             createHtml(model){
                 let html = [];
-                html.push('<div class="popuDiv"><span>企业名称：</span>'+model.companyName+'</div>');
-                html.push('<div class="popuDiv"><span>企业地址：</span>'+model.operationAddress+'</div>');
-                html.push('<div class="popuDiv"><span>企业类型：</span>'+model.industryType+'</div>');
-                html.push('<div class="popuDiv"><span>排污许可证号：</span>'+model.permitLicence+'</div>');
-                html.push('<div class="poputools">');
-                html.push('<button onclick="getMineTime('+JSON.stringify(model).replace(/"/g, '&quot;')+',\'factory\')">详情</button>');
-                html.push('</div>');
+                html.push('<div class="popuDiv"><img class="faicon" src="'+this.qy+'" />'+validNullStr(model.companyName)+'</div>');
+                html.push('<div class="popuDiv"><img class="faicon" src="'+this.addr+'" />'+validNullStr(model.operationAddress)+'</div>');
+                html.push('<div class="popuDiv"><img class="faicon" src="'+this.qtype+'" />'+validNullStr(model.industryType)+'</div>');
+                html.push('<div class="popuDiv"><img class="faicon" src="'+this.lic+'" />'+validNullStr(model.permitLicence)+'</div>');
                 return html.join('');
             },
             polygonContains(){//计算点与面的相关关联
-                console.log(this.bufferPolygon);
+                let _self = this;
                 let conList = [];
                 let layerId = "factory";
-                let wzIcon = require("../../assets/image/map/map_fac.png");
+                let wzIcon = require("../../assets/image/map/factory.png");
                 let facLayer = L.markerClusterGroup();
                 for(let i=0;i<this.allFactory.length;i++){
                     let model = this.allFactory[i];
-                    model.longitude =  this.DegreeConvertBack(model.lngDegree,model.lngMinute,model.lngSecond);
-                    model.latitude = this.DegreeConvertBack(model.latDegree,model.latMinute,model.latSecond);
-                    let po = point([model.longitude,model.latitude]);
-                    if(booleanContains(this.bufferPolygon,po)){
-                        let marker = this.$mapUtil.createPointMarker(model,wzIcon);
-                        marker.id = model.dataId;
-                        if(marker){
-                            let html = this.createHtml(model);
-                            marker.bindPopup(html);
-                            facLayer.addLayer(marker);
+                    if(model.longitude&&model.latitude){
+                        //model.longitude =  this.DegreeConvertBack(model.lngDegree,model.lngMinute,model.lngSecond);
+                        //model.latitude = this.DegreeConvertBack(model.latDegree,model.latMinute,model.latSecond);
+                        let po = point([model.longitude,model.latitude]);
+                        if(booleanContains(this.bufferPolygon,po)){
+                            let marker = this.$mapUtil.createPointMarker(model,wzIcon);
+                            if(marker){
+                                marker.id = model.dataId;
+                                let html = this.createHtml(model);
+                                marker.bindPopup(html);
+                                marker.model = model;
+                                marker.on("click",function(e){
+                                    let cmodel = e.target.model;
+                                    _self.setDetailData(model,"factory");
+                                });
+                                facLayer.addLayer(marker);
+                            }
+                            conList.push(model);
                         }
-                        conList.push(model);
                     }
                 }
                 this.$mapUtil.lMap.addLayer(facLayer);
@@ -915,6 +985,140 @@
             },
             hideBuffer(){
                 this.bufferShow = false;
+            },
+            drawMapEchart(){
+                let cMark1 = L.marker([39.3155500,117.4109200],
+                    {icon:L.divIcon({
+                            className:'leaflet-echart-icon',
+                            iconSize:[160,160],
+                            html:'<div id="cm1" style="width:100px;height:100px;position:relative;background-color:transparent;"></div>'
+                        })}).addTo(this.$mapUtil.lMap);
+                let chartObj = {
+                    value:60,
+                    all:40,
+                    name:"AQI"
+                };
+                let lineChart = this.$charts.init(document.getElementById("cm1"));
+                lineChart.resize();
+                lineChart.clear();
+                lineChart.setOption({
+                    tooltip: {
+                        show:false,
+                    },
+                    color: ['#EFC71D', '#02D7FC'],
+                    series: [{
+                        type: 'pie',
+                        hoverAnimation:false,
+                        radius: ['80%', '55%'],
+                        center: ['50%', '50%'],
+                        label: {
+                            normal: {
+                                position: 'center'
+                            }
+                        },
+                        data: [{
+                            value: chartObj.value,
+                            name: chartObj.name,
+                            label: {
+                                normal: {
+                                    formatter: '{c}\n',
+                                    textStyle: {
+                                        color: '#fff',
+                                        fontSize: 13
+                                    }
+                                }
+                            }
+                        }, {
+                            value: chartObj.all,
+                            name: '其它总量',
+                            label: {
+                                normal: {
+                                    formatter: '\n'+chartObj.name,
+                                    textStyle: {
+                                        color: 'rgba(255,255,255,0.87)',
+                                        fontSize: 13
+                                    }
+                                },
+                                show:false
+                            }
+                        }]
+                    }]
+                });
+
+
+            },
+            getFactorySnList(){
+                this.$axios.get('../data/factory.json')
+                    .then(res=>{
+                        this.facSnList = res.data;
+                    })
+            },
+            getFactoryBySn(sncode){
+                for(let i=0;i<this.facSnList.length;i++){
+                    if(this.facSnList[i].shapes.indexOf(sncode)>=0){
+                        return this.facSnList[i];
+                    }
+                }
+                return null;
+            },
+            getFactoryByName(usci){
+                this.$refs.timeContainer.hideData();
+                let conList = [];
+                let layerId = "factory";
+                let wzIcon = require("../../assets/image/map/map_fac.png");
+                let queryStatus = true;
+                let facLayer = L.markerClusterGroup();
+                for(let i=0;i<this.allFactory.length;i++){
+                    let model = this.allFactory[i];
+                    //model.longitude =  this.DegreeConvertBack(model.lngDegree,model.lngMinute,model.lngSecond);
+                   // model.latitude = this.DegreeConvertBack(model.latDegree,model.latMinute,model.latSecond);
+                    if(model.permitLicence&&model.permitLicence.indexOf(usci)>=0){
+                        this.setDetailData(model,"factory");
+                        queryStatus = false;
+                    }
+                }
+                /*this.$mapUtil.lMap.addLayer(facLayer);
+                this.$mapUtil.addTemLayer(layerId,facLayer);
+                this.setDataList(layerId,conList);*/
+                if(queryStatus){
+                    this.$message.error("未查询到企业信息");
+                }
+            },
+            getFactoryByNm(comNm){
+                let conList = [];
+                for(let i=0;i<this.allFactory.length;i++){
+                    let model = this.allFactory[i];
+                   // model.longitude =  this.DegreeConvertBack(model.lngDegree,model.lngMinute,model.lngSecond);
+                   // model.latitude = this.DegreeConvertBack(model.latDegree,model.latMinute,model.latSecond);
+                    if(model.companyName.indexOf(comNm)>=0){
+                        conList.push(model);
+                    }
+                }
+                return conList;
+            },
+            getFacLayerList(){
+                return this.$refs.layerContains.factoryList;
+            },
+            getAirLayerList(){
+                return this.$refs.layerContains.airList;
+            },
+            changeStationQuery(){
+
+            },
+            setAirIndex(vis){
+                this.airSelect = vis;
+            },
+            getSttpData(layerId,type,item){
+                return this.$refs.layerContains.getSttpData(layerId,type,item);
+            },
+            showSearchDiv(){
+                this.$refs.searchConf.showSearchDiv();
+            },
+            validNullStr(str){
+                if(str!=null&&str!="null"){
+                    return str;
+                }
+                return "-";
             }
 
         }
@@ -961,6 +1165,7 @@
     .menusDiv ul li{
         padding: 7px 10px;
         border-radius: 5px;
+        cursor: pointer;
      }
     .menusDiv ul li.active,.menusDiv ul li:hover {
         background-color: rgba(63, 81, 181, 0.5);
@@ -985,6 +1190,9 @@
         transition-duration: .4s;
         width: 110px;
     }
+    .upMap {
+        bottom:80px;
+    }
     .baseMap:hover {
         width: 310px;
         -webkit-transition-property: width,background-color;
@@ -992,7 +1200,13 @@
         -webkit-transition-duration: .4s;
         transition-duration: .4s;
     }
-
+    .baseMap:hover + .lengndDiv {
+        right: 305px !important;
+        -webkit-transition-property: right;
+        transition-property: right;
+        -webkit-transition-duration: .4s;
+        transition-duration: .4s;
+    }
     .baseMap ul{
         display: flex;
         flex-wrap: wrap;
@@ -1130,7 +1344,7 @@
         width: auto;
         display: flex;
         border-radius: 3px;
-        background-color: rgba(0, 0, 0, 0.7)
+        background-color: rgba(0, 34, 68, 0.83);
     }
     .mapTools ul {
         list-style: none;
@@ -1145,7 +1359,7 @@
         color: #fff;
         padding: 0 15px;
         font-size: 14px;
-
+        cursor: pointer;
     }
     .mapTools ul li img{
         vertical-align: middle;
@@ -1169,7 +1383,7 @@
         width: 115px;
         display: flex;
         border-radius: 3px;
-        background-color: rgba(0, 0, 0, 0.7)
+        background-color: rgba(0, 34, 68, 0.83);
     }
     .mapboxs ul {
         list-style: none;
@@ -1184,7 +1398,7 @@
         font-size: 13px;
         text-align: left;
         padding-left: 10px;
-
+        cursor: pointer;
     }
     .mapboxs ul li img{
         vertical-align: middle;
@@ -1203,7 +1417,7 @@
         width: 115px;
         display: flex;
         border-radius: 3px;
-        background-color: rgba(0, 0, 0, 0.7)
+        background-color: rgba(0, 34, 68, 0.83);
     }
     .managerbox ul {
         list-style: none;
@@ -1218,6 +1432,8 @@
         color: #fff;
         font-size: 13px;
         text-align: center;
+        overflow: hidden;
+        cursor: pointer;
     }
     .managerbox ul li:hover,.managerbox ul li.active {
         color: #3071e9;
@@ -1275,14 +1491,108 @@
         font-size: 13px;
         cursor: pointer;
     }
+    .airIndexDiv {
+        margin-left: -95px;
+        margin-top: 8px;
+    }
+    .airIndexDiv >>>.el-input__inner {
+        color: #fff;
+        background-color:rgba(0, 0, 0, 0.88);
+        border-radius: 14px;
+        border: 0;
+        height: 28px;
+        font-size: 13px;
+        width: 100%;
+    }
+    .airIndexDiv >>>.el-input__icon, .airIndexDiv >>>.el-range-separator {
+        display: -webkit-box;
+        display: -ms-flexbox;
+        -js-display: flex;
+        display: flex;
+        -webkit-box-pack: center;
+        -ms-flex-pack: center;
+        justify-content: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        color: #fff;
+    }
+    .airIndexDiv >>>.el-range-input {
+        background: transparent;
+        color: #fff;
+    }
+    .iptw-130 {
+        width:90px;
+    }
+
+    .lengndDiv {
+        position:absolute;
+        right: 105px;
+        bottom: 10px;
+        width:auto;
+        height:auto;
+        z-index:999;
+        -webkit-transition-property: right;
+        transition-property: right;
+        -webkit-transition-duration: .4s;
+        transition-duration: .4s;
+    }
+    .lengndDiv img {
+        width: 290px;
+    }
+    .uplegend {
+        bottom:80px;
+    }
 </style>
 <style>
+    .gMarker_0 {
+        width:30px;
+        height:30px;
+        border-radius:15px;
+        background-color:#00E400;        
+    }
+    .gMarker_1 {
+        width:30px;
+        height:30px;
+        border-radius:15px;
+        background-color:#00E400;        
+    }
+    .gMarker_2 {
+        width:30px;
+        height:30px;
+        border-radius:15px;
+        background-color:#FFF600;        
+    }
+    .gMarker_3 {
+        width:30px;
+        height:30px;
+        border-radius:15px;
+        background-color:#FF5F00;        
+    }
+    .gMarker_4 {
+        width:30px;
+        height:30px;
+        border-radius:15px;
+        background-color:#FF0011;        
+    }
+    .gMarker_5 {
+        width:30px;
+        height:30px;
+        border-radius:15px;
+        background-color:#9A004C;        
+    }
+    .gMarker_6 {
+        width:30px;
+        height:30px;
+        border-radius:15px;
+        background-color:#7E0023;        
+    }
     .popuDiv {
         height: auto;
         line-height: 28px;
         min-width: 250px;
         width:auto;
-        padding: 0 5px;
+        padding: 0 0px;
         word-break: break-all;
         word-wrap: break-word;
     }
@@ -1309,6 +1619,13 @@
         color: #fff;
         box-shadow: 0 3px 14px rgba(0,0,0,0.4);
         border-radius: 3px;
+        border: 1px solid rgba(33, 23, 189, 0.48);
+    }
+    .faicon {
+        width:15px;
+        height:15px;
+        vertical-align: middle;
+        margin-right:5px;
     }
     ::-webkit-scrollbar {
         width: 6px;
@@ -1323,7 +1640,7 @@
         border-radius: 2px;
     }
     ::-webkit-scrollbar-thumb {
-        background: #3E6CBC;
+        background: #22447e;
         border-radius: 2px;
     }
     ::-webkit-input-placeholder {

@@ -1,9 +1,10 @@
 <template>
     <div class="loginPage">
 
-        <div class="loginDiv">
+        <div class="loginDiv"  v-loading="loading" element-loading-spinner="el-icon-loading"
+    element-loading-background="rgba(0, 0, 0, 0.8)">
             <div class="loginTitle">
-                天津经济技术开发区信息化平台
+                天津经开区生态环境一张图
             </div>
             <div class="loginBox">
                 <div class="formDiv" style="margin-top:60px">
@@ -30,7 +31,8 @@
         data(){
             return{
                 username:"",
-                password:""
+                password:"",
+                loading:false
             }
         },
         methods:{
@@ -38,6 +40,7 @@
                 if(this.username==""||this.password==""){
                     this.$message("用户名或密码不可为空！");
                 }
+                this.loading = true;
                 let body = {
                     "userName":this.username,
                     "passWord":this.password
@@ -48,6 +51,7 @@
                     data: body,
                     header:{'Content-type': 'application/json'}
                 }).then(res => {
+                    this.loading = false;
                     if(res.data.code == 200){
                         let user = res.data.data;
                         sessionStorage.setItem("username",user.name);

@@ -6,21 +6,34 @@
         </div>
         <div class="apiDatas">
             <el-collapse v-model="activeNames" accordion>
-                <el-collapse-item :title="'在线监控企业数据('+factoryList.length+')'" name="factory" class="leftBox" v-show="facShow">
-                    <div v-for="(item,key) in factoryList" class="container" :key="key"  @click="zoomToMap(item,'factory')"  @mouseenter="showMapPoint(item)" @mouseleave="clearMap()">
+                <el-collapse-item :title="'所有企业数据('+factoryList.length+')'" name="factory" class="leftBox" v-show="facShow">
+                    <div v-for="(item,key) in factoryList" class="container public" :key="key"  @click="zoomToMap(item,'factory')"  @mouseenter="showMapPoint(item)" @mouseleave="clearMap()">
                         <div class="source">
                             <div class="content">
                                 <div class="company_name text-ell">{{item.companyName}}</div>
-                                <div class="company_type">行业类别：{{item.industryType}}</div>
-                                <p  class="describe text-ell">{{item.divisionProvince}}{{item.divisionArea}}</p>
-                                <p  class="describe text-ell">{{item.operationAddress}}</p>
+                                <!--div class="company_type">行业类别：{{item.industryType}}</div>
+                                <p  class="describe text-ell">{{item.operationAddress}}</p-->
                                 <p  class="describe text-ell">排污许可证号：{{item.permitLicence}}</p>
-                                <!--<button  type="button" class="el-button el-button&#45;&#45;primary"><span>污染源</span></button>-->
-                               <!-- <button  type="button" class="el-button el-button&#45;&#45;success" @click="zoomToMap(item,'factory')"><span>详情</span></button>-->
                             </div>
                         </div>
                     </div>
                     <div class="nodata" v-if="factoryList.length==0">
+                       <span>未查询到相关数据</span>
+                    </div>
+                </el-collapse-item>
+                <el-collapse-item :title="'在线监控企业数据('+wryFacList.length+')'" name="wryFac" class="leftBox" v-show="wryFacShow">
+                    <div v-for="(item,key) in wryFacList" class="container" :key="key"  @click="zoomToMap(item,'wryFac')"  @mouseenter="showMapPoint(item)" @mouseleave="clearMap()">
+                        <div class="source">
+                            <div class="content">
+                                <div class="company_name text-ell">{{item.companyName}}</div>
+                                <!--div class="company_type">行业类别：{{item.industryType}}</div>
+                                <p  class="describe text-ell">{{item.operationAddress}}</p-->
+                                <p  class="describe text-ell">排污许可证号：{{item.permitLicence}}</p>
+                               
+                            </div>
+                        </div>
+                    </div>
+                    <div class="nodata" v-if="wryFacList.length==0">
                        <span>未查询到相关数据</span>
                     </div>
                 </el-collapse-item>
@@ -29,11 +42,11 @@
                         <div class="source">
                             <div class="content">
                                 <div class="company_name text-ell">{{item.companyName}}</div>
-                                <div class="company_type">行业类别：{{item.industryType}}</div>
+                                <!--div class="company_type">行业类别：{{item.industryType}}</div>
                                 <p  class="describe text-ell">{{item.divisionProvince}}{{item.divisionArea}}</p>
-                                <p  class="describe text-ell">{{item.operationAddress}}</p>
+                                <p  class="describe text-ell">{{item.operationAddress}}</p-->
                                 <p  class="describe text-ell">排污许可证号：{{item.permitLicence}}</p>
-                                <!--<button  type="button" class="el-button el-button&#45;&#45;success" @click="zoomToMap(item,'menulist')"><span>详情</span></button>-->
+                                
                             </div>
                         </div>
                     </div>
@@ -48,8 +61,6 @@
                                 <div class="company_name text-ell">{{item.enterpriseName}}</div>
                                 <div class="company_type">行业类别：{{item.industryType}}</div>
                                 <p  class="describe text-ell">{{item.address}}</p>
-                                <p  class="describe text-ell">排污许可证号：{{item.permitLicence}}</p>
-                               <!-- <button  type="button" class="el-button el-button&#45;&#45;success"  @click="zoomToMap(item,'mine')"><span>详情</span></button>-->
                             </div>
                         </div>
                     </div>
@@ -90,43 +101,135 @@
                     </div>
                 </el-collapse-item>
                 <el-collapse-item :title="'常规监测站数据('+normalList.length+')'" name="sttp_normal" class="leftBox" v-show="normalShow">
-                    <div v-for="(item,key) in normalList" class="container" :key="key" @click="zoomToMap(item,'sttp_normal')"  @mouseenter="showNormalPoint(item)" @mouseleave="clearMap()">
+                    <div class="queryCont">
+                        <div class="iptw-130 mgr-8">
+                            <span>空气质量指标：</span>
+                            <el-select v-model="queryNorIndex"  @change="changeStationQuery('sttp_normal')" placeholder="请选择">
+                                <el-option
+                                        v-for="item in queryIndexOptions"
+                                        :key="item.value"
+                                        :label="item.label"
+                                        :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </div>
+                    </div>
+                    <div class="tableDiv">
+                        <table  class="table table-wrapper" id="editTable">
+                          <thead>
+                            <tr>
+                              <th>排名</th>
+                              <th class="tabname">站点</th>
+                              <th>{{queryNorIndex}}</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr  v-for="(item,key) in normalList"   @click="zoomToMap(item,'sttp_normal')" @mouseenter="showNormalPoint(item)" @mouseleave="clearMap()" >
+                              <td class="tabindex">{{key+1}}</td>
+                              <td class="tabname">{{item.stationName}}</td>
+                              <td class="tabvalue"><span :class=[getLevelCls(item)]>{{item.value}}</span></td>
+                            </tr>
+                          </tbody>
+                        </table>
+                    </div>
+
+                    <!--div v-for="(item,key) in normalList" class="container" :key="key" @click="zoomToMap(item,'sttp_normal')"  @mouseenter="showNormalPoint(item)" @mouseleave="clearMap()">
                         <div class="source">
                             <div class="content">
                                 <div class="company_name text-ell">{{item.stationName}}</div>
                                 <div class="company_type">测站类型：{{item.stationType=='1'?'常规监测站':'传感器监测站'}}</div>
                                 <p  class="describe text-ell">测站地址：{{item.portAddress}}</p>
-                               <!-- <button  type="button" class="el-button el-button&#45;&#45;success"  @click="zoomToMap(item,'sttp_normal')"><span>详情</span></button>-->
+                               
                             </div>
                         </div>
                     </div>
                     <div class="nodata" v-if="normalList.length==0">
                         <span>未查询到相关数据</span>
-                    </div>
+                    </div-->
                 </el-collapse-item>
                 <el-collapse-item :title="'微站数据('+wzList.length+')'" name="sttp_wz" class="leftBox" v-show="wzShow">
-                    <div v-for="(item,key) in wzList" class="container" :key="key"  @click="zoomToMap(item,'sttp_wz')"  @mouseenter="showWzPoint(item)" @mouseleave="clearMap()">
-                        <div class="source">
-                            <div class="content">
-                                <div class="company_name text-ell">{{item.stationName}}</div>
-                                <div class="company_type">测站类型：{{item.stationType=='1'?'常规监测站':'传感器监测站'}}</div>
-                                <p  class="describe text-ell">测站地址：{{item.portAddress}}</p>
-                                <!--<button  type="button" class="el-button el-button&#45;&#45;success"  @click="zoomToMap(item,'sttp_wz')"><span>详情</span></button>-->
-                            </div>
+                    <div class="queryCont">
+                        <div class="iptw-130 mgr-8">
+                            <span>空气质量指标：</span>
+                            <el-select v-model="queryWzIndex"  @change="changeStationQuery('sttp_wz')" placeholder="请选择">
+                                <el-option
+                                        v-for="item in queryIndexOptions"
+                                        :key="item.value"
+                                        :label="item.label"
+                                        :value="item.value">
+                                </el-option>
+                            </el-select>
                         </div>
                     </div>
-                    <div class="nodata" v-if="wzList.length==0">
-                        <span>未查询到相关数据</span>
+                    <div class="tableDiv">
+                        <table  class="table table-wrapper" id="editTable">
+                          <thead>
+                            <tr>
+                              <th>排名</th>
+                              <th class="tabname">站点</th>
+                              <th>{{queryWzIndex}}</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr  v-for="(item,key) in wzList"   @click="zoomToMap(item,'sttp_wz')" @mouseenter="showWzPoint(item)" @mouseleave="clearMap()" >
+                              <td class="tabindex">{{key+1}}</td>
+
+                              <td class="tabname" :title="item.pointName">
+                                <el-tooltip class="item" effect="dark" :content="item.stationName" placement="top">
+                                   <span>{{item.stationName}}</span>
+                                </el-tooltip>
+                              </td>
+                              <td class="tabvalue"><span :class=[getLevelCls(item)]>{{item.value}}</span></td>
+                            </tr>
+                          </tbody>
+                        </table>
                     </div>
+
+                    
                 </el-collapse-item>
                 <el-collapse-item :title="'空气质量监测站数据('+allList.length+')'" name="sttp_all" class="leftBox" v-show="allShow">
+                    <!--div class="queryCont">
+                        <div class="iptw-130 mgr-8">
+                            <span>空气质量指标：</span>
+                            <el-select v-model="querySkIndex"  @change="changeStationQuery('sttp_all')" placeholder="请选择">
+                                <el-option
+                                        v-for="item in queryIndexOptions"
+                                        :key="item.value"
+                                        :label="item.label"
+                                        :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </div>
+                    </div>
+                    <div class="tableDiv">
+                        <table  class="table table-wrapper" id="editTable">
+                          <thead>
+                            <tr>
+                              <th>排名</th>
+                              <th class="tabname">站点</th>
+                              <th>{{querySkIndex}}</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr  v-for="(item,key) in allList"   @click="zoomToMap(item,'sttp_all')" >
+                              <td class="tabindex">{{key+1}}</td>
+                              <td class="tabname" :title="item.pointName">
+                                <el-tooltip class="item" effect="dark" content="item.pointName" placement="top">
+                                   {{item.pointName}}
+                                </el-tooltip>
+                              </td>
+                              <td class="tabvalue"><span>110</span></td>
+                            </tr>
+                          </tbody>
+                        </table>
+                    </div-->
                     <div v-for="(item,key) in allList" class="container" :key="key"  @click="zoomToMap(item,'sttp_all')"  @mouseenter="showGKZPoint(item)" @mouseleave="clearMap()">
                         <div class="source">
                             <div class="content">
                                 <div class="company_name text-ell">{{item.pointName}}</div>
                                 <div class="company_type">测站类型：空气质量监测站</div>
                                 <p  class="describe text-ell">测站地址：{{item.address}}</p>
-                                <!--<button  type="button" class="el-button el-button&#45;&#45;success"  @click="zoomToMap(item,'sttp_all')"><span>详情</span></button>-->
+                               
                             </div>
                         </div>
                     </div>
@@ -184,7 +287,7 @@
                     <div v-for="(item,key) in hjxfList" class="container" :key="key"  @click="showHjxf(item)">
                         <div class="source">
                             <div class="content">
-                                <div class="company_name text-ell">{{item.companyName}}</div>
+                                <div class="company_name text-ell">{{validNullStr(item.companyName)}}</div>
                                 <div class="company_type">信访次数：{{item.indexValue}}个</div>
                             </div>
                         </div>
@@ -213,7 +316,7 @@
                     <div v-for="(item,key) in xzcfList" class="container" :key="key" @click="showXzcf(item)">
                         <div class="source">
                             <div class="content">
-                                <div class="company_name text-ell">{{item.companyName}}</div>
+                                <div class="company_name text-ell">{{validNullStr(item.companyName)}}</div>
                                 <div class="company_type">处罚次数：{{item.indexValue}}个</div>
                             </div>
                         </div>
@@ -239,10 +342,10 @@
                             </el-date-picker>
                         </div>
                     </div>
-                    <div v-for="(item,key) in fspkList" class="container" :key="key" >
+                    <div v-for="(item,key) in fspkList" class="container" :key="key" @click="queryCB(item)" >
                         <div class="source">
                             <div class="content">
-                                <div class="company_name text-ell">{{item.companyName}}</div>
+                                <div class="company_name text-ell">{{validNullStr(item.companyName)}}</div>
                                 <div class="company_type">超标数量：{{item.indexValue}}个</div>
                             </div>
                         </div>
@@ -268,10 +371,10 @@
                             </el-date-picker>
                         </div>
                     </div>
-                    <div v-for="(item,key) in fqpkList" class="container" :key="key">
+                    <div v-for="(item,key) in fqpkList" class="container" :key="key"  @click="queryCB(item)">
                         <div class="source">
                             <div class="content">
-                                <div class="company_name text-ell">{{item.companyName}}</div>
+                                <div class="company_name text-ell">{{validNullStr(item.companyName)}}</div>
                                 <div class="company_type">超标数量：{{item.indexValue}}个</div>
                             </div>
                         </div>
@@ -295,6 +398,7 @@
                 resultList:[],
                 activeNames: '',
                 factoryList:[],
+                wryFacList:[],
                 menuList:[],
                 mineList:[],
                 wwList:[],
@@ -309,6 +413,7 @@
                 fqpkList:[],
                 fspkList:[],
                 facShow:false,
+                wryFacShow:false,
                 menuShow:false,
                 mineShow:false,
                 wwShow:false,
@@ -323,7 +428,33 @@
                 fspkShow:false,
                 fqpkShow:false,
                 temLayer:null,
-                stime:[this.initETime(365),this.initSTime()],
+                stime:[this.initETime(30),this.initSTime()],
+                queryNorIndex:"AQI",
+                queryWzIndex:"AQI",
+                queryGkIndex:"AQI",
+                querySkIndex:"AQI",
+                queryIndexOptions: [{
+                    value: 'AQI',
+                    label: 'AQI'
+                },{
+                    value: 'PM2_5',
+                    label: 'PM2.5'
+                },{
+                    value: 'PM10',
+                    label: 'PM10'
+                },{
+                    value: 'SO2',
+                    label: 'SO2'
+                },{
+                    value: 'NO2',
+                    label: 'NO2'
+                },{
+                    value: 'O3',
+                    label: 'O3'
+                },{
+                    value: 'CO',
+                    label: 'CO'
+                }]
             }
         },
         mounted(){
@@ -344,13 +475,17 @@
                 this.$mapUtil.lMap.addLayer(this.temLayer);
             },
             showData() {
-                this.showConts = true;
+                if(!this.mineShow&&!this.facShow&&!this.wwShow&&!this.wgShow&&!this.normalShow&&!this.wzShow&&!this.gkShow&&!this.skShow&&!this.allShow&&!this.hjxfShow&&!this.xzcfShow&&!this.fspkShow&&!this.fqpkShow&&!this.menuShow&&!this.wryFacShow){
+                    this.showConts = false;
+                }else{
+                    this.showConts = true;
+                }
             },
             hideData(){
                 this.showConts = false;
             },
             showMapPoint(item){
-                let wzIcon = require("../../assets/image/map/map_fac.png");
+                let wzIcon = require("../../assets/image/map/factory.png");
                 this.temLayer.clearLayers();
                 let model = {};
                 model.longitude =  this.DegreeConvertBack(item.lngDegree,item.lngMinute,item.lngSecond);
@@ -365,7 +500,7 @@
                 }
             },
             showMinePoint(item){
-                let wzIcon = require("../../assets/image/map/map_gk.png");
+                let wzIcon = require("../../assets/image/map/mine.png");
                 this.temLayer.clearLayers();
                 let marker = this.$mapUtil.createPointMarker(item,wzIcon);
                 if(marker) {
@@ -377,7 +512,7 @@
                 }
             },
             showWwPoint(item){
-                let wzIcon = require("../../assets/image/map/map_water.png");
+                let wzIcon = require("../../assets/image/map/wry_water.png");
                 this.temLayer.clearLayers();
                 let marker = this.$mapUtil.createPointMarker(item,wzIcon);
                 if(marker){
@@ -389,7 +524,7 @@
                 }
             },
             showWgPoint(item){
-                let wzIcon = require("../../assets/image/map/map_water.png");
+                let wzIcon = require("../../assets/image/map/wry_air.png");
                 this.temLayer.clearLayers();
                 let marker = this.$mapUtil.createPointMarker(item,wzIcon);
                 if(marker){
@@ -401,7 +536,7 @@
                 }
             },
             showNormalPoint(item){
-                let wzIcon = require("../../assets/image/map/fac.png");
+                let wzIcon = require("../../assets/image/map/normal.png");
                 this.temLayer.clearLayers();
                 let marker = this.$mapUtil.createPointMarkerByLgnt(item,wzIcon);
                 if(marker) {
@@ -425,7 +560,7 @@
                 }
             },
             showWzPoint(item){
-                let wzIcon = require("../../assets/image/map/map_wz2.png");
+                let wzIcon = require("../../assets/image/map/wz.png");
                 this.temLayer.clearLayers();
                 let marker = this.$mapUtil.createPointMarkerByLgnt(item,wzIcon);
                 if(marker) {
@@ -444,7 +579,7 @@
             },
             zoomToMap(item,type){
                 let model = {};
-                if(type == "factory"){
+                if(type == "factory"|| type == "wryFac"){
                     model.longitude =  this.DegreeConvertBack(item.lngDegree,item.lngMinute,item.lngSecond);
                     model.latitude = this.DegreeConvertBack(item.latDegree,item.latMinute,item.latSecond);
                     this.$mapUtil.lMap.flyTo([model.latitude,model.longitude],16,{animate:false});
@@ -454,6 +589,7 @@
                             layer.openPopup();
                         }
                     });
+                    type = "factory";
                 }else if(type == "menulist"){
                     model.longitude =  this.DegreeConvertBack(item.lngDegree,item.lngMinute,item.lngSecond);
                     model.latitude = this.DegreeConvertBack(item.latDegree,item.latMinute,item.latSecond);
@@ -550,6 +686,9 @@
                 }else if(type == "menulist"){
                     this.menuList = list;
                     this.menuShow = true;
+                }else if(type == "wryFac"){
+                    this.wryFacList = list;
+                    this.wryFacShow = true;
                 }
                 if(!this.showConts){
                     this.showConts = true;
@@ -598,9 +737,15 @@
                 }else if(type == "menulist"){
                     this.menuList = [];
                     this.menuShow = false;
+                }else if(type == "wryFac"){
+                    this.wryFacList = [];
+                    this.wryFacShow = false;
                 }
-                if(!this.mineShow&&!this.facShow&&!this.wwShow&&!this.wgShow&&!this.normalShow&&!this.wzShow&&!this.gkShow&&!this.skShow&&!this.allShow&&!this.hjxfShow&&!this.xzcfShow&&!this.fspkShow&&!this.fqpkShow&&!this.menuShow){
+                if(!this.mineShow&&!this.facShow&&!this.wwShow&&!this.wgShow&&!this.normalShow&&!this.wzShow&&!this.gkShow&&!this.skShow&&!this.allShow&&!this.hjxfShow&&!this.xzcfShow&&!this.fspkShow&&!this.fqpkShow&&!this.menuShow&&!this.wryFacShow){
                     this.showConts = false;
+                }
+                if(!this.normalShow&&!this.wzShow&&!this.gkShow&&!this.skShow&&!this.allShow){
+                    this.$parent.setAirIndex(false);
                 }
             },
             changeHjxfQuery(){
@@ -613,13 +758,36 @@
                 this.$parent.queryFspkData("fspk",this.stime[0],this.stime[1])
             },
             changeFqpkQuery(){
-                this.$parent.queryFqpkData("fqfk",this.stime[0],this.stime[1])
+                this.$parent.queryFqpkData("fqpk",this.stime[0],this.stime[1])
             },
             showXzcf(item){
                 this.$parent.setDetailData(item,"xzcf");
             },
             showHjxf(item){
                 this.$parent.setDetailData(item,"hjxf");
+            },
+            queryCB(item){
+            
+                this.$parent.queryCBdata(item,this.stime[0],this.stime[1])
+            },
+            changeStationQuery(type){
+                this.$mapUtil.removeTemLayer(type);
+                if(type == "sttp_normal"){
+                    this.$parent.getSttpData(type,"1",this.queryNorIndex);
+                }else if(type == "sttp_wz"){
+                    this.$parent.getSttpData(type,"2",this.queryWzIndex);
+                }else if(type == "sttp_all"){
+                    this.$parent.getSttpData(type,"2",this.queryWzIndex);
+                }
+            },
+            getLevelCls(item){
+                return "level_"+item.level;
+            },
+            validNullStr(str){
+                if(str!=null&&str!="null"){
+                    return str;
+                }
+                return "-";
             }
         }
     }
@@ -630,12 +798,12 @@
         position: absolute;
         top: 125px;
         left: 10px;
-        width: 300px;
+        width: 305px;
         z-index: 999;
         border-radius: 3px;
-        background-color: rgba(0, 0, 0, 0.8);
+        background-color: rgba(0, 34, 68, 0.83);
         color: #fff;
-        height: calc(100% - 140px);
+        height: calc(100% - 205px);
     }
     .etitle {
         height: 30px;
@@ -643,7 +811,7 @@
         padding: 0 10px;
         text-align: left;
         border-bottom: 1px solid #102856;
-        font-size: 14px;
+        font-size: 13px;
     }
     .etitle i {
         float: right;
@@ -654,6 +822,10 @@
     .apiDatas{
         height: calc(100% - 35px);
         overflow: auto;
+    }
+    .leftBox >>>.el-collapse {
+        border-top: 1.5px solid #3765a7;
+        border-bottom: 0px solid #EBEEF5;
     }
     .leftBox >>>.el-collapse-item__header {
         display: -webkit-box;
@@ -666,7 +838,7 @@
         height: 32px;
         line-height: 32px;
         color: #fff;
-        font-size: 14px;
+        font-size: 13px;
         font-weight: 400;
         background-color: rgba(0,0,0,.1);
         border-bottom: 0;
@@ -692,18 +864,21 @@
         line-height: 1.769230769230769;
     }
     .el-collapse {
-        border-top: 1.5px solid #3286fe;
+        border-top: 1.5px solid #27508a;
         border-bottom: 0px solid #EBEEF5;
     }
     .container {
         cursor: pointer;
         padding: 10px 20px;
         margin: 0;
-        -webkit-box-shadow: inset 0 -1px 0 0 hsla(0,0%,98%,.2);
-        box-shadow: inset 0 -1px 0 0 hsla(0,0%,98%,.2);
+        -webkit-box-shadow: 0px 1px 10px #087dce inset;
+        box-shadow: 0px 1px 10px #087dce inset;
+        background-size: 2px 16px, 16px 2px, 2px 16px, 16px 2px;
+        margin: 5px;
+        background-color: rgba(33, 150, 243, 0.15);
     }
     .container:hover {
-        background-color: rgba(255, 255, 255, 0.17);
+        background-color: rgba(33, 150, 243, 0.45);
     }
     .source {
         display: -webkit-box;
@@ -721,7 +896,7 @@
     .source .content .company_name {
         height: 22px;
         line-height: 22px;
-        font-size: 14px;
+        font-size: 13px;
         color: #fff;
         text-align: left;
     }
@@ -734,11 +909,11 @@
         min-height: 22px;
         line-height: 22px;
         font-size: 12px;
-        color: hsla(0,0%,98%,.6);
+        color: #fff;
         text-align: left;
     }
     .describe {
-        color: hsla(0,0%,98%,.6);
+        color: #fff;
         font-size: 12px;
         line-height: 22px;
         min-height: 22px;
@@ -755,7 +930,6 @@
     }
     .queryCont {
         padding: 5px;
-        border-bottom: 1px solid #535556;
     }
     .queryCont >>>.el-input__inner {
         color: #fff;
@@ -788,10 +962,128 @@
         text-align: center;
         margin-left: 20px;
     }
+    .iptw-130 {
+        text-align:left;
+        padding:5px 10px;
+    }
+    .iptw-130 .el-select, .iptw-130 .el-select>.el-input {
+        width: 130px;
+    }
     .nodata {
         font-size: 14px;
         padding: 5px;
         color: #ef1313;
         font-weight: 600;
+    }
+
+    .tableDiv >>>.el-table thead tr {
+        background-color: #242630;
+    }
+    .tableDiv >>>.el-table tbody tr {
+        background-color: #000;
+        color:#fff;
+        cursor: pointer;
+        font-size:13px;
+        text-align:center;
+
+    }
+    .tableDiv >>>.el-table tr:hover {
+        background-color: #000;
+    }
+    .tableDiv >>>.el-table td, .tableDiv >>>.el-table th {
+        padding: 3px 0; 
+        min-width: 0;
+        box-sizing: border-box;
+        text-overflow: ellipsis;
+        vertical-align: middle;
+        position: relative;
+        text-align:center;
+        border:none;
+        color:#fff;
+        font-size:13px;
+    }
+    /******************琛ㄦ牸鍖哄煙*******************/
+    .tableDiv {
+        height: auto;
+        overflow-y: auto;
+        border: none;
+        padding-top: 5px;
+        border-top: none;
+    }
+    #editTable {
+        width: 100%;
+    }
+    /* Border styles */
+    .table-wrapper thead, .table-wrapper tr {
+       border-top: none;
+       height: 30px;
+       cursor:pointer;
+    }
+    .table-wrapper {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    /* Padding and font style */
+    .table-wrapper td, .table-wrapper th {
+        padding: 5px 10px;
+        font-size: 12px;
+        text-align: center;
+        font-family: Verdana;
+        color: #fff;
+        border: none !important;
+        max-width: 400px;
+        white-space: nowrap;
+    }
+    .table-wrapper th {
+        background-color: #00255A;
+        height: 20px;
+        font-weight: 500;
+        color: #fff;
+        font-size: 13px;
+    }
+    .table-wrapper th:first-child {
+        border-left: none;
+    }
+    /* Alternating background colors */
+    .table-wrapper tr:nth-child(even) {
+        background: transparent;
+    }
+    .table-wrapper tr:nth-child(odd) {
+        background: transparent;
+    }
+    .tabname{
+       max-width: 150px !important;
+       overflow: hidden;
+    }
+    .tabvalue span {
+        display: inline-block;
+        border-radius: 10px;
+        padding: 0px 8px;
+        background-color: #FF9902;
+        font-size: 12px;
+        width: 40px;
+    }
+    .tabvalue span.level_0{
+        background-color: #00E400;
+    }
+    .tabvalue span.level_1{
+        background-color: #00E400;
+    }
+    .tabvalue span.level_2{
+        background-color: #FFF600;
+        color:#000;
+    }
+    .tabvalue span.level_3{
+        background-color: #FF5F00;
+    }
+    .tabvalue span.level_4{
+        background-color: #FF0011;
+    }
+    .tabvalue span.level_5{
+        background-color: #9A004C;
+    }
+    .tabvalue span.level_6{
+        background-color: #7E0023;
     }
 </style>

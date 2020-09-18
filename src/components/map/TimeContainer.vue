@@ -1,30 +1,35 @@
 <template>
-    <div class="dataTimeDiv" v-show="showResult" v-loading="loading">
-
+    <div class="dataTimeDiv" v-show="showResult" v-loading="loading" element-loading-spinner="el-icon-loading"
+    element-loading-background="rgba(0, 0, 0, 0.8)">
         <div class="etitle">
-            <span>{{showName}}</span>
-            <i class="el-icon-close" @click="hideData"></i>
+            <span>{{validNullStr(showName)}}</span>
+            <img src="../../assets/image/back.png"  @click="hideData">
+            
         </div>
         <div class="containers" >
             <div class="detailDiv" v-if="showType=='factory'">
                 <div class="baseDiv">
                     <div class="company_name text-ell">{{showObj.companyName}}</div>
-                    <div class="company_type">行业类别：{{showObj.industryType}}</div>
-                    <p  class="describe text-ell">行政区：{{showObj.divisionProvince}}{{showObj.divisionArea}}</p>
-                    <p  class="describe text-ell">地址：{{showObj.operationAddress}}</p>
-                    <p  class="describe text-ell">排污许可证号：{{showObj.permitLicence}}</p>
+                    <div class="company_type"><img class="faicon" src="@/assets/image/fa/fa-type.png"/>行业类别：{{showObj.industryType}}</div>
+                    <p  class="describe text-ell"><img class="faicon" src="@/assets/image/fa/fa-code.png"/>统一社会信用代码：{{showObj.uscCode}}</p>
+                    <p  class="describe text-ell"><img class="faicon" src="@/assets/image/fa/fa-lic.png"/>排污许可证号：{{showObj.permitLicence}}</p>
+                    <p  class="describe text-ell"><img class="faicon" src="@/assets/image/fa/fa-law.png"/>法人代表：{{showObj.corpPerson}}</p>
+                    <p  class="describe text-ell"><img class="faicon" src="@/assets/image/fa/fa-user.png"/>联系人：{{showObj.linkman}}</p>
+                    <p  class="describe text-ell"><img class="faicon" src="@/assets/image/fa/fa-tel.png"/>联系电话：{{showObj.telephone}}</p>
+                    <p  class="describe text-ell"><img class="faicon" src="@/assets/image/fa/fa-addr.png"/>地址：{{showObj.operationAddress}}</p>
+                    <p  class="describe text-ell"><img class="faicon" src="@/assets/image/fa/fa-post.png"/>邮编：{{showObj.postCode}}</p>
                 </div>
                 <div class="dataConts">
                     <el-collapse v-model="activeNames" accordion>
-                        <el-collapse-item :title="'废水排污口('+wgList.length+')'" name="wg" class="leftBox">
-                            <div v-for="(item,key) in wgList" class="container" :key="key">
+                        <el-collapse-item v-if="wgList.length>0" :title="'废水排污口('+wgList.length+')'" name="wg" class="leftBox">
+                            <div v-for="(item,key) in wgList" class="container"  @click="zoomToMap(item,'wg')" :key="key">
                                 <div class="source">
                                     <div class="content">
                                         <div class="company_name text-ell">{{item.portName}}</div>
                                         <div class="company_type">所属企业：{{item.companyName}}</div>
                                         <p  class="describe text-ell">排口地址：{{item.portAddress}}</p>
                                         <p  class="describe text-ell">排污许可证号：{{item.permitLicence}}</p>
-                                        <button  type="button" class="el-button el-button--success"   @click="zoomToMap(item,'wg')"><span>详情</span></button>
+                                        <!--button  type="button" class="el-button el-button--success"   @click="zoomToMap(item,'wg')"><span>详情</span></button-->
                                     </div>
                                 </div>
                             </div>
@@ -32,15 +37,15 @@
                                 <span>未查询到相关数据</span>
                             </div>
                         </el-collapse-item>
-                        <el-collapse-item :title="'废气排污口('+wwList.length+')'" name="ww" class="leftBox">
-                            <div v-for="(item,key) in wwList" class="container" :key="key">
+                        <el-collapse-item v-if="wwList.length>0" :title="'废气排污口('+wwList.length+')'" name="ww" class="leftBox">
+                            <div v-for="(item,key) in wwList" class="container"  @click="zoomToMap(item,'ww')" :key="key">
                                 <div class="source">
                                     <div class="content">
                                         <div class="company_name text-ell">{{item.portName}}</div>
                                         <div class="company_type">所属企业：{{item.companyName}}</div>
                                         <p  class="describe text-ell">排口地址：{{item.portAddress}}</p>
                                         <p  class="describe text-ell">排污许可证号：{{item.permitLicence}}</p>
-                                        <button  type="button" class="el-button el-button--success"   @click="zoomToMap(item,'ww')"><span>详情</span></button>
+                                        <!--button  type="button" class="el-button el-button--success"   @click="zoomToMap(item,'ww')"><span>详情</span></button-->
                                     </div>
                                 </div>
                             </div>
@@ -48,7 +53,7 @@
                                 <span>未查询到相关数据</span>
                             </div>
                         </el-collapse-item>
-                        <el-collapse-item :title="'行政处罚('+xzcfList.length+')'" name="xxcf" class="leftBox">
+                        <el-collapse-item v-if="xzcfList.length>0" :title="'行政处罚('+xzcfList.length+')'" name="xzcf" class="leftBox">
                             <div v-for="(item,key) in xzcfList" class="container" :key="key" >
                                 <div class="source">
                                     <div class="content">
@@ -63,7 +68,7 @@
                                 <span>未查询到相关数据</span>
                             </div>
                         </el-collapse-item>
-                        <el-collapse-item :title="'环境信访('+xfList.length+')'" name="xf" class="leftBox">
+                        <el-collapse-item v-if="xfList.length>0" :title="'环境信访('+xfList.length+')'" name="xf" class="leftBox">
                             <div v-for="(item,key) in xfList" class="container" :key="key">
                                 <div class="source">
                                     <div class="content">
@@ -82,7 +87,7 @@
                     </el-collapse>
                 </div>
             </div>
-            <div class="detailDiv" v-if="showType=='mine'">
+            <div class="detailDiv" v-if="showType=='mineprop'">
                 <div class="baseDiv">
                     <div class="company_name text-ell">{{showObj.enterpriseName}}</div>
                     <div class="company_type">行业类别：{{showObj.industryType}}</div>
@@ -480,10 +485,10 @@
                     </div>
                 </div>
             </div>
-            <div class="detailDiv" v-if="showType=='mineprop'">
+            <div class="detailDiv" v-if="showType=='mine'">
                 <div class="baseDiv">
-                    <div class="company_name text-ell">{{showObj.productLineName}}</div>
-                    <div class="company_type">所属企业：{{showObj.enterpriseName}}</div>
+                    <div class="company_name text-ell">{{showObj.enterpriseName}}</div>
+                    <div class="company_type">企业地址：{{showObj.address}}</div>
                     <p  class="describe text-ell">排污许可证号：{{showObj.permitLicence}}</p>
                 </div>
                 <div class="dataConts">
@@ -506,17 +511,17 @@
                             </div>
                         </div>
                         <div class="queryCont">
-                            <div class="iptw-60 mgr-8">
-                                <el-select v-model="queryMineTimeType" @change="changeMineQuery" placeholder="请选择">
+                            <div class="iptw-80 mgr-8">
+                                <el-select v-model="queryFacMineIndex"  @change="changeFacMineQuery()" placeholder="请选择">
                                     <el-option
-                                            v-for="item in queryMineOptions"
-                                            :key="item.value"
-                                            :label="item.label"
-                                            :value="item.value">
+                                            v-for="item in queryFacMineOptions"
+                                            :key="item.productLineNo"
+                                            :label="item.productLineName"
+                                            :value="item.productLineNo">
                                     </el-option>
                                 </el-select>
                             </div>
-                            <div class="iptw-60 mgr-8">
+                            <div class="iptw-80 mgr-8">
                                 <el-select v-model="queryLineIndex"  @change="changeMineQuery()" placeholder="请选择">
                                     <el-option
                                             v-for="item in queryLineOptions"
@@ -526,7 +531,20 @@
                                     </el-option>
                                 </el-select>
                             </div>
-                            <div class="iptw-60 mgr-8">
+                        </div>
+                        <div class="queryCont">
+                            <div class="iptw-80 mgr-8">
+                                <el-select v-model="queryMineTimeType" @change="changeMineQuery" placeholder="请选择">
+                                    <el-option
+                                            v-for="item in queryMineOptions"
+                                            :key="item.value"
+                                            :label="item.label"
+                                            :value="item.value">
+                                    </el-option>
+                                </el-select>
+                            </div>
+
+                            <div class="iptw-80 mgr-8">
                                 <el-select v-model="showIndex"   @change="changeMineShowCont" placeholder="请选择">
                                     <el-option
                                             v-for="item in showIndexOptions"
@@ -589,10 +607,10 @@
                 </div>
             </div>
             <div class="detailDiv" v-if="showType=='xzcf'">
-                <div class="baseDiv">
+                <!--div class="baseDiv">
                     <div class="company_name text-ell">{{showObj.companyName}}</div>
                     <p  class="describe text-ell">排污许可证号：{{showObj.permitLicence}}</p>
-                </div>
+                </div-->
                 <div class="dataConts">
                     <div v-for="(item,key) in xzcfList" class="container" :key="key" >
                         <div class="source">
@@ -610,10 +628,10 @@
                 </div>
             </div>
             <div class="detailDiv" v-if="showType=='hjxf'">
-                <div class="baseDiv">
+                <!--div class="baseDiv">
                     <div class="company_name text-ell">{{showObj.companyName}}</div>
                     <p  class="describe text-ell">排污许可证号：{{showObj.permitLicence}}</p>
-                </div>
+                </div-->
                 <div class="dataConts">
                     <div v-for="(item,key) in xfList" class="container" :key="key">
                         <div class="source">
@@ -631,7 +649,27 @@
                     </div>
                 </div>
             </div>
-
+            <div class="detailDiv" v-if="showType=='cbxq'">
+                <!--div class="baseDiv">
+                    <div class="company_name text-ell">{{showObj.companyName}}</div>
+                    <p  class="describe text-ell">排污许可证号：{{showObj.permitLicence}}</p>
+                </div-->
+                <div class="dataConts">
+                    <div v-for="(item,key) in cbList" class="container" :key="key">
+                        <div class="source">
+                            <div class="content">
+                                <div class="company_name text-ell">排口名称：{{item.nodeName}}</div>
+                                <p  class="describe">超标详情：{{item.alarmInfo}}</p>
+                                <p  class="describe text-ell">报警代码：{{item.code}}</p>
+                                <p  class="describe text-ell">报警时间：{{item.alarmTime}}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="nodata" v-if="cbList.length==0">
+                        <span>未查询到相关数据</span>
+                    </div>
+                </div>
+            </div>
         </div>
 
 
@@ -645,10 +683,12 @@
         data(){
             return{
                 showResult:false,
+                backParent:false,//是否返回上级
                 loading:false,
                 newData:{},
                 showName:"",
                 currentCls:"baseDiv",
+                formatStr:"mm月dd日",
                 activeNames:"",
                 activeMineNames:"mineline",
                 activeMineLineNames:"mineprop",
@@ -662,6 +702,7 @@
                 wwList:[],
                 xfList:[],
                 xzcfList:[],
+                cbList:[],
                 queryTimeType:"1",
                 queryOptions: [{
                     value: '1',
@@ -775,6 +816,8 @@
                 queryWryIndexOptions:[],
                 queryLineOptions:[],
                 queryLineIndex:'',
+                queryFacMineIndex:'',
+                queryFacMineOptions:[],
                 queryAirIndex:'',
                 queryAirIndexOptions:[],
                 chartDOM:"linechart"
@@ -800,8 +843,13 @@
                 return this.$appUtil.formatDate("yyyy-MM-dd",start);
             },
             hideData(){
-                this.showResult = false;
-                this.$parent.setDataShow();
+                if(this.backParent){
+                    this.showType = "factory";
+                }else{
+                    this.showResult = false;
+                    this.$parent.setDataShow();
+                }
+                this.backParent = false;
             },
             setShowObj(obj,type){
                 this.showObj = obj;
@@ -814,9 +862,14 @@
                     this.showName = obj.companyName;
                     this.queryFactoryData(obj.companyName);
                     this.queryFactoryXZData(obj.companyName);
+                }else if(type == "wryFac"){
+                    this.showName = obj.companyName;
+                    this.queryFactoryData(obj.companyName);
+                    this.queryFactoryXZData(obj.companyName);
                 }else if(type == "mine"){
                     this.showName = obj.enterpriseName;
                     this.queryMineData(obj.enterpriseNo);
+                    this.chartDOM = "lineminechart";
                 }else if(type == "ww"){//废水
                     this.showName = obj.portName;
                     this.chartDOM = "linewwchart";
@@ -847,6 +900,8 @@
                 }else if(type == "hjxf"){
                     this.showName = obj.companyName;
                     this.queryHjxf(obj.permitLicence);
+                }else if(type == "cbxq"){
+                     this.showName = obj.companyName;
                 }
             },
             queryFactoryData(companyname){
@@ -879,6 +934,9 @@
                 }).then(res => {
                     let list = res.data.data.list;
                     this.wwList = list;
+                    if(list.length>0){
+                        this.activeNames = "ww";
+                    }
                 });
                 this.$axios({
                     url: appCfg.map.gisApiUrl+"api/share/data/2c9a818f73768e6501737696cc1e0021?userKey="+appCfg.map.userKey,
@@ -888,6 +946,9 @@
                 }).then(res => {
                     let list = res.data.data.list;
                     this.wgList = list;
+                    if(list.length>0){
+                        this.activeNames = "wg";
+                    }
                 });
 
             },
@@ -923,6 +984,9 @@
                 }).then(res => {
                     let list = res.data.data.list;
                     this.xzcfList = list;
+                    if(list.length>0){
+                        this.activeNames = "xzcf";
+                    }
                 });
 
                 let xfbody = {
@@ -956,6 +1020,9 @@
                 }).then(res => {
                     let list = res.data.data.list;
                     this.xfList = list;
+                    if(list.length>0){
+                        this.activeNames = "xf";
+                    }
                 });
             },
             queryMineData(enterpriseNo){
@@ -988,11 +1055,16 @@
                 }).then(res => {
                     let list = res.data.data.list;
                     if(list.length>0){
-                        this.lineList = list;
+                        this.queryFacMineOptions = list;
+                        this.queryFacMineIndex = list[0].productLineNo;
+                        this.queryLineData(list[0].productLineNo);
                     }else{
                         this.$message.error("未查询到企业生产线数据");
                     }
                 });
+            },
+            changeFacMineQuery(){
+                this.queryLineData(this.queryFacMineIndex);
             },
             queryLineData(productLineNo){
                 let body = {
@@ -1188,8 +1260,10 @@
             },
             changeStationQuery(){
                 if(this.queryTimeType == 2){
+                    this.formatStr = "hh时ff时";
                     this.searchSttpHour(this.showObj.stationId,this.stime,this.queryIndex);
                 }else{
+                    this.formatStr = "dd日hh时";
                     this.searchSttpMine(this.showObj.stationId,this.stime,this.queryIndex);
                 }
             },
@@ -1200,7 +1274,8 @@
                     let ydata = [];
                     let chartObj = {};
                     for(let i=0;i<list.length;i++){
-                        xdata.push(list[i].recordTime);
+                        let dtime = this.$appUtil.formatDate(this.formatStr,new Date(list[i].recordTime));
+                        xdata.push(dtime);
                         let yda = list[i].value==null?0:parseFloat(list[i].value).toFixed(3);
                         ydata.push(yda);
                     }
@@ -1333,12 +1408,15 @@
                 if(type == 1){
                     apiUk = "2c9a818f73768e65017376b526a50036";
                     filed = "T_Poms_GasOutlet.id";
+                    this.formatStr = "hh时ff分";
                 }else if(type == 2){
                     apiUk = "2c9a818f73768e65017376b3ad710030";
                     filed = "T_Poms_GasOutlet.id";
+                    this.formatStr = "dd日hh时";
                 }else{
                     apiUk = "2c9a818f73768e65017376b4935d0033";
                     filed = "T_Poms_GasOutlet.id";
+                    this.formatStr = "MM月dd日";
                 }
                 let body = {
                     "conditions":[
@@ -1391,7 +1469,7 @@
                             list[i].itemName = itemName;
                             list[i].status = this.getIndexStatus(list[i][this.queryWryIndex+"_FLAG"]);
                             list[i].value = list[i][this.queryWryIndex];
-                            list[i].recordTime = this.$appUtil.formatDate("yyyy-MM-dd HH:mm:ss",new Date(list[i].recordTime))
+                            list[i].recordTime = this.$appUtil.formatDate("yyyy-MM-dd HH:ff:ss",new Date(list[i].recordTime))
                         }
                         this.currentCls = this.getIndexCls(list[0][this.queryWryIndex+"_FLAG"]);
                         this.newData = {
@@ -1410,12 +1488,15 @@
                 if(type == 1){
                     apiUk = "2c9a818f73768e65017376b2f8a9002d";
                     filed = "T_Poms_WaterOutlet.id";
+                    this.formatStr = "hh时ff分";
                 }else if(type == 2){
                     apiUk = "2c9a818f73768e65017376b1e8cc0027";
                     filed = "T_Poms_WaterOutlet.id";
+                    this.formatStr = "dd日hh时";
                 }else{
                     apiUk = "2c9a818f73768e65017376b268ae002a";
                     filed = "T_Poms_WaterOutlet.id";
+                    this.formatStr = "MM月dd日";
                 }
                 let body = {
                     "conditions":[
@@ -1524,12 +1605,15 @@
                 if(type == 1){
                     apiUk = "2c9a818f73768e65017376bb0e13004e";
                     filed = "T_Aqms_Min.nodeId";
+                    this.formatStr = "hh时ff分";
                 }else if(type == 2){
                     apiUk = "2c9a818f73768e65017376bd2fd50054";
                     filed = "T_Aqms_Hour.nodeId";
+                    this.formatStr = "dd日hh时";
                 }else{
                     apiUk = "2c9a818f73768e65017376bb95470051";
                     filed = "T_Aqms_Day.nodeId";
+                    this.formatStr = "MM月dd日";
                 }
                 let body = {
                     "conditions":[
@@ -1582,7 +1666,7 @@
                             list[i].itemName = itemName;
                             list[i].status = this.getAirStatus(list[i][this.queryAirIndex+"_FLAG"]);
                             list[i].value = list[i][this.queryAirIndex];
-                            list[i].recordTime = this.$appUtil.formatDate("yyyy-MM-dd HH:mm:ss",new Date(list[i].recordTime))
+                            list[i].recordTime = this.$appUtil.formatDate("yyyy-MM-dd HH:ff:ss",new Date(list[i].recordTime))
                         }
                         this.currentCls = this.getAirCls(list[0][this.queryAirIndex+"_FLAG"]);
                         this.newData = {
@@ -1694,6 +1778,7 @@
                     });
                 }
                 this.setShowObj(item,type);
+                this.backParent = true;
             },
             createLineHtml(model){
                 let html = [];
@@ -1711,6 +1796,7 @@
             },
             changeMineQuery(){
                 if(this.queryMineTimeType == "1"){
+                    this.formatStr = "hh时ff分";
                     this.searchMineData(this.queryLineIndex,this.stime);
                 }else{
                     this.searchDayAndHour(this.queryLineIndex,this.stime)
@@ -1762,6 +1848,11 @@
                 })
             },
             searchDayAndHour(id,stime){
+                if(this.queryMineTimeType==2){
+                    this.formatStr = "dd日hh时";
+                }else{
+                    this.formatStr = "MM月dd日";
+                }
                 let body = {
                     "conditions":[
                         {
@@ -1820,7 +1911,8 @@
                     let ydata = [];
                     let chartObj = {};
                     for(let i=0;i<list.length;i++){
-                        xdata.push(list[i].dataTime);
+                        let dtime = this.$appUtil.formatDate(this.formatStr,new Date(list[i].dataTime))
+                        xdata.push(dtime);
                         let yda = list[i].dataValue==null?0:parseFloat(list[i].dataValue).toFixed(3);
                         ydata.push(yda);
                     }
@@ -1836,7 +1928,8 @@
                     let minData = [];
                     let chartObj = {};
                     for(let i=0;i<list.length;i++){
-                        xdata.push(list[i].dataTime);
+                        let dtime = this.$appUtil.formatDate(this.formatStr,new Date(list[i].dataTime))
+                        xdata.push(dtime);
                         let max = list[i].maxValue==null?0:parseFloat(list[i].maxValue).toFixed(3);
                         let min = list[i].minValue==null?0:parseFloat(list[i].minValue).toFixed(3);
                         let avg = list[i].avgValue==null?0:parseFloat(list[i].avgValue).toFixed(3);
@@ -2016,6 +2109,52 @@
                     this.xfList = list;
                 });
             },
+            queryCBdata(item,stime,etime){
+                this.showName = item.companyName;
+                this.showObj = item;
+                this.showResult = true;
+                this.showType = "cbxq";
+                let xfbody = {
+                    "conditions":[
+                        {
+                            "operator":"AND",
+                            "field":"nodeId",
+                            "match":"equal",
+                            "value":item.outletId,
+                            "maxValue":"",
+                            "minValue":""
+                        },
+                        {
+                            "operator":"AND",
+                            "match":"range",
+                            "field":"alarmTime",
+                            "value":"",
+                            "maxValue":etime,
+                            "minValue":stime
+                        }
+
+                    ],
+                    "page":{
+                        "pageable": false,
+                        "currentPage": 1,
+                        "pageSize": 10
+                    },
+                    "sort":{
+                        "field": "createTime",
+                        "order": "DESC"
+                    }
+                };
+
+                this.$axios({
+                    url: appCfg.map.gisApiUrl+"api/share/data/2c9a818f746c8ba001746d5fad980127?userKey="+appCfg.map.userKey,
+                    method: "post",
+                    data: xfbody,
+                    header:{'Content-type': 'application/json'}
+                }).then(res => {
+                    let list = res.data.data.list;
+                    this.cbList = list;
+                });
+            },
             drawMapEchart(){
                 let cMark1 = L.marker([110.66,40.77],
                         {icon:L.divIcon({
@@ -2025,6 +2164,12 @@
                         })}).addTo(map);
 
 
+            },
+            validNullStr(str){
+                if(str!=null&&str!="null"){
+                    return str;
+                }
+                return "-";
             }
         }
     }
@@ -2035,12 +2180,12 @@
         position: absolute;
         top: 125px;
         left: 10px;
-        width: 300px;
+        width: 305px;
         z-index: 999;
         border-radius: 3px;
-        background-color: rgba(0, 0, 0, 0.82);
+        background-color: rgba(0, 34, 68, 0.83);
         color: #fff;
-        height: calc(100% - 140px);
+        height: calc(100% - 205px);
     }
     .etitle {
         height: 30px;
@@ -2063,11 +2208,17 @@
         font-size: 16px;
         cursor: pointer;
     }
+    .etitle img {
+        float: right;
+        margin-top: 5px;
+        width: 15px;
+        cursor: pointer;
+    }
     .dataConts {
-        height:calc(100% - 120px);
+        height:auto;
     }
     .timeDatas{
-        height: calc(100% - 75px);
+        height: auto;
         overflow: auto;
         overflow-x: hidden;
     }
@@ -2081,6 +2232,9 @@
         box-shadow: inset 0 -1px 0 0 hsla(0,0%,98%,.2);
         background-color: rgba(3, 169, 244, 0.29);
         position: relative;
+        box-shadow: 0px 1px 10px #087dce inset;
+        background-size: 2px 16px, 16px 2px, 2px 16px, 16px 2px;
+        margin: 5px;
     }
 
     .sucDiv {
@@ -2091,6 +2245,9 @@
         box-shadow: inset 0 -1px 0 0 hsla(0,0%,98%,.2);
         background-color: rgba(0, 150, 25, 0.58);
         position: relative;
+        box-shadow: 0px 1px 10px #087dce inset;
+        background-size: 2px 16px, 16px 2px, 2px 16px, 16px 2px;
+        margin: 5px;
     }
     .warnDiv {
         cursor: pointer;
@@ -2100,6 +2257,9 @@
         box-shadow: inset 0 -1px 0 0 hsla(0,0%,98%,.2);
         background-color: rgba(176, 174, 10,0.57);
         position: relative;
+        box-shadow: 0px 1px 10px #087dce inset;
+        background-size: 2px 16px, 16px 2px, 2px 16px, 16px 2px;
+        margin: 5px;
     }
     .goodDiv {
         cursor: pointer;
@@ -2109,6 +2269,9 @@
         box-shadow: inset 0 -1px 0 0 hsla(0,0%,98%,.2);
         background-color: rgba(14, 255, 127,0.57);
         position: relative;
+        box-shadow: 0px 1px 10px #087dce inset;
+        background-size: 2px 16px, 16px 2px, 2px 16px, 16px 2px;
+        margin: 5px;
     }
     .errDiv {
         cursor: pointer;
@@ -2118,6 +2281,9 @@
         box-shadow: inset 0 -1px 0 0 hsla(0,0%,98%,.2);
         background-color: rgba(255, 0, 0,0.57);
         position: relative;
+        box-shadow: 0px 1px 10px #087dce inset;
+        background-size: 2px 16px, 16px 2px, 2px 16px, 16px 2px;
+        margin: 5px;
     }
     .eleft {
         width: 200px;
@@ -2177,6 +2343,10 @@
         border-radius: 1px;
         font-size: 12px;
     }
+    .leftBox >>>.el-collapse {
+        border-top: 1.5px solid #3765a7;
+        border-bottom: 0px solid #EBEEF5;
+    }
     .leftBox >>>.el-collapse-item__header {
         display: -webkit-box;
         display: -ms-flexbox;
@@ -2188,7 +2358,7 @@
         height: 32px;
         line-height: 32px;
         color: #fff;
-        font-size: 14px;
+        font-size: 13px;
         font-weight: 400;
         background-color: rgba(0,0,0,.1);
         border-bottom: 0;
@@ -2214,7 +2384,7 @@
         line-height: 1.769230769230769;
     }
     .el-collapse {
-        border-top: 1.5px solid #3286fe;
+        border-top: 1.5px solid #27508a;
         border-bottom: 0px solid #EBEEF5;
     }
     .containers {
@@ -2225,18 +2395,21 @@
         cursor: pointer;
         padding: 10px 20px;
         margin: 0;
-        -webkit-box-shadow: inset 0 -1px 0 0 hsla(0,0%,98%,.2);
-        box-shadow: inset 0 -1px 0 0 hsla(0,0%,98%,.2);
+        -webkit-box-shadow: 0px 1px 10px #087dce inset;
+        box-shadow: 0px 1px 10px #087dce inset;
+        background-size: 2px 16px, 16px 2px, 2px 16px, 16px 2px;
+        margin: 5px;
+        background-color: rgba(33, 150, 243, 0.15);
     }
     .container:hover {
-        background-color: rgba(255, 255, 255, 0.17);
+        background-color: rgba(33, 150, 243, 0.45);
     }
     .queryCont {
         display: flex;
-        padding: 0 15px;
+        padding: 5px 15px;
     }
     .detailDiv {
-        height: 100%;
+        height: auto;
     }
     .queryTitle {
         height: 25px;
@@ -2257,7 +2430,7 @@
     }
     .itime {
         width: 100%;
-        margin: 8px 0;
+        margin: 2px 0;
     }
     .queryCont >>>.el-input__inner {
         color: #fff;
