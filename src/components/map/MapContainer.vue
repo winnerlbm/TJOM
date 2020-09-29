@@ -69,7 +69,9 @@
         <div class="managerbox" v-show="managerShow == true">
             <ul>
                 <li  v-for="(item,key) in managerList"  :class="{'active':menuSel == item.id}" :key="key" @click="queryManagerFac(item,key)"  @click.stop="doSomething($event)" >
-                    <span>{{item.name}}</span>
+                    <el-tooltip effect="dark" :content="item.name" placement="top">
+                        <span>{{item.name}}</span>
+                    </el-tooltip>
                 </li>
             </ul>
         </div>
@@ -199,6 +201,7 @@
                 drawControl:null,
                 menuSel:"",
                 allFactory:[],
+                allMineFactory:[],
                 facSnList:[],
                 bufferPolygon:null,
                 drawLayer:null,
@@ -389,6 +392,13 @@
                             this.highLayer.addTo(map);
                             if(this.featureProps.USCI){
                                 this.getFactoryByName(this.featureProps.USCI);
+                                /*let facList = this.getMineFactoryByUsci(this.featureProps.USCI);
+                                if(facList.length>0){
+                                    this.setDetailData(facList[0],"mine");
+                                }else{
+                                    this.getFactoryByName(this.featureProps.USCI);
+                                }*/
+                                
                                 let winHtml = [];
                                 winHtml.push('<div class="popuDiv"><img class="faicon" src="'+this.qy+'" />'+this.featureProps.FIRM_NAME+'</div>');
                                 winHtml.push('<div class="popuDiv"><img class="faicon" src="'+this.pscode+'" />'+this.featureProps.USCI+'</div>');
@@ -607,12 +617,14 @@
                 })
             },
             queryManagerFac(item,key){
+                this.setManager();
                 let layerId = "menulist";
                 if(this.menuSel == item.id){
                     this.menuSel = "";
                     this.$mapUtil.removeTemLayer(layerId);
                     this.removeDataList(layerId);
                 }else{
+                    this.$mapUtil.removeTemLayer(layerId);
                     this.menuSel = item.id;
                     let _self = this;
                     let body = {
@@ -648,7 +660,7 @@
                            // model.latitude = this.DegreeConvertBack(model.latDegree,model.latMinute,model.latSecond);
                             let marker = this.$mapUtil.createPointMarker(model,wzIcon);
                             if(marker){
-                                marker.id = model.dataId;
+                                marker.id = model.permitLicence;
                                 let html = this.createHtml(model);
                                 marker.bindPopup(html);
                                 marker.model = model;
@@ -668,14 +680,7 @@
             getAllFactory(){
                 let body = {
                     "conditions":[
-                        {
-                            "operator":"AND",
-                            "field":"",
-                            "match":"contain",
-                            "value":"",
-                            "maxValue":"",
-                            "minValue":""
-                        }
+                        
                     ],
                     "page":{
                         "pageable": false,
@@ -695,6 +700,15 @@
                 }).then(res => {
                     this.allFactory = res.data.data.list;
                 })
+                this.$axios({
+                    url: appCfg.map.gisApiUrl+"api/share/data/2c9a818f73768e6501737affb75b00ad?userKey="+appCfg.map.userKey,
+                    method: "post",
+                    data: body,
+                    header:{'Content-type': 'application/json'}
+                }).then(res => {
+                    this.allMineFactory = res.data.data.list;
+                })
+
             },
             analysisWindyData(windydata) {
                 var p = 0;
@@ -883,7 +897,7 @@
             setDataList(type,list){
                 this.$refs.dataContainer.setDataList(type,list);
                 this.$refs.timeContainer.showResult = false;
-                if(type.indexOf("sttp")>=0){
+                if(type=="sttp_normal"||type=="sttp_wz"){
                     this.setAirIndex(true);
                 }
                 this.clearRoute();
@@ -894,8 +908,8 @@
             removeDataList(type){
                 this.$refs.dataContainer.removeDataList(type);
             },
-            setDetailData(obj,type){
-                this.$refs.timeContainer.setShowObj(obj,type);
+            setDetailData(obj,type,timerange){
+                this.$refs.timeContainer.setShowObj(obj,type,timerange);
                 this.$refs.dataContainer.hideData();
                 this.clearRoute();
             },
@@ -922,7 +936,7 @@
                 let html = [];
                 html.push('<div class="popuDiv"><img class="faicon" src="'+this.qy+'" />'+validNullStr(model.companyName)+'</div>');
                 html.push('<div class="popuDiv"><img class="faicon" src="'+this.addr+'" />'+validNullStr(model.operationAddress)+'</div>');
-                html.push('<div class="popuDiv"><img class="faicon" src="'+this.qtype+'" />'+validNullStr(model.industryType)+'</div>');
+                html.push('<div class="popuDiv"><img class="faicon" src="'+this.qtype+'" />'+validNullStr(model.industryTypeName)+'</div>');
                 html.push('<div class="popuDiv"><img class="faicon" src="'+this.lic+'" />'+validNullStr(model.permitLicence)+'</div>');
                 return html.join('');
             },
@@ -1070,8 +1084,6 @@
                 let facLayer = L.markerClusterGroup();
                 for(let i=0;i<this.allFactory.length;i++){
                     let model = this.allFactory[i];
-                    //model.longitude =  this.DegreeConvertBack(model.lngDegree,model.lngMinute,model.lngSecond);
-                   // model.latitude = this.DegreeConvertBack(model.latDegree,model.latMinute,model.latSecond);
                     if(model.permitLicence&&model.permitLicence.indexOf(usci)>=0){
                         this.setDetailData(model,"factory");
                         queryStatus = false;
@@ -1084,13 +1096,11 @@
                     this.$message.error("未查询到企业信息");
                 }
             },
-            getFactoryByNm(comNm){
+            getMineFactoryByUsci(usci){
                 let conList = [];
-                for(let i=0;i<this.allFactory.length;i++){
-                    let model = this.allFactory[i];
-                   // model.longitude =  this.DegreeConvertBack(model.lngDegree,model.lngMinute,model.lngSecond);
-                   // model.latitude = this.DegreeConvertBack(model.latDegree,model.latMinute,model.latSecond);
-                    if(model.companyName.indexOf(comNm)>=0){
+                for(let i=0;i<this.allMineFactory.length;i++){
+                    let model = this.allMineFactory[i];
+                    if(model.permitLicence&&model.permitLicence.indexOf(usci)>=0){
                         conList.push(model);
                     }
                 }
@@ -1101,6 +1111,9 @@
             },
             getAirLayerList(){
                 return this.$refs.layerContains.airList;
+            },
+            setAllChecked(checked){
+                this.$refs.layerContains.setAllChecked(checked);
             },
             changeStationQuery(){
 
@@ -1445,6 +1458,10 @@
     }
     .managerbox ul li span {
         vertical-align: middle;
+        display: inline-block;
+        overflow: hidden;
+        white-space: nowrap;
+        width: 100px;
     }
 
     .bufferWindow {

@@ -41,7 +41,13 @@
                 hideShow:false,
                 showSearch:true,
                 searchVal:"",
-                factoryList:[]
+                factoryList:[],
+                qy:require("@/assets/image/fa/fa-qy.png"),
+                addr:require("@/assets/image/fa/fa-addr.png"),
+                qtype:require("@/assets/image/fa/fa-type.png"),
+                lic:require("@/assets/image/fa/fa-lic.png"),
+                sttp:require("@/assets/image/fa/fa-sttp.png"),
+                par:require("@/assets/image/fa/fa-par.png"),
             }
         },
         methods:{
@@ -88,6 +94,10 @@
                         }
                     }
                 }
+                if(this.$parent.managerSelect){
+                    queryAll = false;
+                    this.getMenuFac("menulist");
+                }
                 if(queryAll){
                     this.getMineData("mine");
                    // this.getWry("wg");
@@ -99,6 +109,7 @@
                     this.getCsttp("sttp_sk",2);
                     this.getSttpAll("sttp_all");
                     this.getWryFac("wryFac");
+                    this.getMenuFac("menulist");
                 }
                 this.showResult = false;
             },
@@ -113,6 +124,7 @@
                 this.$mapUtil.removeTemLayer("sttp_sk");
                 this.$mapUtil.removeTemLayer("sttp_all");
                 this.$mapUtil.removeTemLayer("wryFac");
+                this.$mapUtil.removeTemLayer("menulist");
             },
             hideData(){
                 this.searchVal = "";
@@ -127,7 +139,9 @@
                 this.$parent.removeDataList("sttp_wz");
                 this.$parent.removeDataList("sttp_gk");
                 this.$parent.removeDataList("sttp_sk");
+                this.$parent.removeDataList("menulist");
                 this.$parent.clearRoute();
+                this.$parent.setAllChecked(false);
                 this.hideShow = false;
             },
             showRoutePlan(){
@@ -145,6 +159,7 @@
                 this.$parent.removeDataList("sttp_wz");
                 this.$parent.removeDataList("sttp_gk");
                 this.$parent.removeDataList("sttp_sk");
+                this.$parent.removeDataList("menulist");
             },
             showSearchDiv(){
                 this.showSearch = true;
@@ -185,7 +200,7 @@
                       //  model.latitude = this.DegreeConvertBack(model.latDegree,model.latMinute,model.latSecond);
                         let marker = this.$mapUtil.createPointMarker(model,wzIcon);
                         if(marker){
-                            marker.id = model.dataId;
+                            marker.id = model.permitLicence;
                             let html = this.createHtml(model);
                             marker.bindPopup(html);
                             facLayer.addLayer(marker);
@@ -228,11 +243,43 @@
                     let list = res.data.data.list;
                     let facLayer = L.markerClusterGroup();
                     for(let model of list) {
-                        //model.longitude =  this.DegreeConvertBack(model.lngDegree,model.lngMinute,model.lngSecond);
-                        //model.latitude = this.DegreeConvertBack(model.latDegree,model.latMinute,model.latSecond);
                         let marker = this.$mapUtil.createPointMarker(model,wzIcon);
                         if(marker){
-                            marker.id = model.dataId;
+                            marker.id = model.permitLicence;
+                            let html = this.createHtml(model);
+                            marker.bindPopup(html);
+                            facLayer.addLayer(marker);
+                        }
+                    }
+                    this.$mapUtil.lMap.addLayer(facLayer);
+                    this.$mapUtil.addTemLayer(layerId,facLayer);
+                    this.$parent.setDataList(layerId,list);
+                })
+            },
+            getMenuFac(layerId){//环境管理清单查询
+                let wzIcon = require("../../assets/image/map/factory.png");
+                let body = {
+                    "conditions":[
+                        {
+                            "operator":"AND",
+                            "field":"companyName",
+                            "match":"equal",
+                            "value":this.searchVal
+                        }
+                    ]
+                };
+                this.$axios({
+                    url: appCfg.map.gisApiUrl+"api/share/data/2c9a818f74bee2570174c5453f111534?userKey="+appCfg.map.userKey,
+                    method: "post",
+                    data: body,
+                    header:{'Content-type': 'application/json'}
+                }).then(res => {
+                    let list = res.data.data;
+                    let facLayer = L.markerClusterGroup();
+                    for(let model of list) {
+                        let marker = this.$mapUtil.createPointMarker(model,wzIcon);
+                        if(marker){
+                            marker.id = model.permitLicence;
                             let html = this.createHtml(model);
                             marker.bindPopup(html);
                             facLayer.addLayer(marker);
@@ -622,77 +669,78 @@
             },
             createHtml(model){
                 let html = [];
-                html.push('<div class="popuDiv"><span>企业名称：</span>'+model.companyName+'</div>');
-                html.push('<div class="popuDiv"><span>企业地址：</span>'+model.operationAddress+'</div>');
-                html.push('<div class="popuDiv"><span>企业类型：</span>'+model.industryType+'</div>');
-                html.push('<div class="popuDiv"><span>排污许可证号：</span>'+model.permitLicence+'</div>');
-                html.push('<div class="poputools">');
+                
+                html.push('<div class="popuDiv"><img class="faicon" src="'+this.qy+'" />'+validNullStr(model.companyName)+'</div>');
+                html.push('<div class="popuDiv"><img class="faicon" src="'+this.addr+'" />'+validNullStr(model.operationAddress)+'</div>');
+                html.push('<div class="popuDiv"><img class="faicon" src="'+this.qtype+'" />'+validNullStr(model.industryTypeName)+'</div>');
+                html.push('<div class="popuDiv"><img class="faicon" src="'+this.lic+'" />'+validNullStr(model.permitLicence)+'</div>');
+               /* html.push('<div class="poputools">');
                 html.push('<button onclick="getMineTime('+JSON.stringify(model).replace(/"/g, '&quot;')+',\'factory\')">详情</button>');
-                html.push('</div>');
+                html.push('</div>');*/
                 return html.join('');
             },
             createMineHtml(model){
                 let html = [];
-                html.push('<div class="popuDiv"><span>企业名称：</span>'+model.enterpriseName+'</div>');
-                html.push('<div class="popuDiv"><span>企业地址：</span>'+model.address+'</div>');
-                html.push('<div class="popuDiv"><span>排污许可证号：</span>'+model.permitLicence+'</div>');
-                html.push('<div class="poputools">');
+                html.push('<div class="popuDiv"><img class="faicon" src="'+this.qy+'" />'+validNullStr(model.enterpriseName)+'</div>');
+                html.push('<div class="popuDiv"><img class="faicon" src="'+this.addr+'" />'+validNullStr(model.address)+'</div>');
+                html.push('<div class="popuDiv"><img class="faicon" src="'+this.lic+'" />'+validNullStr(model.permitLicence)+'</div>');
+               /* html.push('<div class="poputools">');
                 html.push('<button onclick="getMineTime('+JSON.stringify(model).replace(/"/g, '&quot;')+',\'mine\')">详情</button>');
-                html.push('</div>');
-                return html.join('');
-            },
-            createPwkHtml(model){
-                let html = [];
-                html.push('<div class="popuDiv"><span>排口名称：</span>'+model.portName+'</div>');
-                html.push('<div class="popuDiv"><span>公司名称：</span>'+model.companyName+'</div>');
-                html.push('<div class="popuDiv"><span>使用状态：</span>'+model.useStatusName+'</div>');
-                html.push('<div class="popuDiv"><span>排污许可证：</span>'+model.permitLicence+'</div>');
-                html.push('<div class="poputools">');
-                html.push('<button onclick="getMineTime('+JSON.stringify(model).replace(/"/g, '&quot;')+',\'ww\')">详情</button>');
-                html.push('</div>');
-                return html.join('');
-            },
-            createWryHtml(model){
-                let html = [];
-                html.push('<div class="popuDiv"><span>排污口名称：</span>'+model.portName+'</div>');
-                html.push('<div class="popuDiv"><span>公司名称：</span>'+model.companyName+'</div>');
-                html.push('<div class="popuDiv"><span>排污许可证：</span>'+model.permitLicence+'</div>');
-                html.push('<div class="popuDiv"><span>排污口类型：</span>废水排污口</div>');
-                html.push('<div class="poputools">');
-                html.push('<button onclick="getMineTime('+JSON.stringify(model).replace(/"/g, '&quot;')+',\'wg\')">详情</button>');
-                html.push('</div>');
+                html.push('</div>');*/
                 return html.join('');
             },
             createSttpHtml(model){
                 let html = [];
-                html.push('<div class="popuDiv"><span>站点名称：</span>'+model.stationName+'</div>');
-                html.push('<div class="popuDiv"><span>站点类型：</span>'+this.getStationTypeNm(model.stationType)+'</div>');
-                html.push('<div class="popuDiv"><span>监测参数：</span>'+model.param+'</div>');
-                /* html.push('<div class="poputools">');
-                 html.push('<button onclick="getMineTime(\''+model.stationId+'\',\'stpmine\')">分钟数据</button>');
-                 html.push('<button onclick="getMineTime(\''+model.stationId+'\',\'stphour\')">小时数据</button>');
-                 html.push('</div>');*/
+                html.push('<div class="popuDiv"><img class="faicon" src="'+this.sttp+'" />'+validNullStr(model.stationName)+'</div>');
+                html.push('<div class="popuDiv"><img class="faicon" src="'+this.qtype+'" />'+this.getStationTypeNm(model.stationType)+'</div>');
+                html.push('<div class="popuDiv"><img class="faicon" src="'+this.par+'" />'+validNullStr(model.param)+'</div>');
+               /* html.push('<div class="poputools">');
+                html.push('<button onclick="getMineTime(\''+model.stationId+'\',\'stpmine\')">分钟数据</button>');
+                html.push('<button onclick="getMineTime(\''+model.stationId+'\',\'stphour\')">小时数据</button>');
+                html.push('</div>');
                 html.push('<div class="poputools">');
                 html.push('<button onclick="getMineTime('+JSON.stringify(model).replace(/"/g, '&quot;')+',\'sttp\')">详情</button>');
-                html.push('</div>');
+                html.push('</div>');*/
+                return html.join('');
+            },
+            createPwkHtml(model){
+                let html = [];
+                html.push('<div class="popuDiv"><span>排口名称：</span>'+validNullStr(model.portName)+'</div>');
+                html.push('<div class="popuDiv"><span>公司名称：</span>'+validNullStr(model.companyName)+'</div>');
+                html.push('<div class="popuDiv"><span>使用状态：</span>'+validNullStr(model.useStatusName)+'</div>');
+                html.push('<div class="popuDiv"><span>排污许可证：</span>'+validNullStr(model.permitLicence)+'</div>');
+                /*html.push('<div class="poputools">');
+                html.push('<button onclick="getMineTime('+JSON.stringify(model).replace(/"/g, '&quot;')+',\'ww\')">详情</button>');
+                html.push('</div>');*/
                 return html.join('');
             },
             createGSttpHtml(model){
                 let html = [];
-                html.push('<div class="popuDiv"><span>站点名称：</span>'+model.pointName+'</div>');
-                html.push('<div class="popuDiv"><span>站点类型：</span>'+model.manageLevelName+'</div>');
-                html.push('<div class="popuDiv"><span>站点编码：</span>'+model.pointCode+'</div>');
-                html.push('<div class="popuDiv"><span>站点地址：</span>'+model.address+'</div>');
-                html.push('<div class="poputools">');
+                html.push('<div class="popuDiv"><img class="faicon" src="'+this.sttp+'" />'+validNullStr(model.pointName)+'</div>');
+                html.push('<div class="popuDiv"><img class="faicon" src="'+this.qtype+'" />'+validNullStr(model.manageLevelName)+'</div>');
+                //html.push('<div class="popuDiv"><span>站点编码：</span>'+validNullStr(model.pointCode)+'</div>');
+                html.push('<div class="popuDiv"><img class="faicon" src="'+this.addr+'" />'+validNullStr(model.address)+'</div>');
+                /*html.push('<div class="poputools">');
                 html.push('<button onclick="getMineTime('+JSON.stringify(model).replace(/"/g, '&quot;')+',\'air\')">详情</button>');
-                html.push('</div>');
+                html.push('</div>');*/
+                return html.join('');
+            },
+            createWryHtml(model){
+                let html = [];
+                html.push('<div class="popuDiv"><span>排污口名称：</span>'+validNullStr(model.portName)+'</div>');
+                html.push('<div class="popuDiv"><span>公司名称：</span>'+validNullStr(model.companyName)+'</div>');
+                html.push('<div class="popuDiv"><span>排污许可证：</span>'+validNullStr(model.permitLicence)+'</div>');
+                html.push('<div class="popuDiv"><span>排污口类型：</span>废水排污口</div>');
+                /*html.push('<div class="poputools">');
+                html.push('<button onclick="getMineTime('+JSON.stringify(model).replace(/"/g, '&quot;')+',\'wg\')">详情</button>');
+                html.push('</div>');*/
                 return html.join('');
             },
             getStationTypeNm(type){
                 if(type == 1){
-                    return "常规空气质量监测点";
+                    return "常规监测站";
                 }else if(type == 2){
-                    return "传感器监测点";
+                    return "传感器监测站";
                 }else {
                     return "其它";
                 }

@@ -101,7 +101,7 @@ const mapUtil = {
 
         let cfg = {
             // radius should be small ONLY if scaleRadius is true (or small radius is intended)
-            "radius": .07,
+            "radius": .03,
             "maxOpacity": .65,
             // scales the radius based on map zoom
             "scaleRadius": true,
@@ -179,7 +179,7 @@ const mapUtil = {
         this.baseMapLayer.setZIndex(0);
     },
     createPointMarker(proper,img){
-        if(proper.latitude&&proper.longitude&&proper.latitude!=""&&proper.longitude!=""){
+        if(proper.latitude&&proper.longitude&&proper.latitude!=""&&proper.longitude!=""&&proper.latitude!="null"&&proper.longitude!="null"){
             let mcIcon = L.icon({
                 iconUrl: img ,
                 iconSize: [30, 30],
@@ -190,8 +190,7 @@ const mapUtil = {
             });
 
             return L.marker([ proper.latitude,proper.longitude],{
-                icon:mcIcon,
-                id:proper.id
+                icon:mcIcon
             });
         }else{
             return null;
@@ -208,8 +207,7 @@ const mapUtil = {
                 shadowAnchor: [22, 94]
             });
             return L.marker([ proper.lat,proper.lng],{
-                icon:mcIcon,
-                id:proper.id
+                icon:mcIcon
             });
         }else{
             return null;

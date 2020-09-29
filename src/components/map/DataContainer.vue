@@ -1,7 +1,7 @@
 <template>
     <div class="dataConDiv" v-show="showConts">
         <div class="etitle">
-            <span>基础数据信息</span>
+            <span>数据详情</span>
            <!-- <i class="el-icon-close" @click="hideData"></i>-->
         </div>
         <div class="apiDatas">
@@ -11,7 +11,7 @@
                         <div class="source">
                             <div class="content">
                                 <div class="company_name text-ell">{{item.companyName}}</div>
-                                <!--div class="company_type">行业类别：{{item.industryType}}</div>
+                                <!--div class="company_type">行业类别：{{item.industryTypeName}}</div>
                                 <p  class="describe text-ell">{{item.operationAddress}}</p-->
                                 <p  class="describe text-ell">排污许可证号：{{item.permitLicence}}</p>
                             </div>
@@ -26,7 +26,7 @@
                         <div class="source">
                             <div class="content">
                                 <div class="company_name text-ell">{{item.companyName}}</div>
-                                <!--div class="company_type">行业类别：{{item.industryType}}</div>
+                                <!--div class="company_type">行业类别：{{item.industryTypeName}}</div>
                                 <p  class="describe text-ell">{{item.operationAddress}}</p-->
                                 <p  class="describe text-ell">排污许可证号：{{item.permitLicence}}</p>
                                
@@ -42,8 +42,8 @@
                         <div class="source">
                             <div class="content">
                                 <div class="company_name text-ell">{{item.companyName}}</div>
-                                <!--div class="company_type">行业类别：{{item.industryType}}</div>
-                                <p  class="describe text-ell">{{item.divisionProvince}}{{item.divisionArea}}</p>
+                                <div class="company_type" v-if="item.templateName!=null">清单名称：{{item.templateName}}</div>
+                                <!--p  class="describe text-ell">{{item.divisionProvince}}{{item.divisionArea}}</p>
                                 <p  class="describe text-ell">{{item.operationAddress}}</p-->
                                 <p  class="describe text-ell">排污许可证号：{{item.permitLicence}}</p>
                                 
@@ -59,8 +59,8 @@
                         <div class="source">
                             <div class="content">
                                 <div class="company_name text-ell">{{item.enterpriseName}}</div>
-                                <div class="company_type">行业类别：{{item.industryType}}</div>
-                                <p  class="describe text-ell">{{item.address}}</p>
+                                <!--div class="company_type">行业类别：{{item.industryTypeName}}</div-->
+                                <p  class="describe text-ell">地址：{{item.address}}</p>
                             </div>
                         </div>
                     </div>
@@ -214,7 +214,7 @@
                             <tr  v-for="(item,key) in allList"   @click="zoomToMap(item,'sttp_all')" >
                               <td class="tabindex">{{key+1}}</td>
                               <td class="tabname" :title="item.pointName">
-                                <el-tooltip class="item" effect="dark" content="item.pointName" placement="top">
+                                <el-tooltip class="item" effect="dark" :content="item.pointName" placement="top">
                                    {{item.pointName}}
                                 </el-tooltip>
                               </td>
@@ -227,7 +227,7 @@
                         <div class="source">
                             <div class="content">
                                 <div class="company_name text-ell">{{item.pointName}}</div>
-                                <div class="company_type">测站类型：空气质量监测站</div>
+                                <div class="company_type">测站类型：{{item.manageLevelName}}</div>
                                 <p  class="describe text-ell">测站地址：{{item.address}}</p>
                                
                             </div>
@@ -242,7 +242,7 @@
                         <div class="source">
                             <div class="content">
                                 <div class="company_name text-ell">{{item.pointName}}</div>
-                                <div class="company_type">测站类型：国控监测站</div>
+                                <div class="company_type">测站类型：{{item.manageLevelName}}</div>
                                 <p  class="describe text-ell">测站地址：{{item.address}}</p>
                                <!-- <button  type="button" class="el-button el-button&#45;&#45;success"  @click="zoomToMap(item,'sttp_gk')"><span>详情</span></button>-->
                             </div>
@@ -257,7 +257,7 @@
                         <div class="source">
                             <div class="content">
                                 <div class="company_name text-ell">{{item.pointName}}</div>
-                                <div class="company_type">测站类型：省控监测站</div>
+                                <div class="company_type">测站类型：{{item.manageLevelName}}</div>
                                 <p  class="describe text-ell">测站地址：{{item.address}}</p>
                                 <!--<button  type="button" class="el-button el-button&#45;&#45;success"  @click="zoomToMap(item,'sttp_sk')"><span>详情</span></button>-->
                             </div>
@@ -272,11 +272,11 @@
                         <div class="itime">
                             <el-date-picker
                                     v-model="stime"
-                                    type="daterange"
+                                    type="datetimerange"
                                     align="right"
                                     unlink-panels
                                     @change="changeHjxfQuery"
-                                    value-format="yyyy-MM-dd"
+                                    value-format="yyyy-MM-dd HH:mm:ss"
                                     range-separator=""
                                     start-placeholder="开始日期"
                                     end-placeholder="结束日期"
@@ -301,11 +301,11 @@
                         <div class="itime">
                             <el-date-picker
                                     v-model="stime"
-                                    type="daterange"
+                                    type="datetimerange"
                                     align="right"
                                     unlink-panels
                                     @change="changeXzcfQuery"
-                                    value-format="yyyy-MM-dd"
+                                    value-format="yyyy-MM-dd HH:mm:ss"
                                     range-separator=""
                                     start-placeholder="开始日期"
                                     end-placeholder="结束日期"
@@ -330,11 +330,11 @@
                         <div class="itime">
                             <el-date-picker
                                     v-model="stime"
-                                    type="daterange"
+                                    type="datetimerange"
                                     align="right"
                                     unlink-panels
                                     @change="changeFspkQuery"
-                                    value-format="yyyy-MM-dd"
+                                    value-format="yyyy-MM-dd HH:mm:ss"
                                     range-separator=""
                                     start-placeholder="开始日期"
                                     end-placeholder="结束日期"
@@ -345,7 +345,8 @@
                     <div v-for="(item,key) in fspkList" class="container" :key="key" @click="queryCB(item)" >
                         <div class="source">
                             <div class="content">
-                                <div class="company_name text-ell">{{validNullStr(item.companyName)}}</div>
+                                <div class="company_name text-ell">排口：{{validNullStr(item.portName)}}</div>
+                                <div class="company_name text-ell">企业：{{validNullStr(item.companyName)}}</div>
                                 <div class="company_type">超标数量：{{item.indexValue}}个</div>
                             </div>
                         </div>
@@ -359,11 +360,11 @@
                         <div class="itime">
                             <el-date-picker
                                     v-model="stime"
-                                    type="daterange"
+                                    type="datetimerange"
                                     align="right"
                                     unlink-panels
                                     @change="changeFqpkQuery"
-                                    value-format="yyyy-MM-dd"
+                                    value-format="yyyy-MM-dd HH:mm:ss"
                                     range-separator=""
                                     start-placeholder="开始日期"
                                     end-placeholder="结束日期"
@@ -374,7 +375,8 @@
                     <div v-for="(item,key) in fqpkList" class="container" :key="key"  @click="queryCB(item)">
                         <div class="source">
                             <div class="content">
-                                <div class="company_name text-ell">{{validNullStr(item.companyName)}}</div>
+                                <div class="company_name text-ell">排口：{{validNullStr(item.portName)}}</div>
+                                <div class="company_name text-ell">企业：{{validNullStr(item.companyName)}}</div>
                                 <div class="company_type">超标数量：{{item.indexValue}}个</div>
                             </div>
                         </div>
@@ -463,12 +465,15 @@
         methods:{
             initSTime(){
                 const end = new Date();
-                return this.$appUtil.formatDate("yyyy-MM-dd",end);
+                return this.$appUtil.formatDate("yyyy-MM-dd HH:ff:ss",end);
             },
             initETime(day){
                 const start = new Date();
                 start.setTime(start.getTime() - 3600 * 1000 * 24 * day);
-                return this.$appUtil.formatDate("yyyy-MM-dd",start);
+                return this.$appUtil.formatDate("yyyy-MM-dd HH:ff:ss",start);
+            },
+            resetTime(){
+                this.stime = [this.initETime(30),this.initSTime()];
             },
             initDraw(){
                 this.temLayer = L.layerGroup();
@@ -487,9 +492,9 @@
             showMapPoint(item){
                 let wzIcon = require("../../assets/image/map/factory.png");
                 this.temLayer.clearLayers();
-                let model = {};
-                model.longitude =  this.DegreeConvertBack(item.lngDegree,item.lngMinute,item.lngSecond);
-                model.latitude = this.DegreeConvertBack(item.latDegree,item.latMinute,item.latSecond);
+                let model = item;
+               // model.longitude =  this.DegreeConvertBack(item.lngDegree,item.lngMinute,item.lngSecond);
+               // model.latitude = this.DegreeConvertBack(item.latDegree,item.latMinute,item.latSecond);
                 let marker = this.$mapUtil.createPointMarker(model,wzIcon);
                 if(marker) {
                     this.temLayer.addLayer(marker);
@@ -578,45 +583,39 @@
                 return Math.abs(deg) + (Math.abs(min)/60 + Math.abs(sec)/3600);
             },
             zoomToMap(item,type){
-                let model = {};
-                if(type == "factory"|| type == "wryFac"){
-                    model.longitude =  this.DegreeConvertBack(item.lngDegree,item.lngMinute,item.lngSecond);
-                    model.latitude = this.DegreeConvertBack(item.latDegree,item.latMinute,item.latSecond);
-                    this.$mapUtil.lMap.flyTo([model.latitude,model.longitude],16,{animate:false});
-                    let layerGroup = this.$mapUtil.getTempLayer(type);
-                    layerGroup.eachLayer(function (layer){
-                        if (layer.id === item.dataId){
-                            layer.openPopup();
-                        }
-                    });
-                    type = "factory";
-                }else if(type == "menulist"){
-                    model.longitude =  this.DegreeConvertBack(item.lngDegree,item.lngMinute,item.lngSecond);
-                    model.latitude = this.DegreeConvertBack(item.latDegree,item.latMinute,item.latSecond);
-                    this.$mapUtil.lMap.flyTo([model.latitude,model.longitude],16,{animate:false});
-                    let layerGroup = this.$mapUtil.getTempLayer(type);
-                    layerGroup.eachLayer(function (layer){
-                        if (layer.id === item.dataId){
-                            layer.openPopup();
-                        }
-                    });
+                let model =item;
+
+                if(type == "factory"|| type == "wryFac"||type == "menulist"){
+                    if(item.latitude&&item.longitude&&item.latitude!=""&&item.longitude!=""&&item.latitude!="null"&&item.longitude!="null"){
+                        this.$mapUtil.lMap.flyTo([model.latitude,model.longitude],16,{animate:false});
+                        let layerGroup = this.$mapUtil.getTempLayer(type);
+                        layerGroup.eachLayer(function (layer){
+                            if (layer.id === item.permitLicence){
+                                layer.openPopup();
+                            }
+                        });
+                    }
                     type = "factory";
                 }else if(type == "mine") {
-                    this.$mapUtil.lMap.flyTo([item.latitude, item.longitude], 16,{ animate:false});
-                    let layerGroup = this.$mapUtil.getTempLayer(type);
-                    layerGroup.eachLayer(function (layer){
-                        if (layer.id === item.enterpriseNo){
-                            layer.openPopup();
-                        }
-                    });
+                    if(item.latitude&&item.longitude&&item.latitude!=""&&item.longitude!=""&&item.latitude!="null"&&item.longitude!="null"){
+                        this.$mapUtil.lMap.flyTo([item.latitude, item.longitude], 16,{ animate:false});
+                        let layerGroup = this.$mapUtil.getTempLayer(type);
+                        layerGroup.eachLayer(function (layer){
+                            if (layer.id === item.permitLicence){
+                                layer.openPopup();
+                            }
+                        });
+                    }
                 }else if(type == "sttp_normal"||type == "sttp_wz") {
-                    this.$mapUtil.lMap.flyTo([item.lat, item.lng], 16,{ animate:false});
-                    let layerGroup = this.$mapUtil.getTempLayer(type);
-                    layerGroup.eachLayer(function (layer){
-                        if (layer.id === item.stationId){
-                            layer.openPopup();
-                        }
-                    });
+                    if(item.lat&&item.lng){
+                        this.$mapUtil.lMap.flyTo([item.lat, item.lng], 16,{ animate:false});
+                        let layerGroup = this.$mapUtil.getTempLayer(type);
+                        layerGroup.eachLayer(function (layer){
+                            if (layer.id === item.stationId){
+                                layer.openPopup();
+                            }
+                        });
+                    }
                     type = "sttp";
                 }else if(type == "ww"||type == "wg"){
                     if(item.latitude&&item.longitude){
@@ -643,6 +642,7 @@
                 this.$parent.setDetailData(item,type);
             },
             setDataList(type,list){
+                this.resetTime();
                 this.activeNames = type;
                 if(type=="factory"){
                     this.factoryList = list;
@@ -761,13 +761,12 @@
                 this.$parent.queryFqpkData("fqpk",this.stime[0],this.stime[1])
             },
             showXzcf(item){
-                this.$parent.setDetailData(item,"xzcf");
+                this.$parent.setDetailData(item,"xzcf",this.stime);
             },
             showHjxf(item){
-                this.$parent.setDetailData(item,"hjxf");
+                this.$parent.setDetailData(item,"hjxf",this.stime);
             },
             queryCB(item){
-            
                 this.$parent.queryCBdata(item,this.stime[0],this.stime[1])
             },
             changeStationQuery(type){
@@ -958,9 +957,9 @@
         color: #fff;
     }
     .itime {
-        width: 80%;
+        width: 95%;
         text-align: center;
-        margin-left: 20px;
+        margin-left: 10px;
     }
     .iptw-130 {
         text-align:left;

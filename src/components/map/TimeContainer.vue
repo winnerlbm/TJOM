@@ -10,7 +10,7 @@
             <div class="detailDiv" v-if="showType=='factory'">
                 <div class="baseDiv">
                     <div class="company_name text-ell">{{showObj.companyName}}</div>
-                    <div class="company_type"><img class="faicon" src="@/assets/image/fa/fa-type.png"/>行业类别：{{showObj.industryType}}</div>
+                    <div class="company_type"><img class="faicon" src="@/assets/image/fa/fa-type.png"/>行业类别：{{validNullStr(showObj.industryTypeName)}}</div>
                     <p  class="describe text-ell"><img class="faicon" src="@/assets/image/fa/fa-code.png"/>统一社会信用代码：{{showObj.uscCode}}</p>
                     <p  class="describe text-ell"><img class="faicon" src="@/assets/image/fa/fa-lic.png"/>排污许可证号：{{showObj.permitLicence}}</p>
                     <p  class="describe text-ell"><img class="faicon" src="@/assets/image/fa/fa-law.png"/>法人代表：{{showObj.corpPerson}}</p>
@@ -21,7 +21,7 @@
                 </div>
                 <div class="dataConts">
                     <el-collapse v-model="activeNames" accordion>
-                        <el-collapse-item v-if="wgList.length>0" :title="'废水排污口('+wgList.length+')'" name="wg" class="leftBox">
+                        <el-collapse-item v-if="wgList.length>0" :title="'废气排污口('+wgList.length+')'" name="wg" class="leftBox">
                             <div v-for="(item,key) in wgList" class="container"  @click="zoomToMap(item,'wg')" :key="key">
                                 <div class="source">
                                     <div class="content">
@@ -29,7 +29,6 @@
                                         <div class="company_type">所属企业：{{item.companyName}}</div>
                                         <p  class="describe text-ell">排口地址：{{item.portAddress}}</p>
                                         <p  class="describe text-ell">排污许可证号：{{item.permitLicence}}</p>
-                                        <!--button  type="button" class="el-button el-button--success"   @click="zoomToMap(item,'wg')"><span>详情</span></button-->
                                     </div>
                                 </div>
                             </div>
@@ -37,7 +36,7 @@
                                 <span>未查询到相关数据</span>
                             </div>
                         </el-collapse-item>
-                        <el-collapse-item v-if="wwList.length>0" :title="'废气排污口('+wwList.length+')'" name="ww" class="leftBox">
+                        <el-collapse-item v-if="wwList.length>0" :title="'废水排污口('+wwList.length+')'" name="ww" class="leftBox">
                             <div v-for="(item,key) in wwList" class="container"  @click="zoomToMap(item,'ww')" :key="key">
                                 <div class="source">
                                     <div class="content">
@@ -45,7 +44,6 @@
                                         <div class="company_type">所属企业：{{item.companyName}}</div>
                                         <p  class="describe text-ell">排口地址：{{item.portAddress}}</p>
                                         <p  class="describe text-ell">排污许可证号：{{item.permitLicence}}</p>
-                                        <!--button  type="button" class="el-button el-button--success"   @click="zoomToMap(item,'ww')"><span>详情</span></button-->
                                     </div>
                                 </div>
                             </div>
@@ -84,13 +82,25 @@
                                 <span>未查询到相关数据</span>
                             </div>
                         </el-collapse-item>
+                        <el-collapse-item v-if="lineList.length>0" :title="'工况监测生产线('+lineList.length+')'" name="mineline" class="leftBox">
+                            <div v-for="(item,key) in lineList" class="container"  @click="zoomToMap(item,'mineline')" :key="key">
+                                <div class="source">
+                                    <div class="content">
+                                        <div class="company_name text-ell">{{item.productLineName}}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="nodata" v-if="lineList.length==0">
+                                <span>未查询到相关数据</span>
+                            </div>
+                        </el-collapse-item>
                     </el-collapse>
                 </div>
             </div>
             <div class="detailDiv" v-if="showType=='mineprop'">
                 <div class="baseDiv">
                     <div class="company_name text-ell">{{showObj.enterpriseName}}</div>
-                    <div class="company_type">行业类别：{{showObj.industryType}}</div>
+                    <div class="company_type">行业类别：{{showObj.industryTypeName}}</div>
                     <p  class="describe text-ell">排污许可证号：{{showObj.permitLicence}}</p>
                 </div>
                 <div class="dataConts">
@@ -117,18 +127,107 @@
                     <p  class="describe text-ell">排污许可证号：{{showObj.permitLicence}}</p>
                 </div>
                 <div class="dataConts">
-                    <div v-for="(item,key) in propList" class="container" :key="key"    @click="showMineline(item,'mineprop')">
-                        <div class="source">
-                            <div class="content">
-                                <div class="company_name text-ell">{{item.deviceName}}</div>
-                                <div class="company_type">所属企业：{{showObj.enterpriseName}}</div>
-                                <p  class="describe text-ell">地址：{{showObj.address}}</p>
-                                <!--<button  type="button" class="el-button el-button&#45;&#45;success"   @click="showMineline(item,'mineprop')"><span>详情</span></button>-->
+                    <div class="queryDiv">
+                        <div class="queryTitle">数据查询</div>
+                        <div class="queryCont">
+                            <div class="itime">
+                                <el-date-picker
+                                        v-model="stime"
+                                        type="datetimerange"
+                                        align="right"
+                                        unlink-panels
+                                        @change="changeMineQuery"
+                                        value-format="yyyy-MM-dd HH:mm:ss"
+                                        range-separator=""
+                                        start-placeholder="开始日期"
+                                        end-placeholder="结束日期"
+                                        :picker-options="pickerOptions">
+                                </el-date-picker>
+                            </div>
+                        </div>
+                        <div class="queryCont">
+                            <div class="iptw-130 mgr-8">
+                                <el-select v-model="queryLineIndex"  @change="changeMineQuery()" placeholder="请选择">
+                                    <el-option
+                                            v-for="item in queryLineOptions"
+                                            :key="item.deviceId"
+                                            :label="item.deviceName"
+                                            :value="item.deviceId">
+                                    </el-option>
+                                </el-select>
+                            </div>
+                        </div>
+                        <div class="queryCont">
+                            <div class="iptw-80 mgr-8">
+                                <el-select v-model="queryMineTimeType" @change="changeMineQuery" placeholder="请选择">
+                                    <el-option
+                                            v-for="item in queryMineOptions"
+                                            :key="item.value"
+                                            :label="item.label"
+                                            :value="item.value">
+                                    </el-option>
+                                </el-select>
+                            </div>
+
+                            <div class="iptw-80 mgr-8">
+                                <el-select v-model="showIndex"   @change="changeMineShowCont" placeholder="请选择">
+                                    <el-option
+                                            v-for="item in showIndexOptions"
+                                            :key="item.value"
+                                            :label="item.label"
+                                            :value="item.value">
+                                    </el-option>
+                                </el-select>
                             </div>
                         </div>
                     </div>
-                    <div class="nodata" v-if="propList.length==0">
-                        <span>未查询到相关数据</span>
+                    <div class="timeDatas" v-show="queryMineTimeType=='1'">
+                        <div class="tables" v-show="showIndex==1">
+                            <ul class="ulTitle">
+                                <li>
+                                    <span class="ename">序号</span>
+                                    <span class="eval">监测值</span>
+                                    <span class="etime">监测时间</span>
+                                </li>
+                            </ul>
+                            <ul class="dataList">
+                                <li v-for="(item,key) in resultList" :key="key" >
+                                    <span class="ename">{{key}}</span>
+                                    <span class="eval">{{item.dataValue==null?'-':parseFloat(item.dataValue).toFixed(3)}}</span>
+                                    <span class="etime">{{item.dataTime}}</span>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="echarts" v-show="showIndex==2">
+                            <div id="lineminechart">
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="timeDatas" v-show="queryMineTimeType!='1'">
+                        <div class="tables" v-show="showIndex==1">
+                            <ul class="ulTitle">
+                                <li>
+                                    <span class="eval">最大值</span>
+                                    <span class="eval">最小值</span>
+                                    <span class="eval">平均值</span>
+                                    <span class="etime">监测时间</span>
+                                </li>
+                            </ul>
+                            <ul class="dataList">
+                                <li v-for="(item,key) in resultList" :key="key" >
+                                    <span class="eval2">{{item.maxValue==null?'-':parseFloat(item.maxValue).toFixed(2)}}</span>
+                                    <span class="eval2">{{item.minValue==null?'-':parseFloat(item.minValue).toFixed(2)}}</span>
+                                    <span class="eval2">{{item.avgValue==null?'-':parseFloat(item.avgValue).toFixed(2)}}</span>
+                                    <span class="etime">{{item.dataTime}}</span>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="echarts" v-show="showIndex==2">
+                            <div id="linedaychart">
+
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -140,7 +239,7 @@
                         <p  class="describe text-ell">排口地址：{{showObj.portAddress}}</p>
                     </div>
                     <div class="eright">
-                        <div class="indexName">{{newData.indexName}}</div>
+                        <div class="indexName">{{newData.indexName}}({{standardUnitName}})</div>
                         <div class="indexVal">{{newData.indexVal==null?'-':parseFloat(newData.indexVal).toFixed(3)}}</div>
                         <div class="indexTime">{{newData.indexTime}}</div>
                     </div>
@@ -152,11 +251,11 @@
                             <div class="itime">
                                 <el-date-picker
                                         v-model="stime"
-                                        type="daterange"
+                                        type="datetimerange"
                                         align="right"
                                         unlink-panels
                                         @change="changeWryQuery('ww')"
-                                        value-format="yyyy-MM-dd"
+                                        value-format="yyyy-MM-dd HH:mm:ss"
                                         range-separator=""
                                         start-placeholder="开始日期"
                                         end-placeholder="结束日期"
@@ -201,7 +300,7 @@
                         <div class="tables" v-show="showIndex==1">
                             <ul class="ulTitle">
                                 <li>
-                                    <span class="ename">监测状态</span>
+                                    <span class="ename">数据状态</span>
                                     <span class="eval">监测值</span>
                                     <span class="etime">监测时间</span>
                                 </li>
@@ -230,7 +329,7 @@
                         <p  class="describe text-ell">排口地址：{{showObj.portAddress}}</p>
                     </div>
                     <div class="eright">
-                        <div class="indexName">{{newData.indexName}}</div>
+                        <div class="indexName">{{newData.indexName}}({{standardUnitName}})</div>
                         <div class="indexVal">{{newData.indexVal==null?'-':parseFloat(newData.indexVal).toFixed(3)}}</div>
                         <div class="indexTime">{{newData.indexTime}}</div>
                     </div>
@@ -242,11 +341,11 @@
                             <div class="itime">
                                 <el-date-picker
                                         v-model="stime"
-                                        type="daterange"
+                                        type="datetimerange"
                                         align="right"
                                         unlink-panels
                                         @change="changeWryQuery('wg')"
-                                        value-format="yyyy-MM-dd"
+                                        value-format="yyyy-MM-dd HH:mm:ss"
                                         range-separator=""
                                         start-placeholder="开始日期"
                                         end-placeholder="结束日期"
@@ -291,7 +390,7 @@
                         <div class="tables" v-show="showIndex==1">
                             <ul class="ulTitle">
                                 <li>
-                                    <span class="ename">监测状态</span>
+                                    <span class="ename">数据状态</span>
                                     <span class="eval">监测值</span>
                                     <span class="etime">监测时间</span>
                                 </li>
@@ -314,9 +413,19 @@
             </div>
             <div class="detailDiv" v-if="showType=='sttp'">
                 <div :class="currentCls">
-                    <div class="company_name text-ell">{{showObj.stationName}}</div>
+                    <div class="eleft">
+                        <div class="company_name text-ell">{{showObj.stationName}}</div>
+                        <div class="company_type">测站类型：{{showObj.stationType=='1'?'常规监测站':'传感器监测站'}}</div>
+                        <p  class="describe text-ell">测站地址：{{showObj.address}}</p>
+                    </div>
+                    <div class="eright">
+                        <div class="indexName">{{newData.indexName}}({{standardUnitName}})</div>
+                        <div class="indexVal">{{newData.indexVal==null?'-':parseFloat(newData.indexVal).toFixed(3)}}</div>
+                        <div class="indexTime">{{newData.indexTime}}</div>
+                    </div>
+                    <!--div class="company_name text-ell">{{showObj.stationName}}</div>
                     <div class="company_type">测站类型：{{showObj.stationType=='1'?'常规监测站':'传感器监测站'}}</div>
-                    <p  class="describe text-ell">测站地址：{{showObj.address}}</p>
+                    <p  class="describe text-ell">测站地址：{{showObj.address}}</p-->
                 </div>
                 <div class="dataConts">
                     <div class="queryDiv">
@@ -325,11 +434,11 @@
                             <div class="itime">
                                 <el-date-picker
                                         v-model="stime"
-                                        type="daterange"
+                                        type="datetimerange"
                                         align="right"
                                         unlink-panels
                                         @change="changeStationQuery"
-                                        value-format="yyyy-MM-dd"
+                                        value-format="yyyy-MM-dd HH:mm:ss"
                                         range-separator=""
                                         start-placeholder="开始日期"
                                         end-placeholder="结束日期"
@@ -374,8 +483,8 @@
                         <div class="tables" v-show="showIndex==1">
                             <ul class="ulTitle">
                                 <li>
-                                    <span class="ename">监测状态</span>
-                                    <span class="eval">监测值</span>
+                                    <span class="ename">等级</span>
+                                    <span class="eval">{{queryIndex=="AQI"?"AQI":"监测值"}}</span>
                                     <span class="etime">监测时间</span>
                                 </li>
                             </ul>
@@ -403,7 +512,7 @@
                         <p  class="describe text-ell">测站地址：{{showObj.address}}</p>
                     </div>
                     <div class="eright">
-                        <div class="indexName">{{newData.indexName}}</div>
+                        <div class="indexName">{{newData.indexName}}({{standardUnitName}})</div>
                         <div class="indexVal">{{newData.indexVal==null?'-':parseFloat(newData.indexVal).toFixed(3)}}</div>
                         <div class="indexTime">{{newData.indexTime}}</div>
                     </div>
@@ -415,11 +524,11 @@
                             <div class="itime">
                                 <el-date-picker
                                         v-model="stime"
-                                        type="daterange"
+                                        type="datetimerange"
                                         align="right"
                                         unlink-panels
                                         @change="changeAirQuery"
-                                        value-format="yyyy-MM-dd"
+                                        value-format="yyyy-MM-dd HH:mm:ss"
                                         range-separator=""
                                         start-placeholder="开始日期"
                                         end-placeholder="结束日期"
@@ -464,7 +573,7 @@
                         <div class="tables" v-show="showIndex==1">
                             <ul class="ulTitle">
                                 <li>
-                                    <span class="ename">空气质量</span>
+                                    <span class="ename">数据状态</span>
                                     <span class="eval">监测值</span>
                                     <span class="etime">监测时间</span>
                                 </li>
@@ -498,11 +607,11 @@
                             <div class="itime">
                                 <el-date-picker
                                         v-model="stime"
-                                        type="daterange"
+                                        type="datetimerange"
                                         align="right"
                                         unlink-panels
                                         @change="changeMineQuery"
-                                        value-format="yyyy-MM-dd"
+                                        value-format="yyyy-MM-dd HH:mm:ss"
                                         range-separator=""
                                         start-placeholder="开始日期"
                                         end-placeholder="结束日期"
@@ -637,7 +746,7 @@
                         <div class="source">
                             <div class="content">
                                 <div class="company_name text-ell">编号名称：{{item.petitionNoName}}</div>
-                                <p  class="describe text-ell">案件分类：{{item.classifyName}}</p>
+                                <p  class="describe">信访内容：{{item.content}}</p>
                                 <p  class="describe text-ell">案件来源：{{item.sourceName}}</p>
                                 <p  class="describe text-ell">创建时间：{{item.createTime}}</p>
                                 <p  class="describe text-ell">案件状态：{{item.currentNode}}</p>
@@ -660,7 +769,7 @@
                             <div class="content">
                                 <div class="company_name text-ell">排口名称：{{item.nodeName}}</div>
                                 <p  class="describe">超标详情：{{item.alarmInfo}}</p>
-                                <p  class="describe text-ell">报警代码：{{item.code}}</p>
+                                <!--p  class="describe text-ell">报警代码：{{item.code}}</p-->
                                 <p  class="describe text-ell">报警时间：{{item.alarmTime}}</p>
                             </div>
                         </div>
@@ -695,6 +804,7 @@
                 lineList:[],
                 propList:[],
                 showObj:{},
+                oldObj:{},
                 searchVal:"",
                 showType:"",
                 resultList:[],
@@ -703,11 +813,14 @@
                 xfList:[],
                 xzcfList:[],
                 cbList:[],
-                queryTimeType:"1",
-                queryOptions: [{
+                standardUnitName:"",
+                queryTimeType:"2",
+                queryOptions: [
+                /*{
                     value: '1',
                     label: '分钟'
-                }, {
+                }, */
+                {
                     value: '2',
                     label: '小时'
                 }],
@@ -755,34 +868,44 @@
                 queryIndex:"AQI",
                 queryIndexOptions: [{
                     value: 'AQI',
-                    label: 'AQI'
+                    label: 'AQI',
+                    standardUnitName:'-'
                 },{
                     value: 'PM10',
-                    label: 'PM10'
+                    label: 'PM10',
+                    standardUnitName:'ug/m^3'
                 },{
                     value: 'SO2',
-                    label: '二氧化硫'
+                    label: 'SO2',
+                    standardUnitName:'ug/m^3'
                 },{
                     value: 'NO2',
-                    label: '二氧化氮'
+                    label: 'NO2',
+                    standardUnitName:'ug/m^3'
                 },{
                     value: 'O3',
-                    label: '臭氧'
+                    label: 'O3',
+                    standardUnitName:'ug/m^3'
                 },{
                     value: 'CO',
-                    label: '一氧化碳'
+                    label: 'CO',
+                    standardUnitName:'ug/m^3'
                 },{
                     value: 'VOC',
-                    label: '挥发性有机化合物'
+                    label: 'VOC',
+                    standardUnitName:'ug/m^3'
                 },{
                     value: 'TSP',
-                    label: '总悬浮颗粒物'
+                    label: 'TSP',
+                    standardUnitName:''
                 },{
                     value: 'H2S',
-                    label: '硫化氢'
+                    label: 'H2S',
+                    standardUnitName:'ug/m^3'
                 },{
                     value: 'NH3',
-                    label: '氨气'
+                    label: 'NH3',
+                    standardUnitName:'ug/m^3'
                 }],
                 pickerOptions: {
                     shortcuts: [{
@@ -835,23 +958,26 @@
             },
             initSTime(){
                 const end = new Date();
-                return this.$appUtil.formatDate("yyyy-MM-dd",end);
+                return this.$appUtil.formatDate("yyyy-MM-dd HH:ff:ss",end);
             },
             initETime(day){
                 const start = new Date();
                 start.setTime(start.getTime() - 3600 * 1000 * 24 * day);
-                return this.$appUtil.formatDate("yyyy-MM-dd",start);
+                return this.$appUtil.formatDate("yyyy-MM-dd HH:ff:ss",start);
             },
             hideData(){
                 if(this.backParent){
                     this.showType = "factory";
+                    this.showObj = this.oldObj;
+                    this.showName = this.showObj.companyName;
                 }else{
                     this.showResult = false;
                     this.$parent.setDataShow();
                 }
                 this.backParent = false;
             },
-            setShowObj(obj,type){
+            setShowObj(obj,type,timerange){
+                console.log(obj);
                 this.showObj = obj;
                 this.showResult = true;
                 this.showType = type;
@@ -860,12 +986,13 @@
                 this.newData = {};
                 if(type == "factory"){
                     this.showName = obj.companyName;
-                    this.queryFactoryData(obj.companyName);
-                    this.queryFactoryXZData(obj.companyName);
+                    this.queryFactoryData(obj.permitLicence);
+                    this.queryFactoryXZData(obj.permitLicence);
+                    this.queryMineLine(obj.permitLicence);
                 }else if(type == "wryFac"){
                     this.showName = obj.companyName;
-                    this.queryFactoryData(obj.companyName);
-                    this.queryFactoryXZData(obj.companyName);
+                    this.queryFactoryData(obj.permitLicence);
+                    this.queryFactoryXZData(obj.permitLicence);
                 }else if(type == "mine"){
                     this.showName = obj.enterpriseName;
                     this.queryMineData(obj.enterpriseNo);
@@ -873,11 +1000,11 @@
                 }else if(type == "ww"){//废水
                     this.showName = obj.portName;
                     this.chartDOM = "linewwchart";
-                    this.getWrgIndexOptions(obj.id,type);
+                    this.getWrgIndexOptions(obj.realPortId,type);
                 }else if(type == "wg"){//废气
                     this.showName = obj.portName;
                     this.chartDOM = "linewgchart";
-                    this.getWrgIndexOptions(obj.id,type);
+                    this.getWrgIndexOptions(obj.realPortId,type);
                 }else if(type == "sttp"){
                     this.showName = obj.stationName;
                     this.chartDOM = "linechart";
@@ -896,22 +1023,30 @@
                     this.queryLineData(obj.productLineNo);
                 }else if(type == "xzcf"){
                     this.showName = obj.companyName;
-                    this.queryXzcf(obj.permitLicence);
+                    this.queryXzcf(obj.permitLicence,timerange[0],timerange[1]);
                 }else if(type == "hjxf"){
                     this.showName = obj.companyName;
-                    this.queryHjxf(obj.permitLicence);
+                    this.queryHjxf(obj.permitLicence,timerange[0],timerange[1]);
                 }else if(type == "cbxq"){
                      this.showName = obj.companyName;
                 }
             },
-            queryFactoryData(companyname){
+            queryFactoryData(permitLicence){
                 let body = {
                     "conditions":[
                         {
                             "operator":"AND",
-                            "field":"companyName",
+                            "field":"permitLicence",
                             "match":"equal",
-                            "value":companyname,
+                            "value":permitLicence,
+                            "maxValue":"",
+                            "minValue":""
+                        },
+                        {
+                            "operator":"AND",
+                            "field":"realPortId",
+                            "match":"isNotNull",
+                            "value":"",
                             "maxValue":"",
                             "minValue":""
                         }
@@ -952,14 +1087,14 @@
                 });
 
             },
-            queryFactoryXZData(companyname){
+            queryFactoryXZData(permitLicence){
                 let xzcfbody = {
                     "conditions":[
                         {
                             "operator":"AND",
-                            "field":"companyName",
+                            "field":"permitLicence",
                             "match":"equal",
-                            "value":companyname,
+                            "value":permitLicence,
                             "maxValue":"",
                             "minValue":""
                         }
@@ -993,9 +1128,9 @@
                     "conditions":[
                         {
                             "operator":"AND",
-                            "field":"companyName",
+                            "field":"permitLicence",
                             "match":"equal",
-                            "value":companyname,
+                            "value":permitLicence,
                             "maxValue":"",
                             "minValue":""
                         }
@@ -1022,6 +1157,41 @@
                     this.xfList = list;
                     if(list.length>0){
                         this.activeNames = "xf";
+                    }
+                });
+            },
+            queryMineLine(permitLicence){
+                let body = {
+                    "conditions":[
+                        {
+                            "operator":"AND",
+                            "field":"T_Knt_Enterprise.permitLicence",
+                            "match":"equal",
+                            "value":permitLicence,
+                            "maxValue":"",
+                            "minValue":""
+                        }
+                    ],
+                    "page":{
+                        "pageable": false,
+                        "currentPage": 1,
+                        "pageSize": 10
+                    },
+                    "sort":{
+                        "field": "",
+                        "order": "DESC"
+                    }
+                };
+                this.$axios({
+                    url: appCfg.map.gisApiUrl+"api/share/data/2c9a818f73768e6501737afbac58009f?userKey="+appCfg.map.userKey,
+                    method: "post",
+                    data: body,
+                    header:{'Content-type': 'application/json'}
+                }).then(res => {
+                    let list = res.data.data.list;
+                    this.lineList = list;
+                    if(list.length>0){
+                        this.activeNames = "mineline";
                     }
                 });
             },
@@ -1147,21 +1317,31 @@
                 }).then(res => {
                     this.loading = false;
                     let list = res.data.data.list;
-                    if(list.length == 0){
-                        this.$message.error("未查询到相关数据！");
-                        return;
-                    }
                     let obj = {};
                     obj = this.queryIndexOptions.find((item)=>{
                         return item.value === this.queryIndex;
                     });
                     let itemName =  obj.label;
+                    this.standardUnitName = obj.standardUnitName;
+                    if(list.length == 0){
+                        this.$message.error("未查询到相关数据！");
+                        this.resultList = list;
+                        this.changeShowCont();
+                        return;
+                    }
+                    
                     this.resultList = [];
                     for(let i=0;i<list.length;i++){
                         list[i].itemName = itemName;
                         list[i].status = this.getLevel(list[i].level);
                     }
                     this.currentCls = this.getLevelCls(list[0].level);
+                    this.newData = {
+                        indexName:itemName,
+                        indexVal:list[0][this.queryIndex],
+                        indexTime:list[0].recordTime
+                    };
+
                     this.resultList = list;
                     this.changeShowCont();
                 })
@@ -1237,16 +1417,19 @@
                 }).then(res => {
                     this.loading = false;
                     let list = res.data.data.list;
-
-                    if(list.length == 0){
-                        this.$message.error("未查询到相关数据！");
-                        return;
-                    }
                     let obj = {};
                     obj = this.queryIndexOptions.find((item)=>{
                         return item.value === this.queryIndex;
                     });
                     let itemName =  obj.label;
+                    this.standardUnitName = obj.standardUnitName;
+                    if(list.length == 0){
+                        this.$message.error("未查询到相关数据！");
+                        this.resultList = list;
+                        this.changeShowCont();
+                        return;
+                    }
+                    
                     this.resultList = [];
                     for(let i=0;i<list.length;i++){
                         list[i].itemName = itemName;
@@ -1254,6 +1437,11 @@
                         list[i].value = list[i][this.queryIndex];
                     }
                     this.currentCls = this.getIndexCls(list[0][this.queryIndex+"_FLAG"]);
+                    this.newData = {
+                        indexName:itemName,
+                        indexVal:list[0][this.queryIndex],
+                        indexTime:list[0].recordTime
+                    };
                     this.resultList = list;
                     this.changeShowCont("linechart");
                 })
@@ -1276,7 +1464,7 @@
                     for(let i=0;i<list.length;i++){
                         let dtime = this.$appUtil.formatDate(this.formatStr,new Date(list[i].recordTime));
                         xdata.push(dtime);
-                        let yda = list[i].value==null?0:parseFloat(list[i].value).toFixed(3);
+                        let yda = list[i].value==null?"-":parseFloat(list[i].value).toFixed(3);
                         ydata.push(yda);
                     }
                     chartObj.xdata = xdata;
@@ -1360,6 +1548,7 @@
                 });
             },
             getWrgIndexOptions(nodeId,type){
+
                 let body = {
                     "conditions":[
                         {
@@ -1391,6 +1580,8 @@
                         this.queryWryIndex = list[0].columnCode;
                         this.changeWryQuery(type);
                     }else{
+                        this.queryWryIndexOptions = [];
+                        this.queryWryIndex = "";
                         this.$message.error("未查询到该排口监测因子！");
                     }
                 });
@@ -1455,15 +1646,19 @@
                     this.loading = false;
                     if(res.data.code== "200"){
                         let list = res.data.data.list;
-                        if(list.length == 0){
-                            this.$message.error("未查询到相关数据！");
-                            return;
-                        }
                         let obj = {};
                         obj = this.queryWryIndexOptions.find((item)=>{
                             return item.columnCode === this.queryWryIndex;
                         });
                         let itemName =  obj.pollutantName;
+                        this.standardUnitName = obj.standardUnitName;
+                        if(list.length == 0){
+                            this.$message.error("未查询到相关数据！");
+                            this.resultList = list;
+                            this.changeShowCont();
+                            return;
+                        }
+                       
                         this.resultList = [];
                         for(let i=0;i<list.length;i++){
                             list[i].itemName = itemName;
@@ -1536,15 +1731,19 @@
                     if(res.data.code== "200"){
                         let list = res.data.data.list;
                         this.resultList = [];
-                        if(list.length == 0){
-                            this.$message.error("未查询到相关数据！");
-                            return;
-                        }
                         let obj = {};
                         obj = this.queryWryIndexOptions.find((item)=>{
                             return item.columnCode === this.queryWryIndex;
                         });
                         let itemName =  obj.pollutantName;
+                        this.standardUnitName = obj.standardUnitName;
+                        if(list.length == 0){
+                            this.$message.error("未查询到相关数据！");
+                            this.resultList = list;
+                            this.changeShowCont();
+                            return;
+                        }
+                        
                         for(let i=0;i<list.length;i++){
                             list[i].itemName = itemName;
                             list[i].status = this.getIndexStatus(list[i][this.queryWryIndex+"_FLAG"]);
@@ -1652,15 +1851,18 @@
                     this.loading = false;
                     if(res.data.code== "200"){
                         let list = res.data.data.list;
-                        if(list.length == 0){
-                            this.$message.error("未查询到相关数据！");
-                            return;
-                        }
                         let obj = {};
                         obj = this.queryAirIndexOptions.find((item)=>{
                             return item.columnCode === this.queryAirIndex;
                         });
                         let itemName =  obj.name;
+                        this.standardUnitName = obj.dataUnitName;
+                        if(list.length == 0){
+                            this.$message.error("未查询到相关数据！");
+                            this.resultList = list;
+                            this.changeShowCont();
+                            return;
+                        }
                         this.resultList = [];
                         for(let i=0;i<list.length;i++){
                             list[i].itemName = itemName;
@@ -1709,6 +1911,7 @@
                 }
             },
             getAirCls(indexVal){
+                return "baseDiv";
                 if(null==indexVal){
                     return "baseDiv";
                 }else if(indexVal.substring(1,3).indexOf("00")>=0){
@@ -1753,6 +1956,7 @@
                 }
             },
             getIndexCls(indexVal){
+                return "baseDiv";
                 if(null==indexVal){
                     return "baseDiv";
                 }else if(indexVal.indexOf("ZC")>=0){
@@ -1768,15 +1972,18 @@
                 }
             },
             zoomToMap(item,type){
-                if(item.latitude&&item.longitude){
-                    this.$mapUtil.lMap.flyTo([item.latitude, item.longitude], 16,{ animate:false});
-                    let layerGroup = this.$mapUtil.getTempLayer(type);
-                    layerGroup.eachLayer(function (layer){
-                        if (layer.id === item.id){
-                            layer.openPopup();
-                        }
-                    });
-                }
+                /*if(type!="ww"&&type!="ww"){
+                    if(item.latitude&&item.longitude){
+                        this.$mapUtil.lMap.flyTo([item.latitude, item.longitude], 16,{ animate:false});
+                        let layerGroup = this.$mapUtil.getTempLayer(type);
+                        layerGroup.eachLayer(function (layer){
+                            if (layer.id === item.id){
+                                layer.openPopup();
+                            }
+                        });
+                    }
+                }*/
+                this.oldObj = this.showObj;
                 this.setShowObj(item,type);
                 this.backParent = true;
             },
@@ -1841,7 +2048,7 @@
                     let list = res.data.data.list;
                     if(list.length == 0){
                         this.$message.error("未查询到相关数据！");
-                        return;
+                        //return;
                     }
                     this.resultList = list;
                     this.changeMineShowCont("lineminechart");
@@ -1898,7 +2105,7 @@
                     let list = res.data.data.list;
                     if(list.length == 0){
                         this.$message.error("未查询到相关数据！");
-                        return;
+                        //return;
                     }
                     this.resultList = list;
                     this.changeMineShowCont();
@@ -2041,7 +2248,7 @@
                     ]
                 });
             },
-            queryXzcf(permitLicence){
+            queryXzcf(permitLicence,stime,etime){
                 let xzcfbody = {
                     "conditions":[
                         {
@@ -2051,6 +2258,14 @@
                             "value":permitLicence,
                             "maxValue":"",
                             "minValue":""
+                        },
+                        {
+                            "operator":"AND",
+                            "match":"range",
+                            "field":"filingTime",
+                            "value":"",
+                            "maxValue":etime,
+                            "minValue":stime
                         }
 
                     ],
@@ -2075,7 +2290,8 @@
                     this.xzcfList = list;
                 });
             },
-            queryHjxf(permitLicence){
+            queryHjxf(permitLicence,stime,etime){
+                this.loading = true;
                 let xfbody = {
                     "conditions":[
                         {
@@ -2085,6 +2301,14 @@
                             "value":permitLicence,
                             "maxValue":"",
                             "minValue":""
+                        },
+                        {
+                            "operator":"AND",
+                            "match":"range",
+                            "field":"createTime",
+                            "value":"",
+                            "maxValue":etime,
+                            "minValue":stime
                         }
 
                     ],
@@ -2105,11 +2329,13 @@
                     data: xfbody,
                     header:{'Content-type': 'application/json'}
                 }).then(res => {
+                    this.loading = false;
                     let list = res.data.data.list;
                     this.xfList = list;
                 });
             },
             queryCBdata(item,stime,etime){
+                this.loading = true;
                 this.showName = item.companyName;
                 this.showObj = item;
                 this.showResult = true;
@@ -2151,7 +2377,13 @@
                     data: xfbody,
                     header:{'Content-type': 'application/json'}
                 }).then(res => {
+                    this.loading = false;
                     let list = res.data.data.list;
+
+                    for(let i=0;i<list.length;i++){
+                        list[i].alarmTime = this.$appUtil.formatDate("yyyy-MM-dd HH:ff:ss",new Date(list[i].alarmTime));
+                    }
+                    
                     this.cbList = list;
                 });
             },
@@ -2160,7 +2392,7 @@
                         {icon:L.divIcon({
                             className:'leaflet-echart-icon',
                             iconSize:[160,160],
-                            html:'<div id="cm1" style="width:160px;height:160px;position:relative;background-color:transparent;">asd</div>'
+                            html:'<div id="cm1" style="width:160px;height:160px;position:relative;background-color:transparent;"></div>'
                         })}).addTo(map);
 
 
@@ -2230,7 +2462,7 @@
         margin: 0;
         -webkit-box-shadow: inset 0 -1px 0 0 hsla(0,0%,98%,.2);
         box-shadow: inset 0 -1px 0 0 hsla(0,0%,98%,.2);
-        background-color: rgba(3, 169, 244, 0.29);
+        background-color: rgba(33, 150, 243, 0.15);
         position: relative;
         box-shadow: 0px 1px 10px #087dce inset;
         background-size: 2px 16px, 16px 2px, 2px 16px, 16px 2px;
@@ -2425,6 +2657,9 @@
     .iptw-80 .el-select, .iptw-80 .el-select>.el-input {
         width: 130px;
     }
+    .iptw-130 .el-select, .iptw-130 .el-select>.el-input {
+        width: 265px;
+    }
     .mgr-8 {
         margin-right: 5px;
     }
@@ -2474,7 +2709,7 @@
     .ulTitle {
         border-bottom: 1.5px solid #17244d;
         padding: 2px;
-        background-color: #2b3136;
+        background-color: #1a2853;
         margin-top: 10px;
         display: flex;
     }

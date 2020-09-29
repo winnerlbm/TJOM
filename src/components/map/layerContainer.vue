@@ -115,12 +115,20 @@
         methods: {
             initSTime(){
                 const end = new Date();
-                return this.$appUtil.formatDate("yyyy-MM-dd",end);
+                return this.$appUtil.formatDate("yyyy-MM-dd HH:ff:ss",end);
             },
             initETime(day){
                 const start = new Date();
                 start.setTime(start.getTime() - 3600 * 1000 * 24 * day);
-                return this.$appUtil.formatDate("yyyy-MM-dd",start);
+                return this.$appUtil.formatDate("yyyy-MM-dd HH:ff:ss",start);
+            },
+            setAllChecked(checked){
+                for(let data of this.factoryList) {
+                    data.checked = checked;
+                }
+                for(let data of this.airList) {
+                    data.checked = checked;
+                }
             },
             setFactory(val,item){
                 if(val){
@@ -255,7 +263,7 @@
                             let cmodel = e.target.model;
                             _self.$parent.setDetailData(model,"factory");
                         });
-                        marker.id = model.dataId;
+                        marker.id = model.permitLicence;
                         let html = this.createHtml(model);
                         marker.bindPopup(html);
                         facLayer.addLayer(marker);
@@ -269,14 +277,7 @@
                 let wzIcon = require("../../assets/image/map/mine.png");
                 let body = {
                     "conditions":[
-                        {
-                            "operator":"AND",
-                            "field":"",
-                            "match":"contain",
-                            "value":"",
-                            "maxValue":"",
-                            "minValue":""
-                        }
+                        
                     ],
                     "page":{
                         "pageable": false,
@@ -300,7 +301,7 @@
                     for(let model of list) {
                         let marker = this.$mapUtil.createPointMarker(model,wzIcon);
                         if(marker){
-                            marker.id = model.enterpriseNo;
+                            marker.id = model.permitLicence;
                             marker.model = model;
                             marker.on("click",function(e){
                                 let cmodel = e.target.model;
@@ -703,7 +704,7 @@
                 
                 html.push('<div class="popuDiv"><img class="faicon" src="'+this.qy+'" />'+validNullStr(model.companyName)+'</div>');
                 html.push('<div class="popuDiv"><img class="faicon" src="'+this.addr+'" />'+validNullStr(model.operationAddress)+'</div>');
-                html.push('<div class="popuDiv"><img class="faicon" src="'+this.qtype+'" />'+validNullStr(model.industryType)+'</div>');
+                html.push('<div class="popuDiv"><img class="faicon" src="'+this.qtype+'" />'+validNullStr(model.industryTypeName)+'</div>');
                 html.push('<div class="popuDiv"><img class="faicon" src="'+this.lic+'" />'+validNullStr(model.permitLicence)+'</div>');
                /* html.push('<div class="poputools">');
                 html.push('<button onclick="getMineTime('+JSON.stringify(model).replace(/"/g, '&quot;')+',\'factory\')">详情</button>');
@@ -769,9 +770,9 @@
             },
             getStationTypeNm(type){
                 if(type == 1){
-                    return "常规空气质量监测点";
+                    return "常规监测站";
                 }else if(type == 2){
-                    return "传感器监测点";
+                    return "传感器监测站";
                 }else {
                     return "其它";
                 }
@@ -791,6 +792,7 @@
                 }
             },
             getXzcfData(layerId,stime,etime){
+                this.$mapUtil.removeTemLayer(layerId);
                 let body = {
                     "conditions":[
                         {
@@ -817,9 +819,9 @@
                     if(list.length>0){
                         let data = [];
                         for(let model of list) {
-                            if(model.lngDegree!="null"){
-                                model.longitude =  this.DegreeConvertBack(model.lngDegree,model.lngMinute,model.lngSecond);
-                                model.latitude = this.DegreeConvertBack(model.latDegree,model.latMinute,model.latSecond);
+                            if(model.longitude!="null"&&model.longitude!=null){
+                               // model.longitude =  this.DegreeConvertBack(model.lngDegree,model.lngMinute,model.lngSecond);
+                               // model.latitude = this.DegreeConvertBack(model.latDegree,model.latMinute,model.latSecond);
                                 let point = {lat: model.latitude, lng: model.longitude, count: Number(model.indexValue)};
                                 data.push(point)
                             }
@@ -835,6 +837,7 @@
                 })
             },
             getHjxfData(layerId,stime,etime){
+                this.$mapUtil.removeTemLayer(layerId);
                 let body = {
                     "conditions":[
                         {
@@ -861,10 +864,13 @@
                     if(list.length>0){
                         let data = [];
                         for(let model of list) {
-                            model.longitude =  this.DegreeConvertBack(model.lngDegree,model.lngMinute,model.lngSecond);
-                            model.latitude = this.DegreeConvertBack(model.latDegree,model.latMinute,model.latSecond);
-                            let point = {lat: model.latitude, lng: model.longitude, count: Number(model.indexValue)};
-                            data.push(point)
+                            if(model.longitude!="null"&&model.longitude!=null){
+                               // model.longitude =  this.DegreeConvertBack(model.lngDegree,model.lngMinute,model.lngSecond);
+                               // model.latitude = this.DegreeConvertBack(model.latDegree,model.latMinute,model.latSecond);
+                                let point = {lat: model.latitude, lng: model.longitude, count: Number(model.indexValue)};
+                                data.push(point)
+                            }
+                           
                         }
                         let heatData = {
                             max: 10,
@@ -879,6 +885,7 @@
                 })
             },
             getWaterData(layerId,stime,etime){
+                this.$mapUtil.removeTemLayer(layerId);
                 let body = {
                     "conditions":[
                         {
@@ -921,6 +928,7 @@
                 })
             },
             getAirData(layerId,stime,etime){
+                this.$mapUtil.removeTemLayer(layerId);
                 let body = {
                     "conditions":[
                         {

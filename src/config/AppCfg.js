@@ -8,6 +8,7 @@ const appCfg = {
     map: {
         mapRootUrl: 'http://114.116.231.97:6060/geoserver/sf/wms',
         wfsRootUrl: 'http://114.116.231.97:6060/geoserver/sf/ows',
+        //接口外网202.99.99.49 接口内网172.26.1.15 地图外网114.116.231.97 地图内网172.26.1.18
         gisApiUrl: 'http://202.99.99.49:8100/dc-server/',
         userKey:"9b10ae3a-bf25-46db-ac20-c0e8963367e0",
         minZoom: 4,

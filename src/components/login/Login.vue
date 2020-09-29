@@ -46,6 +46,7 @@
                     "passWord":this.password
                 };
                 this.$axios({
+                    //url:"http://172.26.1.11:8306/simple-user-center-server/userCenter/new/login",
                     url: "https://sthj.teda.gov.cn/app-simple-user-center-server/userCenter/new/login",
                     method: "post",
                     data: body,
