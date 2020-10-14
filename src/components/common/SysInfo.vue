@@ -30,7 +30,7 @@
     }
 
     .sys-title-cls {
-        color: #e2e9e9;
+        color: #03e8eb;
         font-size: 24px;
         font-weight: 500;
         margin-left: 10px ;

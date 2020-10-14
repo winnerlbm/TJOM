@@ -23,20 +23,17 @@ const mapUtil = {
         });
 
         //初始化底图-天地图
-       /* this.baseMapLayer = L.tileLayer.chinaProvider('TianDiTu.Satellite.Map', {
+        this.baseMapLayer = L.tileLayer.chinaProvider('GaoDe.Normal.Map', {
             maxZoom: appCfg.map.maxZoom,
             minZoom: appCfg.map.minZoom
         }).addTo(map);
-        this.annoMapLayer = L.tileLayer.chinaProvider('TianDiTu.Satellite.Annotion', {
+
+
+        /*this.baseMapLayer = L.tileLayer.chinaProvider('Geoq.Tecent.Dark', {
             maxZoom: appCfg.map.maxZoom,
             minZoom: appCfg.map.minZoom
         }).addTo(map);*/
 
-
-        this.baseMapLayer = L.tileLayer.chinaProvider('Geoq.Tecent.Dark', {
-            maxZoom: appCfg.map.maxZoom,
-            minZoom: appCfg.map.minZoom
-        }).addTo(map);
 
         mapUtil.lMap = map;
     },

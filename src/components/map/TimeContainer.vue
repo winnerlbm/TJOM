@@ -8,6 +8,10 @@
         </div>
         <div class="containers" >
             <div class="detailDiv" v-if="showType=='factory'">
+                <div class="baseTitle">
+                    <img src="@/assets/image/sline.png">
+                    <span>基本信息</span>
+                </div>
                 <div class="baseDiv">
                     <div class="company_name text-ell">{{showObj.companyName}}</div>
                     <div class="company_type"><img class="faicon" src="@/assets/image/fa/fa-type.png"/>行业类别：{{validNullStr(showObj.industryTypeName)}}</div>
@@ -56,9 +60,11 @@
                                 <div class="source">
                                     <div class="content">
                                         <div class="company_name text-ell">{{item.caseReason}}</div>
-                                        <p  class="describe text-ell">案件来源：{{item.caseSourceName}}</p>
-                                        <p  class="describe text-ell">立案时间：{{item.filingTime}}</p>
-                                        <p  class="describe text-ell">案件状态：{{item.currentNode}}</p>
+                                        <p  class="describe text-ell">{{item.filingTime}}</p>
+                                        <div class="newStatus">
+                                            <div class="caseSource">{{item.caseSourceName}}</div>
+                                            <div class="caseNode">{{item.currentNode}}</div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -70,11 +76,12 @@
                             <div v-for="(item,key) in xfList" class="container" :key="key">
                                 <div class="source">
                                     <div class="content">
-                                        <div class="company_name text-ell">{{item.companyName}}</div>
-
-                                        <p  class="describe text-ell">案件来源：{{item.sourceName}}</p>
-                                        <p  class="describe text-ell">创建时间：{{item.createTime}}</p>
-                                        <p  class="describe text-ell">案件状态：{{item.currentNode}}</p>
+                                        <div class="company_name text-ell">{{item.content}}</div>
+                                        <p  class="describe text-ell">{{item.createTime}}</p>
+                                        <div class="newStatus">
+                                            <div class="caseSource">{{item.sourceName}}</div>
+                                            <div class="caseNode">{{item.currentNode}}</div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -724,10 +731,12 @@
                     <div v-for="(item,key) in xzcfList" class="container" :key="key" >
                         <div class="source">
                             <div class="content">
-                                <div class="company_name text-ell">案由：{{item.caseReason}}</div>
-                                <p  class="describe text-ell">案件来源：{{item.caseSourceName}}</p>
-                                <p  class="describe text-ell">立案时间：{{item.filingTime}}</p>
-                                <p  class="describe text-ell">案件状态：{{item.currentNode}}</p>
+                                <div class="company_name text-ell">{{item.caseReason}}</div>
+                                <p  class="describe text-ell">{{item.filingTime}}</p>
+                                <div class="newStatus">
+                                    <div class="caseSource">{{item.caseSourceName}}</div>
+                                    <div class="caseNode">{{item.currentNode}}</div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -745,11 +754,13 @@
                     <div v-for="(item,key) in xfList" class="container" :key="key">
                         <div class="source">
                             <div class="content">
-                                <div class="company_name text-ell">编号名称：{{item.petitionNoName}}</div>
-                                <p  class="describe">信访内容：{{item.content}}</p>
-                                <p  class="describe text-ell">案件来源：{{item.sourceName}}</p>
-                                <p  class="describe text-ell">创建时间：{{item.createTime}}</p>
-                                <p  class="describe text-ell">案件状态：{{item.currentNode}}</p>
+                                <div class="company_name text-ell">{{item.petitionNoName}}</div>
+                                <p  class="describe">{{item.content}}</p>
+                                <p  class="describe text-ell">{{item.createTime}}</p>
+                                <div class="newStatus">
+                                    <div class="caseSource">{{item.sourceName}}</div>
+                                    <div class="caseNode">{{item.currentNode}}</div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -767,8 +778,8 @@
                     <div v-for="(item,key) in cbList" class="container" :key="key">
                         <div class="source">
                             <div class="content">
-                                <div class="company_name text-ell">排口名称：{{item.nodeName}}</div>
-                                <p  class="describe">超标详情：{{item.alarmInfo}}</p>
+                                <div class="company_name text-ell">{{item.nodeName}}</div>
+                                <p  class="describe">{{item.alarmInfo}}</p>
                                 <!--p  class="describe text-ell">报警代码：{{item.code}}</p-->
                                 <p  class="describe text-ell">报警时间：{{item.alarmTime}}</p>
                             </div>
@@ -2415,17 +2426,19 @@
         width: 305px;
         z-index: 999;
         border-radius: 3px;
-        background-color: rgba(0, 34, 68, 0.83);
+        background-color: rgba(15, 35, 54, 0.83);
         color: #fff;
         height: calc(100% - 205px);
     }
     .etitle {
-        height: 30px;
-        line-height: 30px;
+        height: 32px;
+        line-height: 32px;
         padding: 0 10px;
         text-align: left;
-        border-bottom: 1px solid #102856;
+        border-bottom: 0px solid #102856;
         font-size: 13px;
+        background: rgba(194, 228, 242, 0.1);
+        border-radius: 4px 4px 0px 0px;
     }
     .etitle span {
         display: inline-block;
@@ -2443,8 +2456,24 @@
     .etitle img {
         float: right;
         margin-top: 5px;
-        width: 15px;
+        width: 20px;
         cursor: pointer;
+    }
+    .baseTitle {
+        height: 25px;
+        line-height: 32px;
+        padding: 0 10px;
+        text-align: left;
+        border-bottom: 0px solid #102856;
+        font-size: 13px;
+    }
+    .baseTitle img {
+        margin-right:5px;
+        vertical-align: middle;
+        width:4px;
+    }
+    .baseTitle span {
+        color:#03E9EB;
     }
     .dataConts {
         height:auto;
@@ -2458,64 +2487,44 @@
 
     .baseDiv {
         cursor: pointer;
-        padding: 10px 10px;
+        padding: 10px;
         margin: 0;
-        -webkit-box-shadow: inset 0 -1px 0 0 hsla(0,0%,98%,.2);
-        box-shadow: inset 0 -1px 0 0 hsla(0,0%,98%,.2);
-        background-color: rgba(33, 150, 243, 0.15);
+        /*background-color: rgba(33, 150, 243, 0.15);*/
         position: relative;
-        box-shadow: 0px 1px 10px #087dce inset;
-        background-size: 2px 16px, 16px 2px, 2px 16px, 16px 2px;
-        margin: 5px;
+        margin: 0;
     }
 
     .sucDiv {
         cursor: pointer;
-        padding: 10px 10px;
+        padding: 10px;
         margin: 0;
-        -webkit-box-shadow: inset 0 -1px 0 0 hsla(0,0%,98%,.2);
-        box-shadow: inset 0 -1px 0 0 hsla(0,0%,98%,.2);
         background-color: rgba(0, 150, 25, 0.58);
         position: relative;
-        box-shadow: 0px 1px 10px #087dce inset;
-        background-size: 2px 16px, 16px 2px, 2px 16px, 16px 2px;
-        margin: 5px;
+        margin: 0;
     }
     .warnDiv {
         cursor: pointer;
-        padding: 10px 10px;
+        padding: 10px;
         margin: 0;
-        -webkit-box-shadow: inset 0 -1px 0 0 hsla(0,0%,98%,.2);
-        box-shadow: inset 0 -1px 0 0 hsla(0,0%,98%,.2);
         background-color: rgba(176, 174, 10,0.57);
         position: relative;
-        box-shadow: 0px 1px 10px #087dce inset;
-        background-size: 2px 16px, 16px 2px, 2px 16px, 16px 2px;
-        margin: 5px;
+        margin: 0;
     }
     .goodDiv {
         cursor: pointer;
-        padding: 10px 10px;
+        padding: 10px;
         margin: 0;
-        -webkit-box-shadow: inset 0 -1px 0 0 hsla(0,0%,98%,.2);
-        box-shadow: inset 0 -1px 0 0 hsla(0,0%,98%,.2);
         background-color: rgba(14, 255, 127,0.57);
         position: relative;
-        box-shadow: 0px 1px 10px #087dce inset;
-        background-size: 2px 16px, 16px 2px, 2px 16px, 16px 2px;
-        margin: 5px;
+        margin: 0;
     }
     .errDiv {
         cursor: pointer;
-        padding: 10px 10px;
+        padding: 10px;
         margin: 0;
-        -webkit-box-shadow: inset 0 -1px 0 0 hsla(0,0%,98%,.2);
-        box-shadow: inset 0 -1px 0 0 hsla(0,0%,98%,.2);
         background-color: rgba(255, 0, 0,0.57);
         position: relative;
-        box-shadow: 0px 1px 10px #087dce inset;
-        background-size: 2px 16px, 16px 2px, 2px 16px, 16px 2px;
-        margin: 5px;
+        margin: 0;
     }
     .eleft {
         width: 200px;
@@ -2543,6 +2552,7 @@
         font-size: 14px;
         color: #fff;
         text-align: left;
+        font-family: PingFangSC-Medium, PingFang SC;
     }
     .text-ell {
         overflow: hidden;
@@ -2576,7 +2586,7 @@
         font-size: 12px;
     }
     .leftBox >>>.el-collapse {
-        border-top: 1.5px solid #3765a7;
+        border-top: 0px solid #3765a7;
         border-bottom: 0px solid #EBEEF5;
     }
     .leftBox >>>.el-collapse-item__header {
@@ -2589,7 +2599,7 @@
         justify-content: space-between;
         height: 32px;
         line-height: 32px;
-        color: #fff;
+        color: #03E9EB;
         font-size: 13px;
         font-weight: 400;
         background-color: rgba(0,0,0,.1);
@@ -2600,6 +2610,15 @@
         -ms-flex-positive: 1;
         flex-grow: 1;
         padding: 0 12px;
+    }
+    .leftBox >>>.el-collapse-item__header:before {
+        content: "";   
+        display: inline-block;   
+        width: 3.5px;
+        height: 15px;
+        background: #03E9EB;
+        vertical-align: middle;
+        margin-right: 5px;
     }
     .leftBox >>>.el-collapse-item__wrap {
         will-change: height;
@@ -2616,7 +2635,7 @@
         line-height: 1.769230769230769;
     }
     .el-collapse {
-        border-top: 1.5px solid #27508a;
+        border-top: 0px solid #27508a;
         border-bottom: 0px solid #EBEEF5;
     }
     .containers {
@@ -2627,14 +2646,15 @@
         cursor: pointer;
         padding: 10px 20px;
         margin: 0;
-        -webkit-box-shadow: 0px 1px 10px #087dce inset;
+        /*-webkit-box-shadow: 0px 1px 10px #087dce inset;
         box-shadow: 0px 1px 10px #087dce inset;
         background-size: 2px 16px, 16px 2px, 2px 16px, 16px 2px;
         margin: 5px;
-        background-color: rgba(33, 150, 243, 0.15);
+        background-color: rgba(33, 150, 243, 0.15);*/
+        border-bottom:1px solid rgba(245, 245, 245, 0.22);
     }
     .container:hover {
-        background-color: rgba(33, 150, 243, 0.45);
+        background-color: rgba(170, 213, 253, 0.3);
     }
     .queryCont {
         display: flex;
@@ -2669,7 +2689,7 @@
     }
     .queryCont >>>.el-input__inner {
         color: #fff;
-        background-color: hsla(0,0%,98%,.2);
+        background-color: rgba(23, 154, 155, 0.49);
         border-radius: 14px;
         border: 0;
         height: 24px;
@@ -2707,11 +2727,10 @@
         padding: 0;
     }
     .ulTitle {
-        border-bottom: 1.5px solid #17244d;
         padding: 2px;
-        background-color: #1a2853;
         margin-top: 10px;
         display: flex;
+        background: rgba(194, 228, 242, 0.17);
     }
     .timeDatas li span {
         display: inline-block;
@@ -2742,5 +2761,39 @@
         padding: 5px;
         color: #ef1313;
         font-weight: 600;
+    }
+    .newStatus {
+        text-align: left;
+        margin-top: 5px;
+    }
+    .caseSource {
+        width: auto;
+        min-width:60px;
+        height: 23px;
+        background: rgba(168, 235, 3, 0.2);
+        border-radius: 16px;
+        border: 1px solid #A8EB03;
+        display:inline-block;
+        color:#A8EB03;
+        font-size:12px;
+        padding: 0 5px;
+        line-height: 23px;
+        text-align: center;
+        margin-right:5px;
+    }
+    .caseNode {
+        width: auto;
+        min-width:60px;
+        height: 23px;
+        background: rgba(25, 206, 249, 0.2);
+        border-radius: 16px;
+        border: 1px solid #03E9EB;
+        display:inline-block;
+        color:#03E9EB;
+        font-size:12px;
+        padding: 0 5px;
+        line-height: 23px;
+        text-align: center;
+        margin-right:5px;
     }
 </style>

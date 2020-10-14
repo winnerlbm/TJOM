@@ -53,7 +53,7 @@
 
     .week {
         font-family: lcd;
-        color: #e2e9e9;
+        color: #03e8eb;
         font-size: 16px;
         line-height: 16px;
         font-weight: 600;

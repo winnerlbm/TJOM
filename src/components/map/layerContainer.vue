@@ -1,18 +1,21 @@
 <template>
     <div class="layerDiv" v-loading="loading"  element-loading-spinner="el-icon-loading"
     element-loading-background="rgba(0, 0, 0, 0.8)">
-        <div class="etitle" v-show="false">
-            <i class="el-icon-s-operation" style="margin-right:5px"></i> 业务数据图层
+        <div class="etitle" v-show="true">
+            数据图层
         </div>
         <div class="layerTitle">
+            <span class="laRec"></span>
             企业数据
         </div>
         <div class="layerList">
             <ul>
                 <li v-for="(item,key) in factoryList" :key="key" >
-                    <el-checkbox style="vertical-align: middle" v-model="item.checked" @change="setFactory($event,item)"></el-checkbox>
+                    <!--el-checkbox style="vertical-align: middle" v-model="item.checked"></el-checkbox-->
                     <img :src="item.image" alt="">
                     <span>{{item.name}}</span>
+                    <el-switch  v-model="item.checked" active-color="#20AFB0"  @change="setFactory($event,item)" inactive-color="#356570" :width="30">
+                    </el-switch>
                 </li>
             </ul>
         </div>
@@ -25,30 +28,38 @@
                     <el-checkbox style="vertical-align: middle" v-model="item.checked" @change="setFactory($event,item)"></el-checkbox>
                     <img :src="item.image" alt="">
                     <span>{{item.name}}</span>
+                    <el-switch  v-model="item.checked" active-color="#20AFB0"  @change="setFactory($event,item)" inactive-color="#356570" width="30">
+                    </el-switch>
                 </li>
             </ul>
         </div>-->
         <div class="layerTitle">
+            <span class="laRec"></span>
             空气质量数据监测站
         </div>
         <div class="layerList">
             <ul>
                 <li v-for="(item,key) in airList" :key="key" >
-                    <el-checkbox style="vertical-align: middle" v-model="item.checked" @change="setFactory($event,item)"></el-checkbox>
+                    <!--el-checkbox style="vertical-align: middle" v-model="item.checked" @change="setFactory($event,item)"></el-checkbox-->
                     <img :src="item.image" alt="">
                     <span>{{item.name}}</span>
+                    <el-switch  v-model="item.checked" active-color="#20AFB0"  @change="setFactory($event,item)" inactive-color="#356570" :width="30">
+                    </el-switch>
                 </li>
             </ul>
         </div>
         <div class="layerTitle">
+            <span class="laRec"></span>
             热力图
         </div>
         <div class="layerList">
             <ul>
                 <li v-for="(item,key) in statisList" :key="key" >
-                    <el-checkbox style="vertical-align: middle" v-model="item.checked" @change="setHeatMap($event,item)"></el-checkbox>
+                    <!--el-checkbox style="vertical-align: middle" v-model="item.checked" @change="setHeatMap($event,item)"></el-checkbox-->
                     <img :src="item.image" alt="">
                     <span>{{item.name}}</span>
+                    <el-switch  v-model="item.checked" active-color="#20AFB0"  @change="setHeatMap($event,item)" inactive-color="#356570" :width="30">
+                    </el-switch>
                 </li>
             </ul>
         </div>
@@ -63,8 +74,8 @@
             return {
                 factoryList:[
                     {type:"factory",name:"所有企业",checked:false,image:require("../../assets/image/icon/factory.png")},
-                    {type:"wryFac",name:"在线监控企业",checked:false,image:require("../../assets/image/icon/wryfac.png")},
-                    {type:"mine",name:"工况监控企业",checked:false,image:require("../../assets/image/icon/gkxx.png")},
+                    {type:"wryFac",name:"在线监控企业",checked:false,image:require("../../assets/image/icon/gkxx.png")},
+                    {type:"mine",name:"工况监控企业",checked:false,image:require("../../assets/image/icon/wryfac.png")},
                    /* {type:"wg",name:"废气排污口",checked:false,image:require("../../assets/image/icon/wry.png")},
                     {type:"ww",name:"废水排污口",checked:false,image:require("../../assets/image/icon/wry.png")}*/
                 ],
@@ -991,18 +1002,19 @@
         right: 10px;
         width: 250px;
         height: auto;
-        background-color: rgba(0, 34, 68, 0.83);
+        background-color: rgba(15, 35, 54, 0.83);
         z-index: 1090;
         border-radius: 5px;
     }
     .etitle{
-        height: 25px;
+        height: 31px;
         text-align: left;
         color: #fff;
-        font-size: 13px;
-        line-height: 25px;
+        font-size: 14px;
+        line-height: 31px;
         padding-left: 15px;
-        border-bottom: 2px solid #0c4f9e;
+        background: rgba(194, 228, 242, 0.1);
+        border-radius: 4px 4px 0px 0px;
     }
     .layerList {
         padding: 5px;
@@ -1010,11 +1022,19 @@
     .layerTitle {
         height: 28px;
         line-height: 28px;
-        color: #fff;
+        color: #03E9EB;
         font-size: 13px;
         text-align: left;
         padding: 0 15px;
-        background-color: rgba(27, 40, 86, 0.86);
+        
+    }
+    .laRec {
+        display: inline-block;
+        width: 3px;
+        height: 15px;
+        background: #03E9EB;
+        vertical-align: middle;
+        margin-right: 3px;
     }
     .layerList ul {
         margin: 0;
@@ -1036,6 +1056,48 @@
         font-size: 13px;
         color:#fff;
         vertical-align: middle;
+    }
+    .layerList >>>.el-switch{
+       float:right;
+       margin-top:3px;
+    }
+    .layerList >>>.el-switch__core {
+        margin: 0;
+        display: inline-block;
+        position: relative;
+        width: 30px;
+        height: 15px;
+        border: 1px solid #DCDFE6;
+        outline: none;
+        border-radius: 10px;
+        box-sizing: border-box;
+        background: #DCDFE6;
+        cursor: pointer;
+        transition: border-color .3s, background-color .3s;
+        vertical-align: middle;
+    }
+    .layerList >>>.el-switch__core:after {
+        content: "";
+        position: absolute;
+        top: 1px;
+        left: 1px;
+        border-radius: 100%;
+        transition: all .3s;
+        width: 12px;
+        height: 12px;
+        background-color: #fff;
+    }
+
+    .layerList >>>.el-switch.is-checked .el-switch__core:after {
+        content: "";
+        position: absolute;
+        top: 1px;
+        left: 32px;
+        border-radius: 100%;
+        transition: all .3s;
+        width: 12px;
+        height: 12px;
+        background-color: #fff;
     }
 
 </style>

@@ -770,25 +770,25 @@
         border: 1px solid #3286fe;*/
         height: 40px;
         line-height: 40px;
-        background-color: rgba(0, 34, 68, 0.83);
+        background-color: rgba(15, 35, 54, 0.83);
         width: auto;
         border-radius: 3px;
         text-align: left;
         padding-left: 15px;
-        border: 1px solid #154081;
+        border: 0px solid rgba(15, 35, 54, 0.93);
     }
     .inputDiv input {
         /*border: none;
         height: 30px;
         line-height: 30px;
-        width: 195px;
+        width: 197px;
         border-right: 1px solid #eee;
         outline: none;*/
         border: none;
         height: 30px;
         line-height: 30px;
-        width: 195px;
-        border-right: 1px solid #154081;
+        width: 197px;
+        border-right: 0px solid #152a4b;
         outline: none;
         background: transparent;
         color: #fff;
@@ -807,9 +807,9 @@
         border-radius: 0 3px 3px 0;
         cursor: pointer;
         outline: none;*/
-        background-color: #154081;
+        background-color: rgba(255,255,255,0.1);
         border: none;
-        height: 41px;
+        height: 40px;
         line-height: 40px;
         border-radius: 0 3px 3px 0;
         cursor: pointer;
@@ -847,18 +847,18 @@
     }
     input::-webkit-input-placeholder{
         font-size: 12px;
-        color: #fff;
+        color: #03e8eb;
     }
     input::-moz-placeholder{   /* Mozilla Firefox 19+ */
         font-size: 12px;
-        color: #fff;
+        color: #03e8eb;
     }
     input:-moz-placeholder{    /* Mozilla Firefox 4 to 18 */
         font-size: 12px;
-        color: #fff;
+        color: #03e8eb;
     }
     input:-ms-input-placeholder{  /* Internet Explorer 10-11 */ 
         font-size: 12px;
-        color: #fff;
+        color: #03e8eb;
     }
 </style>

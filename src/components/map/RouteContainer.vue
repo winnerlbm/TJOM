@@ -7,12 +7,16 @@
                 <i class="el-icon-close" @click="hidePRoute"></i>
             </div>
             <div v-for="(item,key) in pointsHtml" class="points">
-                <span>{{item.spanText}}</span>
+                <!--span>{{item.spanText}}</span-->
+                <img :src="item.spanImg" alt="" class="spanImg">
                 <input type="text" v-model="item.inputVal" :placeholder="item.holder" @input="changeItem(item,key)">
                 <div class="tools">
-                    <img src="../../assets/image/route/clearIpt.png" @click="clearInput(item,key)" v-if="item.clear" alt="">
+                    <i class="el-icon-error" @click="clearInput(item,key)" v-if="item.clear" ></i>
+                    <i class="el-icon-remove" @click="delRoute(item,key)" v-if="item.del" ></i>
+                    <i class="el-icon-circle-plus" @click="addRoute(item,key)" v-if="item.add" ></i>
+                    <!--img src="../../assets/image/route/clearIpt.png" @click="clearInput(item,key)" v-if="item.clear" alt="">
                     <img src="../../assets/image/route/delRoute.png" @click="delRoute(item,key)" v-if="item.del" alt="">
-                    <img src="../../assets/image/route/addRoute.png" @click="addRoute(item,key)" v-if="item.add" alt="">
+                    <img src="../../assets/image/route/addRoute.png" @click="addRoute(item,key)" v-if="item.add" alt=""-->
                 </div>
             </div>
             <div class="butns">
@@ -22,7 +26,7 @@
         <div class="routeResult"  v-show="roteResultShow">
             <div class="routTitle">
                 <span>最佳路径</span>
-                <img style="float: right;width: 15px;margin-top: 6px;cursor: pointer" src="../../assets/image/back.png"  @click="hideRoute">
+                <img style="float: right;width: 20px;margin-top: 6px;cursor: pointer" src="../../assets/image/back.png"  @click="hideRoute">
             </div>
             <div class="routes">
                 <div class="origin">
@@ -44,7 +48,7 @@
         <div class="facNmDiv" :style="{'top': curr_top + 'px'}" v-show="facShow">
             <ul>
                 <li v-for="(item,key) in facList" @click="selectFac(item)">
-
+                    <img src="@/assets/image/route/rp.png" alt="">
                     <span>{{item.companyName}}</span>
                 </li>
             </ul>
@@ -60,9 +64,10 @@
                 roteSelectShow:true,
                 roteResultShow:false,
                 pointsHtml:[
-                    {spanText:"起",langs:[],inputVal:"",clear:false,add:true,del:false,holder:"请输入起点"},
-                   /* {spanText:"经",langs:[],inputVal:"",clear:false,add:true,del:true,holder:"请输入途径点"},*/
-                    {spanText:"终",langs:[],inputVal:"",clear:false,add:false,del:false,holder:"请输入终点"},
+                    {spanText:"起",langs:[],inputVal:"",clear:false,add:true,del:false,holder:"请输入起点",
+                    spanImg:require("@/assets/image/route/sp.png")},
+                    {spanText:"终",langs:[],inputVal:"",clear:false,add:false,del:false,holder:"请输入终点",
+                    spanImg:require("@/assets/image/route/ep.png")}
                 ],
                 facList:[],
                 curr_top:40,
@@ -80,9 +85,10 @@
             showPRoute(){
                 this.showRoute = true;
                 this.pointsHtml = [
-                    {spanText:"起",langs:[],inputVal:"",clear:false,add:true,del:false,holder:"请输入起点"},
-                    /*{spanText:"经",langs:[],inputVal:"",clear:false,add:true,del:true,holder:"请输入途径点"},*/
-                    {spanText:"终",langs:[],inputVal:"",clear:false,add:false,del:false,holder:"请输入终点"},
+                    {spanText:"起",langs:[],inputVal:"",clear:false,add:true,del:false,holder:"请输入起点",
+                    spanImg:require("@/assets/image/route/sp.png")},
+                    {spanText:"终",langs:[],inputVal:"",clear:false,add:false,del:false,holder:"请输入终点",
+                    spanImg:require("@/assets/image/route/ep.png")}
                 ];
                 this.tempLayer = L.layerGroup();
                 this.$mapUtil.lMap.addLayer(this.tempLayer);
@@ -117,7 +123,8 @@
                 if(this.pointsHtml.length>=10){
                     this.$message.error("最多添加10个企业点！");
                 }else{
-                    let newitem = {spanText:"经",langs:[],inputVal:"",clear:false,add:true,del:true,holder:"请输入途径点"};
+                    let newitem = {spanText:"经",langs:[],inputVal:"",clear:false,add:true,del:true,holder:"请输入途径点",
+                    spanImg:require("@/assets/image/route/tp.png")};
                     this.pointsHtml.splice(key+1, 0, newitem);
                 }
             },
@@ -308,7 +315,7 @@
         width: 310px;
         z-index: 999;
         border-radius: 3px;
-        background-color: rgba(15, 43, 108, 0.83);
+        background-color: rgba(15, 35, 54, 0.83);
         color: #fff;
         height: auto;
         max-height: calc(100% - 185px);
@@ -320,9 +327,9 @@
         text-align: left;
         padding: 0 10px;
         font-size: 14px;
-        color: #fff;
+        color: #03E9EB;
         border-radius: 3px 3px 0 0;
-        border-bottom: 1.5px solid #283ba4;
+        border-bottom: 1px solid rgba(245, 245, 245, 0.22);
     }
     .routTitle i {
         float: right;
@@ -331,7 +338,7 @@
         cursor: pointer;
     }
     .points {
-        border-bottom: 1px solid #3F51B5;
+        border-bottom: 1px solid rgba(245, 245, 245, 0.22);
         height: 29px;
         line-height: 30px;
         text-align: left;
@@ -353,6 +360,11 @@
         color:#fff;
         background-color: transparent;
     }
+    .spanImg {
+        width: 17px;
+        vertical-align: middle;
+        margin-right: 5px;
+    }
     .tools {
         position: absolute;
         top: 10px;
@@ -362,6 +374,12 @@
         cursor: pointer;
         width: 15px;
         margin: 0 1px;
+    }
+    .tools i {
+        cursor: pointer;
+        font-size: 15px;
+        margin: 0 1px;
+        color:#20AFB0;
     }
     .facNmDiv {
         position: absolute;
@@ -381,13 +399,17 @@
         padding: 0;
     }
     .facNmDiv ul li {
-        height: 28px;
-        line-height: 28px;
+        height: 30px;
+        line-height: 30px;
         cursor: pointer;
         text-align: left;
         padding: 0 15px;
         font-size: 13px;
         overflow: hidden;
+    }
+    .facNmDiv ul li img {
+        width:15px;
+        margin-right:5px;
     }
     .facNmDiv ul li:hover {
         background-color: #eee;

@@ -1,6 +1,10 @@
 <template>
     <div class="markerDiv">
+        <div class="etitle" v-show="true">
+            地图标绘
+        </div>
         <div class="markerTitle">
+            <span class="laRec"></span>
             点位
         </div>
         <div class="markerList">
@@ -11,6 +15,7 @@
             </ul>
         </div>
         <div class="markerTitle">
+            <span class="laRec"></span>
             线路
         </div>
         <div class="markerList">
@@ -21,6 +26,7 @@
             </ul>
         </div>
         <div class="markerTitle">
+            <span class="laRec"></span>
             区域
         </div>
         <div class="markerList">
@@ -30,13 +36,11 @@
                 </li>
             </ul>
         </div>
-        <div class="markerTitle">
-            工具
-        </div>
-        <div class="markerList">
+        <div class="toolList">
             <ul>
                 <li v-for="(item,key) in toolList" :key="key" @click="drawTool(item)"   @click.stop="doSomething($event)" :class="{'active':item.cls==selCls}" >
                     <img :src="item.image" alt="" :title="item.color">
+                    <span>{{item.color}}</span>
                 </li>
             </ul>
         </div>
@@ -203,15 +207,25 @@
     .markerDiv {
         position: absolute;
         top: 130px;
-        right: 180px;
+        right: 80px;
         width: 200px;
         height: auto;
-        background-color: rgba(0, 34, 68, 0.83);
+        background-color: rgba(15, 35, 54, 0.83);
         z-index: 990;
-        border-radius: 5px;
+        border-radius: 2px;
     }
     .markerList {
-        padding:10px;
+        padding:5px 10px;
+    }
+    .etitle{
+        height: 31px;
+        text-align: left;
+        color: #fff;
+        font-size: 14px;
+        line-height: 31px;
+        padding-left: 15px;
+        background: rgba(194, 228, 242, 0.1);
+        border-radius: 4px 4px 0px 0px;
     }
     .markerTitle {
         height: 28px;
@@ -220,7 +234,15 @@
         font-size: 13px;
         text-align: left;
         padding: 0 15px;
-        background-color: rgba(27, 40, 86, 0.86);
+       /* background-color: rgba(27, 40, 86, 0.86);*/
+    }
+    .laRec {
+        display: inline-block;
+        width: 3px;
+        height: 15px;
+        background: #03E9EB;
+        vertical-align: middle;
+        margin-right: 3px;
     }
     .markerList ul {
         list-style: none;
@@ -240,5 +262,31 @@
         height: 20px;
         vertical-align: middle;
         width: 20px;
+    }
+    .toolList {
+        background: #526A74;
+        border-radius: 4px 4px 0px 0px;
+        height:32px;
+    }
+    .toolList ul {
+        display: flex;
+        list-style: none;
+        margin:0;
+        padding:0;
+    }
+    .toolList ul li {
+        color:#fff;
+        width:25%;
+        height:32px;
+        line-height:32px;
+        cursor:pointer;
+    }
+    .toolList ul li img {
+        width:13px;
+        vertical-align: middle;
+        margin-right:3px;
+    }
+    .toolList ul li span{
+        vertical-align: middle;
     }
 </style>

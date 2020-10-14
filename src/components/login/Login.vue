@@ -4,7 +4,7 @@
         <div class="loginDiv"  v-loading="loading" element-loading-spinner="el-icon-loading"
     element-loading-background="rgba(0, 0, 0, 0.8)">
             <div class="loginTitle">
-                天津经开区生态环境一张图
+                大气环境管控GIS系统
             </div>
             <div class="loginBox">
                 <div class="formDiv" style="margin-top:60px">
@@ -55,20 +55,20 @@
                     this.loading = false;
                     if(res.data.code == 200){
                         let user = res.data.data;
+                        let token = user.token;
+                        this.setCookie("token", token, 1);
                         sessionStorage.setItem("username",user.name);
                         this.$router.push('/map');
                     }else{
                         this.$message.error("用户名或密码错误！");
                     }
                 });
-
-
-                /*if(this.username=="admin"&&this.password=="admin"){
-                    sessionStorage.setItem("username","admin");
-                    this.$router.push('/map');
-                }else{
-                    this.$message("用户名或密码错误！");
-                }*/
+            },
+            setCookie(cname, cvalue, exdays) {
+              let d = new Date()
+              d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000))
+              let expires = 'expires=' + d.toUTCString()
+              document.cookie = cname + '=' + cvalue + '; ' + expires
             }
         }
     }

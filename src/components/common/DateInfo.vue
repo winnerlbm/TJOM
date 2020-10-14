@@ -2,15 +2,15 @@
     <div class="date-info-cls">
         <span class="date">
 			<span class="nowtime"
-				  style="color: #e2e9e9;font-size: 25px;font-family: lcd,serif;margin-right: 10px;">
+				  style="color: #03e8eb;font-size: 20px;font-family: lcd,serif;margin-right: 10px;">
 			{{nowTime}}
 			</span>
-			<!--<span  style="font-family: lcd;font-size: 14px;color: #e2e9e9;">{{nowDate}}</span>-->
-			<!--<span style="font-family: MicrosoftYaHei,serif;font-size: 16px;color: #e2e9e9;">{{nowWeek}}</span>-->
+			<!--<span  style="font-family: lcd;font-size: 14px;color: #03e8eb;">{{nowDate}}</span>-->
+			<!--<span style="font-family: MicrosoftYaHei,serif;font-size: 16px;color: #03e8eb;">{{nowWeek}}</span>-->
 		</span>
 		<span class="line"></span>
 		<span class="user">
-			<span style="color: #e2e9e9;font-size: 16px;font-family: lcd,serif;margin-right: 16px;">
+			<span style="color: #03e8eb;font-size: 16px;font-family: lcd,serif;margin-right: 16px;">
 				<img style="width: 25px;vertical-align: middle;margin-right: 5px;" src="../../assets/image/user.png" alt="">{{userName}}
 				<!--<i @click="showLog" class="el-icon-arrow-down loicon"></i>-->
 				<img @click="logOut" style="width: 15px;vertical-align: middle;margin-left: 5px;cursor: pointer" src="../../assets/image/exit.png" alt="">
@@ -141,7 +141,7 @@
 		display: inline-block;
 		width: 2px;
 		height: 45px;
-		background-color: rgba(12, 79, 158, 0.62);
+		background-color: rgba(22, 41, 62, 0.33);
 		margin: 0 15px;
 	}
     .date {
@@ -172,7 +172,7 @@
 		padding: 10px;
 		background-color: #000000;
 		z-index: 9999;
-		color: #fff;
+		color: #03e8eb;
 		border: 1px solid #0b315e;
 	}
 	.items {

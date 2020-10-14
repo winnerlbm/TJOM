@@ -160,6 +160,7 @@
                                 </el-option>
                             </el-select>
                         </div>
+
                     </div>
                     <div class="tableDiv">
                         <table  class="table table-wrapper" id="editTable">
@@ -800,7 +801,7 @@
         width: 305px;
         z-index: 999;
         border-radius: 3px;
-        background-color: rgba(0, 34, 68, 0.83);
+        background-color: rgba(15, 35, 54, 0.83);
         color: #fff;
         height: calc(100% - 205px);
     }
@@ -809,8 +810,9 @@
         line-height: 30px;
         padding: 0 10px;
         text-align: left;
-        border-bottom: 1px solid #102856;
+        border-bottom: 0px solid #102856;
         font-size: 13px;
+        background: rgba(194, 228, 242, 0.1);
     }
     .etitle i {
         float: right;
@@ -823,7 +825,7 @@
         overflow: auto;
     }
     .leftBox >>>.el-collapse {
-        border-top: 1.5px solid #3765a7;
+        border-top: 0px solid #3765a7;
         border-bottom: 0px solid #EBEEF5;
     }
     .leftBox >>>.el-collapse-item__header {
@@ -836,7 +838,7 @@
         justify-content: space-between;
         height: 32px;
         line-height: 32px;
-        color: #fff;
+        color: #03E9EB;
         font-size: 13px;
         font-weight: 400;
         background-color: rgba(0,0,0,.1);
@@ -848,6 +850,16 @@
         flex-grow: 1;
         padding: 0 12px;
     }
+    .leftBox >>>.el-collapse-item__header:before {
+        content: "";   
+        display: inline-block;   
+        width: 3.5px;
+        height: 15px;
+        background: #03E9EB;
+        vertical-align: middle;
+        margin-right: 5px;
+    }
+
     .leftBox >>>.el-collapse-item__wrap {
         will-change: height;
         background-color: transparent !important;
@@ -863,21 +875,22 @@
         line-height: 1.769230769230769;
     }
     .el-collapse {
-        border-top: 1.5px solid #27508a;
+        border-top: 0px solid #27508a;
         border-bottom: 0px solid #EBEEF5;
     }
     .container {
         cursor: pointer;
         padding: 10px 20px;
         margin: 0;
-        -webkit-box-shadow: 0px 1px 10px #087dce inset;
+        /*-webkit-box-shadow: 0px 1px 10px #087dce inset;
         box-shadow: 0px 1px 10px #087dce inset;
         background-size: 2px 16px, 16px 2px, 2px 16px, 16px 2px;
         margin: 5px;
-        background-color: rgba(33, 150, 243, 0.15);
+        background-color: rgba(33, 150, 243, 0.15);*/
+        border-bottom:1px solid rgba(245, 245, 245, 0.22);
     }
     .container:hover {
-        background-color: rgba(33, 150, 243, 0.45);
+        background-color: rgba(170, 213, 253, 0.3);
     }
     .source {
         display: -webkit-box;
@@ -932,7 +945,7 @@
     }
     .queryCont >>>.el-input__inner {
         color: #fff;
-        background-color: hsla(0,0%,98%,.2);
+        background-color: rgba(23, 154, 155, 0.49);
         border-radius: 14px;
         border: 0;
         height: 24px;
@@ -1035,7 +1048,7 @@
         white-space: nowrap;
     }
     .table-wrapper th {
-        background-color: #00255A;
+        background: rgba(194, 228, 242, 0.17);
         height: 20px;
         font-weight: 500;
         color: #fff;
@@ -1057,11 +1070,11 @@
     }
     .tabvalue span {
         display: inline-block;
-        border-radius: 10px;
-        padding: 0px 8px;
+        border-radius: 5px;
+        padding: 0px 3px;
         background-color: #FF9902;
         font-size: 12px;
-        width: 40px;
+        width: 30px;
     }
     .tabvalue span.level_0{
         background-color: #00E400;

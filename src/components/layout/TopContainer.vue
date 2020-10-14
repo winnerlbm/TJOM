@@ -33,6 +33,6 @@
         background-repeat: no-repeat;
         background-size: 100% 100%;*/
         left: 0;
-        background-color: rgba(3, 30, 56, 0.95);
+        background-color: rgba(43, 59, 77, 1.95);
     }
 </style>
