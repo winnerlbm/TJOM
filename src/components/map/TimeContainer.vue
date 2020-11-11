@@ -12,8 +12,8 @@
                     <img src="@/assets/image/sline.png">
                     <span>基本信息</span>
                 </div>
-                <div class="baseDiv">
-                    <div class="company_name text-ell">{{showObj.companyName}}</div>
+                <div class="baseDiv" @click="jumpWeb(showObj)" >
+                    <div class="company_name text-ell"><span class="jump">{{showObj.companyName}}</span></div>
                     <div class="company_type"><img class="faicon" src="@/assets/image/fa/fa-type.png"/>行业类别：{{validNullStr(showObj.industryTypeName)}}</div>
                     <p  class="describe text-ell"><img class="faicon" src="@/assets/image/fa/fa-code.png"/>统一社会信用代码：{{showObj.uscCode}}</p>
                     <p  class="describe text-ell"><img class="faicon" src="@/assets/image/fa/fa-lic.png"/>排污许可证号：{{showObj.permitLicence}}</p>
@@ -22,6 +22,10 @@
                     <p  class="describe text-ell"><img class="faicon" src="@/assets/image/fa/fa-tel.png"/>联系电话：{{showObj.telephone}}</p>
                     <p  class="describe text-ell"><img class="faicon" src="@/assets/image/fa/fa-addr.png"/>地址：{{showObj.operationAddress}}</p>
                     <p  class="describe text-ell"><img class="faicon" src="@/assets/image/fa/fa-post.png"/>邮编：{{showObj.postCode}}</p>
+                    <!--div class="btn-detail">
+                        <span>企业详情</span><img class="faicon" src="@/assets/image/jump.png"/>
+                        <i class="el-icon-position"></i>
+                    </div-->
                 </div>
                 <div class="dataConts">
                     <el-collapse v-model="activeNames" accordion>
@@ -56,14 +60,14 @@
                             </div>
                         </el-collapse-item>
                         <el-collapse-item v-if="xzcfList.length>0" :title="'行政处罚('+xzcfList.length+')'" name="xzcf" class="leftBox">
-                            <div v-for="(item,key) in xzcfList" class="container" :key="key" >
+                            <div v-for="(item,key) in xzcfList" class="container" :key="key" @click="jumpXZCFWeb(item)" >
                                 <div class="source">
                                     <div class="content">
                                         <div class="company_name text-ell">{{item.caseReason}}</div>
                                         <p  class="describe text-ell">{{item.filingTime}}</p>
                                         <div class="newStatus">
                                             <div class="caseSource">{{item.caseSourceName}}</div>
-                                            <div class="caseNode">{{item.currentNode}}</div>
+                                            <div class="caseNode">{{item.currentNode==null?"-":item.currentNode}}</div>
                                         </div>
                                     </div>
                                 </div>
@@ -73,14 +77,14 @@
                             </div>
                         </el-collapse-item>
                         <el-collapse-item v-if="xfList.length>0" :title="'环境信访('+xfList.length+')'" name="xf" class="leftBox">
-                            <div v-for="(item,key) in xfList" class="container" :key="key">
+                            <div v-for="(item,key) in xfList" class="container" :key="key"  @click="jumpHJXFWeb(item)">
                                 <div class="source">
                                     <div class="content">
                                         <div class="company_name text-ell">{{item.content}}</div>
                                         <p  class="describe text-ell">{{item.createTime}}</p>
                                         <div class="newStatus">
                                             <div class="caseSource">{{item.sourceName}}</div>
-                                            <div class="caseNode">{{item.currentNode}}</div>
+                                            <div class="caseNode">{{item.currentNode==null?"-":item.currentNode}}</div>
                                         </div>
                                     </div>
                                 </div>
@@ -427,7 +431,7 @@
                     </div>
                     <div class="eright">
                         <div class="indexName">{{newData.indexName}}({{standardUnitName}})</div>
-                        <div class="indexVal">{{newData.indexVal==null?'-':parseFloat(newData.indexVal).toFixed(3)}}</div>
+                        <div class="indexVal">{{newData.indexVal==null?'-':parseFloat(newData.indexVal).toFixed(1)}}</div>
                         <div class="indexTime">{{newData.indexTime}}</div>
                     </div>
                     <!--div class="company_name text-ell">{{showObj.stationName}}</div>
@@ -498,13 +502,103 @@
                             <ul class="dataList">
                                 <li v-for="(item,key) in resultList" :key="key" >
                                     <span class="ename">{{item.status}}</span>
-                                    <span class="eval">{{item.value==null?'-':parseFloat(item.value).toFixed(3)}}</span>
+                                    <span class="eval">{{item.value==null?'-':parseFloat(item.value).toFixed(1)}}</span>
                                     <span class="etime">{{item.recordTime}}</span>
                                 </li>
                             </ul>
                         </div>
                         <div class="echarts" v-show="showIndex==2">
                             <div id="linechart">
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="detailDiv" v-if="showType=='sttp_gk'">
+                <div :class="currentCls">
+                    <div class="eleft">
+                        <div class="company_name text-ell">{{showObj.stationName}}</div>
+                        <div class="company_type">测站类型：国控监测站</div>
+                        <p  class="describe text-ell">测站地址：{{showObj.address}}</p>
+                    </div>
+                    <div class="eright">
+                        <div class="indexName">{{newData.indexName}}({{standardUnitName}})</div>
+                        <div class="indexVal">{{newData.indexVal==null?'-':parseFloat(newData.indexVal).toFixed(1)}}</div>
+                        <div class="indexTime">{{newData.indexTime}}</div>
+                    </div>
+                </div>
+                <div class="dataConts">
+                    <div class="queryDiv">
+                        <div class="queryTitle">数据查询</div>
+                        <div class="queryCont">
+                            <div class="itime">
+                                <el-date-picker
+                                        v-model="stime"
+                                        type="datetimerange"
+                                        align="right"
+                                        unlink-panels
+                                        @change="changeGKQuery"
+                                        value-format="yyyy-MM-dd HH:mm:ss"
+                                        range-separator=""
+                                        start-placeholder="开始日期"
+                                        end-placeholder="结束日期"
+                                        :picker-options="pickerOptions">
+                                </el-date-picker>
+                            </div>
+                        </div>
+                        <div class="queryCont">
+                            <div class="iptw-60 mgr-8">
+                                <el-select v-model="queryTimeType" @change="changeGKQuery" placeholder="请选择">
+                                    <el-option
+                                            v-for="item in queryOptions"
+                                            :key="item.value"
+                                            :label="item.label"
+                                            :value="item.value">
+                                    </el-option>
+                                </el-select>
+                            </div>
+                            <div class="iptw-60 mgr-8">
+                                <el-select v-model="queryGkIndex"  @change="changeGKQuery" placeholder="请选择">
+                                    <el-option
+                                            v-for="item in queryGkIndexOptions"
+                                            :key="item.value"
+                                            :label="item.label"
+                                            :value="item.value">
+                                    </el-option>
+                                </el-select>
+                            </div>
+                            <div class="iptw-60 mgr-8">
+                                <el-select v-model="showIndex"   @change="changeShowCont" placeholder="请选择">
+                                    <el-option
+                                            v-for="item in showIndexOptions"
+                                            :key="item.value"
+                                            :label="item.label"
+                                            :value="item.value">
+                                    </el-option>
+                                </el-select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="timeDatas">
+                        <div class="tables" v-show="showIndex==1">
+                            <ul class="ulTitle">
+                                <li>
+                                    <span class="ename">等级</span>
+                                    <span class="eval">{{queryGkIndex=="vaqi"?"AQI":"监测值"}}</span>
+                                    <span class="etime">监测时间</span>
+                                </li>
+                            </ul>
+                            <ul class="dataList">
+                                <li v-for="(item,key) in resultList" :key="key" >
+                                    <span class="ename">{{item.status}}</span>
+                                    <span class="eval">{{item.value==null?'-':parseFloat(item.value).toFixed(1)}}</span>
+                                    <span class="etime">{{item.recordTime}}</span>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="echarts" v-show="showIndex==2">
+                            <div id="linegkchart">
 
                             </div>
                         </div>
@@ -728,14 +822,14 @@
                     <p  class="describe text-ell">排污许可证号：{{showObj.permitLicence}}</p>
                 </div-->
                 <div class="dataConts">
-                    <div v-for="(item,key) in xzcfList" class="container" :key="key" >
+                    <div v-for="(item,key) in xzcfList" class="container" :key="key" @click="jumpXZCFWeb(item)" >
                         <div class="source">
                             <div class="content">
                                 <div class="company_name text-ell">{{item.caseReason}}</div>
                                 <p  class="describe text-ell">{{item.filingTime}}</p>
                                 <div class="newStatus">
                                     <div class="caseSource">{{item.caseSourceName}}</div>
-                                    <div class="caseNode">{{item.currentNode}}</div>
+                                    <div class="caseNode">{{item.currentNode==null?"-":item.currentNode}}</div>
                                 </div>
                             </div>
                         </div>
@@ -751,7 +845,7 @@
                     <p  class="describe text-ell">排污许可证号：{{showObj.permitLicence}}</p>
                 </div-->
                 <div class="dataConts">
-                    <div v-for="(item,key) in xfList" class="container" :key="key">
+                    <div v-for="(item,key) in xfList" class="container" :key="key" @click="jumpHJXFWeb(item)">
                         <div class="source">
                             <div class="content">
                                 <div class="company_name text-ell">{{item.petitionNoName}}</div>
@@ -759,7 +853,7 @@
                                 <p  class="describe text-ell">{{item.createTime}}</p>
                                 <div class="newStatus">
                                     <div class="caseSource">{{item.sourceName}}</div>
-                                    <div class="caseNode">{{item.currentNode}}</div>
+                                    <div class="caseNode">{{item.currentNode==null?"-":item.currentNode}}</div>
                                 </div>
                             </div>
                         </div>
@@ -918,6 +1012,36 @@
                     label: 'NH3',
                     standardUnitName:'ug/m^3'
                 }],
+                queryGkIndex:"vaqi",
+                queryGkIndexOptions: [{
+                    value: 'vaqi',
+                    label: 'AQI',
+                    standardUnitName:'-'
+                },{
+                    value: 'v107',
+                    label: 'PM10',
+                    standardUnitName:'ug/m^3'
+                },{
+                    value: 'v101',
+                    label: 'SO2',
+                    standardUnitName:'ug/m^3'
+                },{
+                    value: 'v141',
+                    label: 'NO2',
+                    standardUnitName:'ug/m^3'
+                },{
+                    value: 'v108',
+                    label: 'O3',
+                    standardUnitName:'ug/m^3'
+                },{
+                    value: 'v106',
+                    label: 'CO',
+                    standardUnitName:'ug/m^3'
+                },{
+                    value: 'v121',
+                    label: 'PM2.5',
+                    standardUnitName:'ug/m^3'
+                }],
                 pickerOptions: {
                     shortcuts: [{
                         text: '最近一周',
@@ -1024,6 +1148,10 @@
                     this.showName = obj.pointName;
                     this.chartDOM = "lineairchart";
                     this.getAirIndexOptions(obj.id);
+                }else if(type == "sttp_gk"){
+                    this.showName = obj.stationName;
+                    this.chartDOM = "linegkchart";
+                    this.changeGKQuery();
                 }else if(type == "mineline"){
                     this.showName = obj.productLineName;
                     this.queryLineData(obj.productLineNo);
@@ -1357,6 +1485,217 @@
                     this.changeShowCont();
                 })
             },
+            searchGkHour(stationCode,stime,column){
+                let body = {
+                    "conditions":[
+                        {
+                            "operator":"AND",
+                            "field":"T_Scas_StationHour.stationCode",
+                            "match":"equal",
+                            "value":stationCode
+                        },
+                        {
+                            "operator":"AND",
+                            "match":"range",
+                            "field":"T_Scas_StationHour.timePoint",
+                            "value":"",
+                            "maxValue":stime[1],
+                            "minValue":stime[0]
+                        }
+                    ],
+                    "page":{
+                        "pageable": false,
+                        "currentPage": 1,
+                        "pageSize": 10
+                    },
+                    "sort":{
+                        "field": "timePoint",
+                        "order": "DESC"
+                    }
+                };
+                this.loading = true;
+                this.$axios({
+                    url: appCfg.map.gisApiUrl+"api/share/data/2c9a818f753f777a0175535e5b8956e4?userKey="+appCfg.map.userKey,
+                    method: "post",
+                    data: body,
+                    header:{'Content-type': 'application/json'}
+                }).then(res => {
+                    this.loading = false;
+                    let list = res.data.data.list;
+                    let obj = {};
+                    obj = this.queryGkIndexOptions.find((item)=>{
+                        return item.value === this.queryGkIndex;
+                    });
+                    let itemName =  obj.label;
+                    this.standardUnitName = obj.standardUnitName;
+                    if(list.length == 0){
+                        this.$message.error("未查询到相关数据！");
+                        this.resultList = list;
+                        this.changeShowCont();
+                        return;
+                    }
+                    
+                    this.resultList = [];
+                    for(let i=0;i<list.length;i++){
+                        let model = list[i];
+                        list[i].itemName = itemName;
+                        if(column=="vaqi"){
+                            model.value = model[column];
+                            model.level = this.getAqiLevel(model.quality);
+                        }else if(column=="v101"){
+                            model.value = model[column];
+                            model.level = this.getSo2Level(model.value);
+                        }else if(column=="v121"){
+                            model.value = model[column];
+                            model.level = this.getPm25Level(model.value);
+                        }else if(column=="v141"){
+                            model.value = model[column];
+                            model.level = this.getNo2Level(model.value);
+                        }else if(column=="v107"){
+                            model.value = model[column];
+                            model.level = this.getPm10Level(model.value);
+                        }else if(column=="v106"){
+                            model.value = model[column];
+                            model.level = this.getCOLevel(model.value);
+                        }else if(column=="v108"){
+                            model.value = model[column];
+                            model.level = this.getO3Level(model.value);
+                        }
+                        model.recordTime = model.timePoint;
+                        list[i].status = this.getLevel(list[i].level);
+                    }
+                    this.currentCls = this.getLevelCls(list[0].level);
+                    this.newData = {
+                        indexName:itemName,
+                        indexVal:list[0][this.queryGkIndex],
+                        indexTime:list[0].timePoint
+                    };
+
+                    this.resultList = list;
+                    this.changeShowCont();
+                })
+            },
+            getAqiLevel(level){
+                if(level=="优"){
+                    return 1;
+                }else if(level == "良"){
+                    return 2;
+                }else if(level == "轻度污染"){
+                    return 3;
+                }else if(level == "中度污染"){
+                    return 4;
+                }else if(level == "重度污染"){
+                    return 5;
+                }else if(level == "严重污染"){
+                    return 6;
+                }else{
+                    return 1;
+                }
+            },
+            getSo2Level(val){
+                val = parseFloat(val);
+                if(val>0&&val<=150){
+                    return 1;
+                }else if(val>150&&val<=500){
+                    return 2;
+                }else if(val>500&&val<=650){
+                    return 3;
+                }else if(val>650&&val<800){
+                    return 4;
+                }else{
+                    return 6;
+                }
+            },
+            getNo2Level(val){
+                val = parseFloat(val);
+                if(val>0&&val<=100){
+                    return 1;
+                }else if(val>100&&val<=200){
+                    return 2;
+                }else if(val>200&&val<=700){
+                    return 3;
+                }else if(val>700&&val<1200){
+                    return 4;
+                }else if(val>1200&&val<2340){
+                    return 5;
+                }else if(val>2340&&val<3090){
+                    return 6;
+                }else{
+                    return 6;
+                }
+            },
+            getPm10Level(val){
+                val = parseFloat(val);
+                if(val>0&&val<=50){
+                    return 1;
+                }else if(val>50&&val<=150){
+                    return 2;
+                }else if(val>150&&val<=250){
+                    return 3;
+                }else if(val>250&&val<350){
+                    return 4;
+                }else if(val>350&&val<420){
+                    return 5;
+                }else if(val>420&&val<500){
+                    return 6;
+                }else{
+                    return 6;
+                }
+            },
+            getPm25Level(val){
+                val = parseFloat(val);
+                if(val>0&&val<=35){
+                    return 1;
+                }else if(val>35&&val<=75){
+                    return 2;
+                }else if(val>75&&val<=115){
+                    return 3;
+                }else if(val>115&&val<150){
+                    return 4;
+                }else if(val>150&&val<250){
+                    return 5;
+                }else if(val>250&&val<350){
+                    return 6;
+                }else{
+                    return 6;
+                }
+            },
+            getO3Level(val){
+                val = parseFloat(val);
+                if(val>0&&val<=100){
+                    return 1;
+                }else if(val>100&&val<=160){
+                    return 2;
+                }else if(val>160&&val<=200){
+                    return 3;
+                }else if(val>200&&val<300){
+                    return 4;
+                }else if(val>300&&val<400){
+                    return 5;
+                }else if(val>400&&val<800){
+                    return 6;
+                }else{
+                    return 6;
+                }
+            },
+            getCOLevel(val){
+                val = parseFloat(val);
+                if(val>0&&val<=5){
+                    return 1;
+                }else if(val>5&&val<=10){
+                    return 2;
+                }else if(val>10&&val<=35){
+                    return 3;
+                }else if(val>35&&val<60){
+                    return 4;
+                }else if(val>60&&val<90){
+                    return 5;
+                }else if(val>90&&val<120){
+                    return 6;
+                }else{
+                    return 6;
+                }
+            },
             getLevel(level){
                 if(level==1){
                     return "优";
@@ -1376,17 +1715,17 @@
             },
             getLevelCls(level){
                 if(level==1){
-                    return "sucDiv";
+                    return "levelDiv_1";
                 }else if(level == 2){
-                    return "goodDiv";
+                    return "levelDiv_2";
                 }else if(level == 3){
-                    return "warnDiv";
+                    return "levelDiv_3";
                 }else if(level == 4){
-                    return "errDiv";
+                    return "levelDiv_4";
                 }else if(level == 5){
-                    return "errDiv";
+                    return "levelDiv_5";
                 }else if(level == 6){
-                    return "errDiv";
+                    return "levelDiv_6";
                 }else{
                     return "baseDiv";
                 }
@@ -1459,10 +1798,19 @@
             },
             changeStationQuery(){
                 if(this.queryTimeType == 2){
-                    this.formatStr = "hh时ff时";
+                    this.formatStr = "dd日hh时";
                     this.searchSttpHour(this.showObj.stationId,this.stime,this.queryIndex);
                 }else{
+                    this.formatStr = "hh时ff分";
+                    this.searchSttpMine(this.showObj.stationId,this.stime,this.queryIndex);
+                }
+            },
+            changeGKQuery(){
+                if(this.queryTimeType == 2){
                     this.formatStr = "dd日hh时";
+                    this.searchGkHour(this.showObj.stationCode,this.stime,this.queryGkIndex);
+                }else{
+                    this.formatStr = "hh时ff分";
                     this.searchSttpMine(this.showObj.stationId,this.stime,this.queryIndex);
                 }
             },
@@ -2413,6 +2761,18 @@
                     return str;
                 }
                 return "-";
+            },
+            jumpWeb(item){
+                let webUrl = appCfg.map.jumpUrl+":9007/tj-bims-web/#/pollutionSource/edit/BaseInfo/Entry?id=8a8e80e173bc2db3017457062e73001a&enterpriseType=&permitLicence="+item.permitLicence;
+                window.open(webUrl,'_blank')
+            },
+            jumpXZCFWeb(item){
+                let webUrl = appCfg.map.xzcfUrl+":9012/aps/caseWaitingTask/navigation.do?caseId="+item.id+"&handleType=2&workItemId=0&currentNode="+item.currentNode+"&viewStatus=3";
+                window.open(webUrl,'_blank')
+            },
+            jumpHJXFWeb(item){
+                let webUrl = appCfg.map.xzcfUrl+":9014/eps/eps/petition/total/check.do?id="+item.id;
+                window.open(webUrl,'_blank')
             }
         }
     }
@@ -2523,6 +2883,54 @@
         padding: 10px;
         margin: 0;
         background-color: rgba(255, 0, 0,0.57);
+        position: relative;
+        margin: 0;
+    }
+    .levelDiv_1 {
+        cursor: pointer;
+        padding: 10px;
+        margin: 0;
+        background-color: rgba(0, 228, 0, 0.68);
+        position: relative;
+        margin: 0;
+    }
+    .levelDiv_2 {
+        cursor: pointer;
+        padding: 10px;
+        margin: 0;
+        background-color: rgba(255, 231, 0,0.67);
+        position: relative;
+        margin: 0;
+    }
+    .levelDiv_3 {
+        cursor: pointer;
+        padding: 10px;
+        margin: 0;
+        background-color: rgba(255, 88, 0,0.67);
+        position: relative;
+        margin: 0;
+    }
+    .levelDiv_4 {
+        cursor: pointer;
+        padding: 10px;
+        margin: 0;
+        background-color: rgba(255, 0, 17,0.87);
+        position: relative;
+        margin: 0;
+    }
+    .levelDiv_5 {
+        cursor: pointer;
+        padding: 10px;
+        margin: 0;
+        background-color: rgba(159, 0, 18,0.57);
+        position: relative;
+        margin: 0;
+    }
+    .levelDiv_6 {
+        cursor: pointer;
+        padding: 10px;
+        margin: 0;
+        background-color: rgba(126, 0, 35,0.57);
         position: relative;
         margin: 0;
     }
@@ -2752,7 +3160,7 @@
     .timeDatas li .etime {
         width: 120px !important;
     }
-    #linechart,#linewwchart,#linewgchart ,#lineairchart,#lineminechart ,#linedaychart{
+    #linechart,#linewwchart,#linewgchart ,#lineairchart,#lineminechart ,#linedaychart,#linegkchart{
         width: 300px;
         height: 260px;
     }
@@ -2795,5 +3203,17 @@
         line-height: 23px;
         text-align: center;
         margin-right:5px;
+    }
+    .jump {
+        color:#3385FF;
+        text-decoration: underline;
+    }
+    .jumpIcon {
+        width: 15px;
+        height: 15px;
+        vertical-align: top;
+        margin-right: 5px;
+        margin-top: 2px;
+        margin-left: 5px;
     }
 </style>

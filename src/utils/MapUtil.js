@@ -23,16 +23,16 @@ const mapUtil = {
         });
 
         //初始化底图-天地图
-        this.baseMapLayer = L.tileLayer.chinaProvider('GaoDe.Normal.Map', {
-            maxZoom: appCfg.map.maxZoom,
-            minZoom: appCfg.map.minZoom
-        }).addTo(map);
-
-
-        /*this.baseMapLayer = L.tileLayer.chinaProvider('Geoq.Tecent.Dark', {
+        /*this.baseMapLayer = L.tileLayer.chinaProvider('GaoDe.Normal.Map', {
             maxZoom: appCfg.map.maxZoom,
             minZoom: appCfg.map.minZoom
         }).addTo(map);*/
+
+
+        this.baseMapLayer = L.tileLayer.chinaProvider('Geoq.Tecent.Dark', {
+            maxZoom: appCfg.map.maxZoom,
+            minZoom: appCfg.map.minZoom
+        }).addTo(map);
 
 
         mapUtil.lMap = map;
@@ -98,7 +98,7 @@ const mapUtil = {
 
         let cfg = {
             // radius should be small ONLY if scaleRadius is true (or small radius is intended)
-            "radius": .03,
+            "radius": .008,
             "maxOpacity": .65,
             // scales the radius based on map zoom
             "scaleRadius": true,

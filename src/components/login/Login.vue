@@ -37,8 +37,13 @@
         },
         methods:{
             login(){
+                if(!this.valideDate()){
+                    this.$message.error("软件许可授权已过期！");
+                    return;
+                }
                 if(this.username==""||this.password==""){
-                    this.$message("用户名或密码不可为空！");
+                    this.$message.error("用户名或密码不可为空！");
+                    return;
                 }
                 this.loading = true;
                 let body = {
@@ -46,8 +51,8 @@
                     "passWord":this.password
                 };
                 this.$axios({
-                    //url:"http://172.26.1.11:8306/simple-user-center-server/userCenter/new/login",
-                    url: "https://sthj.teda.gov.cn/app-simple-user-center-server/userCenter/new/login",
+                    url:"http://172.26.1.11:8306/simple-user-center-server/userCenter/new/login",
+                    //url: "https://sthj.teda.gov.cn/app-simple-user-center-server/userCenter/new/login",
                     method: "post",
                     data: body,
                     header:{'Content-type': 'application/json'}
@@ -69,6 +74,13 @@
               d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000))
               let expires = 'expires=' + d.toUTCString()
               document.cookie = cname + '=' + cvalue + '; ' + expires
+            },
+            valideDate(){//添加简单软件授权协议
+                let _date = new Date().getTime();
+                if(_date>=1609430399000){
+                    return false;
+                }
+                return true;
             }
         }
     }

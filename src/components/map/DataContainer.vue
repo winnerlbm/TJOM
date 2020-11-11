@@ -120,7 +120,7 @@
                             <tr>
                               <th>排名</th>
                               <th class="tabname">站点</th>
-                              <th>{{queryNorIndex}}</th>
+                              <th>{{queryNorIndex=="PM2_5"?"PM2.5":queryNorIndex}}</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -168,7 +168,7 @@
                             <tr>
                               <th>排名</th>
                               <th class="tabname">站点</th>
-                              <th>{{queryWzIndex}}</th>
+                              <th>{{queryWzIndex=="PM2_5"?"PM2.5":queryWzIndex}}</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -206,7 +206,7 @@
                         <table  class="table table-wrapper" id="editTable">
                           <thead>
                             <tr>
-                              <th>排名</th>
+                              <th>序号</th>
                               <th class="tabname">站点</th>
                               <th>{{querySkIndex}}</th>
                             </tr>
@@ -239,19 +239,57 @@
                     </div>
                 </el-collapse-item>
                 <el-collapse-item :title="'国控监测站数据('+gkList.length+')'" name="sttp_gk" class="leftBox" v-show="gkShow">
-                    <div v-for="(item,key) in gkList" class="container" :key="key" @click="zoomToMap(item,'sttp_gk')"  @mouseenter="showGKZPoint(item)" @mouseleave="clearMap()">
+                    <div class="queryCont">
+                        <div class="iptw-130 mgr-8">
+                            <span>空气质量指标：</span>
+                            <el-select v-model="queryGkIndex"  @change="changeStationQuery('sttp_gk')" placeholder="请选择">
+                                <el-option
+                                        v-for="item in queryGkIndexOptions"
+                                        :key="item.value"
+                                        :label="item.label"
+                                        :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </div>
+                    </div>
+                    <div class="tableDiv">
+                        <table  class="table table-wrapper" id="editTable">
+                          <thead>
+                            <tr>
+                              <th>序号</th>
+                              <th class="tabname">站点</th>
+                              <th>{{getIndex(queryGkIndex)}}</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr  v-for="(item,key) in gkList"   @click="zoomToMap(item,'sttp_gk')" >
+                              <td class="tabindex">{{key+1}}</td>
+                              <td class="tabname" :title="item.stationName">
+                                {{item.stationName}}
+                                <!--el-tooltip class="item" effect="dark" :content="item.pointName" placement="top">
+                                   {{item.stationName}}
+                                </el-tooltip-->
+                              </td>
+                              <td class="tabvalue"><span :class=[getLevelCls(item)]>{{item.value}}</span></td>
+                            </tr>
+                          </tbody>
+                        </table>
+                    </div>
+
+
+                    <!--div v-for="(item,key) in gkList" class="container" :key="key" @click="zoomToMap(item,'sttp_gk')"  @mouseenter="showGKZPoint(item)" @mouseleave="clearMap()">
                         <div class="source">
                             <div class="content">
                                 <div class="company_name text-ell">{{item.pointName}}</div>
                                 <div class="company_type">测站类型：{{item.manageLevelName}}</div>
                                 <p  class="describe text-ell">测站地址：{{item.address}}</p>
-                               <!-- <button  type="button" class="el-button el-button&#45;&#45;success"  @click="zoomToMap(item,'sttp_gk')"><span>详情</span></button>-->
+                              
                             </div>
                         </div>
                     </div>
                     <div class="nodata" v-if="gkList.length==0">
                         <span>未查询到相关数据</span>
-                    </div>
+                    </div-->
                 </el-collapse-item>
                 <el-collapse-item :title="'省控监测站数据('+skList.length+')'" name="sttp_sk" class="leftBox" v-show="skShow">
                     <div v-for="(item,key) in skList" class="container" :key="key"  @click="zoomToMap(item,'sttp_sk')"  @mouseenter="showGKZPoint(item)" @mouseleave="clearMap()">
@@ -392,6 +430,7 @@
 </template>
 
 <script>
+    import {export_json_to_excel} from "../../excel/Export2Excel.js"
     export default {
         name: "data-container",
         data(){
@@ -434,7 +473,7 @@
                 stime:[this.initETime(30),this.initSTime()],
                 queryNorIndex:"AQI",
                 queryWzIndex:"AQI",
-                queryGkIndex:"AQI",
+                queryGkIndex:"vaqi",
                 querySkIndex:"AQI",
                 queryIndexOptions: [{
                     value: 'AQI',
@@ -456,6 +495,28 @@
                     label: 'O3'
                 },{
                     value: 'CO',
+                    label: 'CO'
+                }],
+                queryGkIndexOptions: [{
+                    value: 'vaqi',
+                    label: 'AQI'
+                },{
+                    value: 'v121',
+                    label: 'PM2.5'
+                },{
+                    value: 'v107',
+                    label: 'PM10'
+                },{
+                    value: 'v101',
+                    label: 'SO2'
+                },{
+                    value: 'v141',
+                    label: 'NO2'
+                },{
+                    value: 'v108',
+                    label: 'O3'
+                },{
+                    value: 'v106',
                     label: 'CO'
                 }]
             }
@@ -628,7 +689,7 @@
                             }
                         });
                     }
-                }else if(type == "sttp_gk"||type == "sttp_sk"||type == "sttp_all"){
+                }else if(type == "sttp_sk"||type == "sttp_all"){
                     if(item.latitude&&item.longitude){
                         this.$mapUtil.lMap.flyTo([item.latitude, item.longitude], 16,{ animate:false});
                         let layerGroup = this.$mapUtil.getTempLayer(type);
@@ -639,11 +700,21 @@
                         });
                     }
                     type = "air";
+                }else if(type == "sttp_gk"){
+                    if(item.latitude&&item.longitude){
+                        this.$mapUtil.lMap.flyTo([item.latitude, item.longitude], 16,{ animate:false});
+                        let layerGroup = this.$mapUtil.getTempLayer(type);
+                        layerGroup.eachLayer(function (layer){
+                            if (layer.id === item.id){
+                                layer.openPopup();
+                            }
+                        });
+                    }
                 }
                 this.$parent.setDetailData(item,type);
             },
             setDataList(type,list){
-                this.resetTime();
+                //this.resetTime();重置查询时间
                 this.activeNames = type;
                 if(type=="factory"){
                     this.factoryList = list;
@@ -778,6 +849,8 @@
                     this.$parent.getSttpData(type,"2",this.queryWzIndex);
                 }else if(type == "sttp_all"){
                     this.$parent.getSttpData(type,"2",this.queryWzIndex);
+                }else{
+                    this.$parent.getCountryData(type,this.queryGkIndex);
                 }
             },
             getLevelCls(item){
@@ -788,7 +861,43 @@
                     return str;
                 }
                 return "-";
-            }
+            },
+            getIndex(item){
+                let obj = {};
+                obj = this.queryGkIndexOptions.find((item)=>{
+                    return item.value === this.queryGkIndex;
+                });
+                return obj.label;
+            },
+            exportBtn(){
+                //导出企业内的数据
+                if(this.factoryList.length==0&&this.menuList.length==0){
+                    this.$message.error("无企业数据可导出！");
+                    return;
+                }
+                if(this.factoryList.length>0){
+                    this.exportExcel(this.factoryList,"企业数据列表");
+                }
+                if(this.menuList.length>0){
+                    this.exportExcel(this.menuList,"环境管理清单");
+                }
+            },
+            exportExcel(list,sheetName) {
+              require.ensure([], () => {
+                
+                //const { export_json_to_excel } = require("../../excel/Export2Excel.js");
+                const tHeader = ["企业名称", "信用代码"];
+                // 上面设置Excel的表格第一行的标题
+                const filterVal = ["companyName", "uscCode"];
+                // 上面的index、nickName、name是tableData里对象的属性
+               // const list = this.tableData; //把data里的tableData存到list
+                const data = this.formatJson(filterVal, list);
+                export_json_to_excel(tHeader, data, sheetName);
+              });
+            },
+            formatJson(filterVal, jsonData) {
+              return jsonData.map(v => filterVal.map(j => v[j]));
+            }
         }
     }
 </script>
@@ -1071,10 +1180,10 @@
     .tabvalue span {
         display: inline-block;
         border-radius: 5px;
-        padding: 0px 3px;
+        padding: 0px 5px;
         background-color: #FF9902;
         font-size: 12px;
-        width: 30px;
+        width: 35px;
     }
     .tabvalue span.level_0{
         background-color: #00E400;

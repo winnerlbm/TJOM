@@ -26,7 +26,7 @@
         methods: {
             //天气信息
             queryWeatherInfo() {
-                getWeatherInfo("https://www.tianqiapi.com/api?version=v6&city=天津&appid=39927915&appsecret=Ws83rr3o").then(
+                getWeatherInfo("https://www.tianqiapi.com/api?version=v6&city=天津&appid=48344738&appsecret=bPbHS8vf").then(
                     (result) => {
                         this.weather = result['tem2'] + "℃ ~ " + result['tem1'] + "℃";
                         this.weatherImg = require('@/assets/image/weather/' + result['wea_img'] + '.png')

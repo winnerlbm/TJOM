@@ -82,11 +82,11 @@
                     if(airList[j].checked){
                         queryAll = false;
                         if(airList[j].type == "sttp_normal"){
-                            this.getNormalSttp("sttp_normal");
+                            this.getSttpData("sttp_normal","1","AQI");
                         }else if(airList[j].type == "sttp_wz"){
-                            this.getWzSttp("sttp_wz");
+                            this.getSttpData("sttp_wz","2","AQI");
                         }else if(airList[j].type == "sttp_gk"){
-                            this.getCsttp("sttp_gk",1);
+                            this.getCountryData("sttp_gk","vaqi");
                         }else if(airList[j].type == "sttp_sk"){
                             this.getCsttp("sttp_sk",2);
                         }else{
@@ -103,10 +103,12 @@
                    // this.getWry("wg");
                    // this.getPwk("ww");
                     this.searchFactory("factory");
-                    this.getNormalSttp("sttp_normal");
-                    this.getWzSttp("sttp_wz");
-                    this.getCsttp("sttp_gk",1);
-                    this.getCsttp("sttp_sk",2);
+                   // this.getNormalSttp("sttp_normal");
+                    this.getSttpData("sttp_normal","1","AQI");
+                   // this.getWzSttp("sttp_wz");
+                    this.getSttpData("sttp_wz","2","AQI");
+                    this.getCountryData("sttp_gk","vaqi");
+                   // this.getCsttp("sttp_sk",2);
                     this.getSttpAll("sttp_all");
                     this.getWryFac("wryFac");
                     this.getMenuFac("menulist");
@@ -664,19 +666,303 @@
                     this.$parent.setDataList(layerId,list);
                 })
             },
+            getSttpData(layerId,type,item){
+                let body = {
+                    "conditions":[
+                        {
+                            "operator":"AND",
+                            "field":"stationType",
+                            "match":"equal",
+                            "value":type,//1常规站 2微站
+                        },
+                        {
+                            "field":"stationName",
+                            "match":"contain",
+                            "value":this.searchVal,
+                        },
+                        {
+                            "operator":"AND",
+                            "field":"itemName",
+                            "match":"equal",
+                            "value":item
+                        }
+                    ],
+                    "page":{
+                        "pageable": false,
+                        "currentPage": 1,
+                        "pageSize": 10
+                    },
+                    "sort":{
+                        "field": "value",
+                        "order": "DESC"
+                    }
+                };
+                this.$axios({
+                    url: appCfg.map.gisApiUrl+"api/share/data/2c9a818f7473169a017476eb0bb51102?userKey="+appCfg.map.userKey,
+                    method: "post",
+                    data: body,
+                    header:{'Content-type': 'application/json'}
+                }).then(res => {
+                    let _self = this;
+                    let list = res.data.data.list;
+                    let markers = [];
+                    for(let model of list) {
+                        let marker = this.createPointByLevel(model);
+                        if(marker){
+                            marker.id = model.stationId;
+                            marker.model = model;
+                            marker.on("click",function(e){
+                                let cmodel = e.target.model;
+                                _self.$parent.setDetailData(model,"sttp");
+                            });
+
+                            let html = this.createSttpHtml(model);
+                            marker.bindPopup(html);
+                            markers.push(marker);
+                        }
+                    }
+                    let facLayer = L.layerGroup(markers);
+                    this.$mapUtil.lMap.addLayer(facLayer);
+                    this.$mapUtil.addTemLayer(layerId,facLayer);
+                    this.$parent.setDataList(layerId,list);
+                })
+            },
+            getCountryData(layerId,item){
+                let body = {
+                    "conditions":[
+                        {
+                            "field":"stationName",
+                            "match":"contain",
+                            "value":this.searchVal,
+                        }
+                    ],
+                    "page":{
+                        "pageable": false,
+                        "currentPage": 1,
+                        "pageSize": 10
+                    },
+                    "sort":{
+                        "field": item,
+                        "order": "DESC"
+                    }
+                };
+                this.$axios({
+                    url: appCfg.map.gisApiUrl+"api/share/data/2c9a818f753f777a0175535ed4b856e7?userKey="+appCfg.map.userKey,
+                    method: "post",
+                    data: body,
+                    header:{'Content-type': 'application/json'}
+                }).then(res => {
+                    let _self = this;
+                    let list = res.data.data.list;
+                    let markers = [];
+                    for(let model of list) {
+                        if(item=="vaqi"){
+                            model.value = model[item];
+                            model.level = this.getLevel(model.quality);
+                        }else if(item=="v101"){
+                            model.value = model[item];
+                            model.level = this.getSo2Level(model.value);
+                        }else if(item=="v121"){
+                            model.value = model[item];
+                            model.level = this.getPm25Level(model.value);
+                        }else if(item=="v141"){
+                            model.value = model[item];
+                            model.level = this.getNo2Level(model.value);
+                        }else if(item=="v107"){
+                            model.value = model[item];
+                            model.level = this.getPm10Level(model.value);
+                        }else if(item=="v106"){
+                            model.value = model[item];
+                            model.level = this.getCOLevel(model.value);
+                        }else if(item=="v108"){
+                            model.value = model[item];
+                            model.level = this.getO3Level(model.value);
+                        }
+                        let marker = this.createGkPointByLevel(model);
+                        if(marker){
+                            marker.id = model.id;
+                            marker.model = model;
+                            marker.on("click",function(e){
+                                let cmodel = e.target.model;
+                                _self.$parent.setDetailData(model,layerId);
+                            });
+
+                            let html = this.createGKttpHtml(model);
+                            marker.bindPopup(html);
+                            markers.push(marker);
+                        }
+                    }
+                    let facLayer = L.layerGroup(markers);
+                    this.$mapUtil.lMap.addLayer(facLayer);
+                    this.$mapUtil.addTemLayer(layerId,facLayer);
+                    this.$parent.setDataList(layerId,list);
+                })
+            },
+            getLevel(level){
+                if(level=="优"){
+                    return 1;
+                }else if(level == "良"){
+                    return 2;
+                }else if(level == "轻度污染"){
+                    return 3;
+                }else if(level == "中度污染"){
+                    return 4;
+                }else if(level == "重度污染"){
+                    return 5;
+                }else if(level == "严重污染"){
+                    return 6;
+                }else{
+                    return 1;
+                }
+            },
+            getSo2Level(val){
+                val = parseFloat(val);
+                if(val>0&&val<=150){
+                    return 1;
+                }else if(val>150&&val<=500){
+                    return 2;
+                }else if(val>500&&val<=650){
+                    return 3;
+                }else if(val>650&&val<800){
+                    return 4;
+                }else{
+                    return 6;
+                }
+            },
+            getNo2Level(val){
+                val = parseFloat(val);
+                if(val>0&&val<=100){
+                    return 1;
+                }else if(val>100&&val<=200){
+                    return 2;
+                }else if(val>200&&val<=700){
+                    return 3;
+                }else if(val>700&&val<1200){
+                    return 4;
+                }else if(val>1200&&val<2340){
+                    return 5;
+                }else if(val>2340&&val<3090){
+                    return 6;
+                }else{
+                    return 6;
+                }
+            },
+            getPm10Level(val){
+                val = parseFloat(val);
+                if(val>0&&val<=50){
+                    return 1;
+                }else if(val>50&&val<=150){
+                    return 2;
+                }else if(val>150&&val<=250){
+                    return 3;
+                }else if(val>250&&val<350){
+                    return 4;
+                }else if(val>350&&val<420){
+                    return 5;
+                }else if(val>420&&val<500){
+                    return 6;
+                }else{
+                    return 6;
+                }
+            },
+            getPm25Level(val){
+                val = parseFloat(val);
+                if(val>0&&val<=35){
+                    return 1;
+                }else if(val>35&&val<=75){
+                    return 2;
+                }else if(val>75&&val<=115){
+                    return 3;
+                }else if(val>115&&val<150){
+                    return 4;
+                }else if(val>150&&val<250){
+                    return 5;
+                }else if(val>250&&val<350){
+                    return 6;
+                }else{
+                    return 6;
+                }
+            },
+            getO3Level(val){
+                val = parseFloat(val);
+                if(val>0&&val<=100){
+                    return 1;
+                }else if(val>100&&val<=160){
+                    return 2;
+                }else if(val>160&&val<=200){
+                    return 3;
+                }else if(val>200&&val<300){
+                    return 4;
+                }else if(val>300&&val<400){
+                    return 5;
+                }else if(val>400&&val<800){
+                    return 6;
+                }else{
+                    return 6;
+                }
+            },
+            getCOLevel(val){
+                val = parseFloat(val);
+                if(val>0&&val<=5){
+                    return 1;
+                }else if(val>5&&val<=10){
+                    return 2;
+                }else if(val>10&&val<=35){
+                    return 3;
+                }else if(val>35&&val<60){
+                    return 4;
+                }else if(val>60&&val<90){
+                    return 5;
+                }else if(val>90&&val<120){
+                    return 6;
+                }else{
+                    return 6;
+                }
+            },
+            createPointByLevel(model){
+                if(model.lat&&model.lng&&model.lat!=""&&model.lng!=""){
+                    let markCls = "gMarker_" + model.level;
+                    let divIcon = L.divIcon({
+                        className: markCls,
+                        //iconSize: [30, 30]
+                    });
+                    return L.marker([ model.lat,model.lng],{
+                        icon:divIcon
+                    });
+                }else{
+                    return null;
+                }
+            },
+            createGkPointByLevel(model){
+                if(model.latitude&&model.longitude&&model.latitude!=""&&model.longitude!=""){
+                    let markCls = "gMarker_" + model.level;
+                    let divIcon = L.divIcon({
+                        className: markCls,
+                        //iconSize: [30, 30]
+                    });
+                    return L.marker([ model.latitude,model.longitude],{
+                        icon:divIcon
+                    });
+                }else{
+                    return null;
+                }
+            },
             DegreeConvertBack(deg,min,sec){ ///<summary>度分秒转换成为度</summary>
                 return Math.abs(deg) + (Math.abs(min)/60 + Math.abs(sec)/3600);
             },
             createHtml(model){
                 let html = [];
-                
                 html.push('<div class="popuDiv"><img class="faicon" src="'+this.qy+'" />'+validNullStr(model.companyName)+'</div>');
                 html.push('<div class="popuDiv"><img class="faicon" src="'+this.addr+'" />'+validNullStr(model.operationAddress)+'</div>');
                 html.push('<div class="popuDiv"><img class="faicon" src="'+this.qtype+'" />'+validNullStr(model.industryTypeName)+'</div>');
                 html.push('<div class="popuDiv"><img class="faicon" src="'+this.lic+'" />'+validNullStr(model.permitLicence)+'</div>');
-               /* html.push('<div class="poputools">');
-                html.push('<button onclick="getMineTime('+JSON.stringify(model).replace(/"/g, '&quot;')+',\'factory\')">详情</button>');
-                html.push('</div>');*/
+                return html.join('');
+            },
+            createGKttpHtml(model){
+                let html = [];
+                html.push('<div class="popuDiv"><img class="faicon" src="'+this.sttp+'" />'+validNullStr(model.stationName)+'</div>');
+                html.push('<div class="popuDiv"><img class="faicon" src="'+this.qtype+'" />国控监测站</div>');
+                html.push('<div class="popuDiv"><img class="faicon" src="'+this.addr+'" />'+validNullStr(model.stationCode)+'</div>');
                 return html.join('');
             },
             createMineHtml(model){

@@ -164,8 +164,8 @@
                     {name:"数据搜索",type:"roadPlan",image:require("../../assets/image/menu/sxsearch_active.png")}
                 ],
                 mapList:[
-                    {id:"tdtLayer",name:"矢量图",type:"tdtvec",image:require("../../assets/image/map/mapvec.jpg")},
                     {id:"tdtLayer",name:"蓝黑版",type:"PurplishBlue",image:require("../../assets/image/map/mapblue.jpg")},
+                    {id:"tdtLayer",name:"矢量图",type:"tdtvec",image:require("../../assets/image/map/mapvec.jpg")},
                     {id:"tdtLayer",name:"影像图",type:"tdtimg",image:require("../../assets/image/map/mapimg.jpg")},
                     /*{id:"tdtLayer",name:"地形图",type:"tdtter",image:require("../../assets/image/map/mapter.jpg")}*/
                 ],
@@ -189,8 +189,8 @@
                     {name:"点查询",type:"queryPoint",image:require("../../assets/image/menu/queryPoint.png")},
                     {name:"线查询",type:"queryLine",image:require("../../assets/image/menu/queryLine.png")},
                     {name:"面查询",type:"queryPolygon",image:require("../../assets/image/menu/queryPolygon.png")},
-                    /*{name:"路径规划",type:"routeAnaly",image:require("../../assets/image/menu/routeAny.png")},
-                     {name:"清除",type:"mulPoint",image:require("../../assets/image/menu/clearMap.png")}*/
+                    {name:"导出",type:"exportBtn",image:require("../../assets/image/menu/exportBtn.png")},
+                    /* {name:"清除",type:"mulPoint",image:require("../../assets/image/menu/clearMap.png")}*/
                 ],
                 toolImg:{
                     windyImg:require("../../assets/image/menu/wind.png"),
@@ -207,6 +207,7 @@
                 menuSel:"",
                 allFactory:[],
                 allMineFactory:[],
+                wryFactory:[],
                 facSnList:[],
                 bufferPolygon:null,
                 drawLayer:null,
@@ -584,20 +585,23 @@
             },
             queryMap(item,key){
                 this.boxSel = item.type;
-                this.clearMap();
                 if(item.type == "queryPoint"){
+                    this.clearMap();
                     this.bufferQuery = true;
                     this.enableDrawOption("marker");
                 }else if(item.type == "queryLine"){
+                    this.clearMap();
                     this.bufferQuery = true;
                     this.enableDrawOption("line");
                 }else if(item.type == "queryPolygon"){
+                    this.clearMap();
                     this.bufferQuery = true;
                     this.enableDrawOption("polygon");
-                }else if(item.type == "routeAnaly"){
-                    this.$refs.routeContainer.showPRoute();
+                }else if(item.type == "exportBtn"){
+                    this.$refs.dataContainer.exportBtn();
                 }else {
                     this.bufferQuery = false;
+
                     this.clearMap();
                 }
             },
@@ -615,9 +619,28 @@
                 }
             },
             clearMap(){
-                this.$mapUtil.removeTemLayer("factory");
-                this.removeDataList("factory");
+                this.clearTopMap();
                 this.drawGroup.clearLayers();
+                this.bufferPolygon = null;
+                this.menuSel = ""
+            },
+            clearTopMap(){
+                this.$mapUtil.removeTemLayer("factory");
+                this.$mapUtil.removeTemLayer("sttp_normal");
+                this.$mapUtil.removeTemLayer("sttp_wz");
+                this.$mapUtil.removeTemLayer("sttp_gk");
+                this.$mapUtil.removeTemLayer("mine");
+                this.$mapUtil.removeTemLayer("wryFac");
+                this.$mapUtil.removeTemLayer("sttp_all");
+                this.$mapUtil.removeTemLayer("menulist");
+                this.removeDataList("factory");
+                this.removeDataList("sttp_all");
+                this.removeDataList("sttp_normal");
+                this.removeDataList("sttp_wz");
+                this.removeDataList("sttp_gk");
+                this.removeDataList("menulist");
+                this.removeDataList("mine");
+                this.removeDataList("wryFac");
             },
             queryManager(){
                 let body = {
@@ -683,25 +706,52 @@
                         let wzIcon = require("../../assets/image/map/factory.png");
                         let list = res.data.data;
                         let facLayer = L.markerClusterGroup();
-                        for(let model of list) {
-                            //model.longitude =  this.DegreeConvertBack(model.lngDegree,model.lngMinute,model.lngSecond);
-                           // model.latitude = this.DegreeConvertBack(model.latDegree,model.latMinute,model.latSecond);
-                            let marker = this.$mapUtil.createPointMarker(model,wzIcon);
-                            if(marker){
-                                marker.id = model.permitLicence;
-                                let html = this.createHtml(model);
-                                marker.bindPopup(html);
-                                marker.model = model;
-                                marker.on("click",function(e){
-                                    let cmodel = e.target.model;
-                                    _self.setDetailData(model,"factory");
-                                });
-                                facLayer.addLayer(marker);
+                        if(this.bufferPolygon){
+                            this.clearTopMap();
+                            let conList = [];
+                            for(let i=0;i<list.length;i++){
+                                let model = list[i];
+                                if(model.longitude&&model.latitude){
+                                    let po = point([model.longitude,model.latitude]);
+                                    if(booleanContains(this.bufferPolygon,po)){
+                                        let marker = this.$mapUtil.createPointMarker(model,wzIcon);
+                                        if(marker){
+                                            marker.id = model.permitLicence;
+                                            let html = this.createHtml(model);
+                                            marker.bindPopup(html);
+                                            marker.model = model;
+                                            marker.on("click",function(e){
+                                                let cmodel = e.target.model;
+                                                _self.setDetailData(model,"factory");
+                                            });
+                                            facLayer.addLayer(marker);
+                                        }
+                                        conList.push(model);
+                                    }
+                                }
                             }
+                            this.$mapUtil.lMap.addLayer(facLayer);
+                            this.$mapUtil.addTemLayer(layerId,facLayer);
+                            this.setDataList(layerId,conList);
+                        }else{
+                            for(let model of list) {
+                                let marker = this.$mapUtil.createPointMarker(model,wzIcon);
+                                if(marker){
+                                    marker.id = model.permitLicence;
+                                    let html = this.createHtml(model);
+                                    marker.bindPopup(html);
+                                    marker.model = model;
+                                    marker.on("click",function(e){
+                                        let cmodel = e.target.model;
+                                        _self.setDetailData(model,"factory");
+                                    });
+                                    facLayer.addLayer(marker);
+                                }
+                            }
+                            this.$mapUtil.lMap.addLayer(facLayer);
+                            this.$mapUtil.addTemLayer(layerId,facLayer);
+                            this.setDataList(layerId,list);
                         }
-                        this.$mapUtil.lMap.addLayer(facLayer);
-                        this.$mapUtil.addTemLayer(layerId,facLayer);
-                        this.setDataList(layerId,list);
                     })
                 }
             },
@@ -737,6 +787,14 @@
                 }).then(res => {
                     this.allMineFactory = res.data.data.list;
                     
+                })
+                this.$axios({
+                    url: appCfg.map.gisApiUrl+"api/share/data/2c9a818f746c8ba001746d602ebd013d?userKey="+appCfg.map.userKey,
+                    method: "post",
+                    data: body,
+                    header:{'Content-type': 'application/json'}
+                }).then(res => {
+                    this.wryFactory = res.data.data.list;
                 })
             },
             analysisWindyData(windydata) {
@@ -926,8 +984,10 @@
             setDataList(type,list){
                 this.$refs.dataContainer.setDataList(type,list);
                 this.$refs.timeContainer.showResult = false;
-                if(type=="sttp_normal"||type=="sttp_wz"){
-                    this.setAirIndex(true);
+                if(type=="sttp_normal"||type=="sttp_wz"||type=="sttp_gk"){
+                    if(list.length>0){
+                        this.setAirIndex(true);
+                    }
                 }
                 this.clearRoute();
             },
@@ -936,6 +996,9 @@
             },
             removeDataList(type){
                 this.$refs.dataContainer.removeDataList(type);
+            },
+            resetTime(){
+                this.$refs.dataContainer.resetTime();
             },
             setDetailData(obj,type,timerange){
                 this.$refs.timeContainer.setShowObj(obj,type,timerange);
@@ -969,17 +1032,197 @@
                 html.push('<div class="popuDiv"><img class="faicon" src="'+this.lic+'" />'+validNullStr(model.permitLicence)+'</div>');
                 return html.join('');
             },
+            createGSttpHtml(model){
+                let html = [];
+                html.push('<div class="popuDiv"><img class="faicon" src="'+this.sttp+'" />'+validNullStr(model.pointName)+'</div>');
+                html.push('<div class="popuDiv"><img class="faicon" src="'+this.qtype+'" />'+validNullStr(model.manageLevelName)+'</div>');
+                html.push('<div class="popuDiv"><img class="faicon" src="'+this.addr+'" />'+validNullStr(model.address)+'</div>');
+                return html.join('');
+            },
+            createSttpHtml(model){
+                let html = [];
+                html.push('<div class="popuDiv"><img class="faicon" src="'+this.sttp+'" />'+validNullStr(model.stationName)+'</div>');
+                html.push('<div class="popuDiv"><img class="faicon" src="'+this.qtype+'" />'+this.getStationTypeNm(model.stationType)+'</div>');
+                html.push('<div class="popuDiv"><img class="faicon" src="'+this.par+'" />'+validNullStr(model.param)+'</div>');
+                return html.join('');
+            },
+            createGKttpHtml(model){
+                let html = [];
+                html.push('<div class="popuDiv"><img class="faicon" src="'+this.sttp+'" />'+validNullStr(model.stationName)+'</div>');
+                html.push('<div class="popuDiv"><img class="faicon" src="'+this.qtype+'" />国控监测站</div>');
+                html.push('<div class="popuDiv"><img class="faicon" src="'+this.addr+'" />'+validNullStr(model.stationCode)+'</div>');
+                return html.join('');
+            },
+            getLevel(level){
+                if(level=="优"){
+                    return 1;
+                }else if(level == "良"){
+                    return 2;
+                }else if(level == "轻度污染"){
+                    return 3;
+                }else if(level == "中度污染"){
+                    return 4;
+                }else if(level == "重度污染"){
+                    return 5;
+                }else if(level == "严重污染"){
+                    return 6;
+                }else{
+                    return 1;
+                }
+            },
+            getSo2Level(val){
+                val = parseFloat(val);
+                if(val>0&&val<=150){
+                    return 1;
+                }else if(val>150&&val<=500){
+                    return 2;
+                }else if(val>500&&val<=650){
+                    return 3;
+                }else if(val>650&&val<800){
+                    return 4;
+                }else{
+                    return 6;
+                }
+            },
+            getNo2Level(val){
+                val = parseFloat(val);
+                if(val>0&&val<=100){
+                    return 1;
+                }else if(val>100&&val<=200){
+                    return 2;
+                }else if(val>200&&val<=700){
+                    return 3;
+                }else if(val>700&&val<1200){
+                    return 4;
+                }else if(val>1200&&val<2340){
+                    return 5;
+                }else if(val>2340&&val<3090){
+                    return 6;
+                }else{
+                    return 6;
+                }
+            },
+            getPm10Level(val){
+                val = parseFloat(val);
+                if(val>0&&val<=50){
+                    return 1;
+                }else if(val>50&&val<=150){
+                    return 2;
+                }else if(val>150&&val<=250){
+                    return 3;
+                }else if(val>250&&val<350){
+                    return 4;
+                }else if(val>350&&val<420){
+                    return 5;
+                }else if(val>420&&val<500){
+                    return 6;
+                }else{
+                    return 6;
+                }
+            },
+            getPm25Level(val){
+                val = parseFloat(val);
+                if(val>0&&val<=35){
+                    return 1;
+                }else if(val>35&&val<=75){
+                    return 2;
+                }else if(val>75&&val<=115){
+                    return 3;
+                }else if(val>115&&val<150){
+                    return 4;
+                }else if(val>150&&val<250){
+                    return 5;
+                }else if(val>250&&val<350){
+                    return 6;
+                }else{
+                    return 6;
+                }
+            },
+            getO3Level(val){
+                val = parseFloat(val);
+                if(val>0&&val<=100){
+                    return 1;
+                }else if(val>100&&val<=160){
+                    return 2;
+                }else if(val>160&&val<=200){
+                    return 3;
+                }else if(val>200&&val<300){
+                    return 4;
+                }else if(val>300&&val<400){
+                    return 5;
+                }else if(val>400&&val<800){
+                    return 6;
+                }else{
+                    return 6;
+                }
+            },
+            getCOLevel(val){
+                val = parseFloat(val);
+                if(val>0&&val<=5){
+                    return 1;
+                }else if(val>5&&val<=10){
+                    return 2;
+                }else if(val>10&&val<=35){
+                    return 3;
+                }else if(val>35&&val<60){
+                    return 4;
+                }else if(val>60&&val<90){
+                    return 5;
+                }else if(val>90&&val<120){
+                    return 6;
+                }else{
+                    return 6;
+                }
+            },
+            createGkPointByLevel(model){
+                if(model.latitude&&model.longitude&&model.latitude!=""&&model.longitude!=""){
+                    let markCls = "gMarker_" + model.level;
+                    let divIcon = L.divIcon({
+                        className: markCls,
+                        //iconSize: [30, 30]
+                    });
+                    return L.marker([ model.latitude,model.longitude],{
+                        icon:divIcon
+                    });
+                }else{
+                    return null;
+                }
+            },
+            getStationTypeNm(type){
+                if(type == 1){
+                    return "常规监测站";
+                }else if(type == 2){
+                    return "传感器监测站";
+                }else {
+                    return "其它";
+                }
+            },
             polygonContains(){//计算点与面的相关关联
+                this.calcFactory(this.allFactory,"factory");
+                this.calcFactory(this.allMineFactory,"mine");
+                this.calcFactory(this.wryFactory,"wryFac");
+                this.calcSttpAll();
+                this.calcSttpData("sttp_normal","1","AQI");
+                this.calcSttpData("sttp_wz","2","AQI");
+                this.calcCountryData("sttp_gk","vaqi")
+                //this.calcCsttp("sttp_gk",1);
+                //this.calcCsttp("sttp_sk",2);
+            },
+            calcFactory(list,layerId){
                 let _self = this;
                 let conList = [];
-                let layerId = "factory";
-                let wzIcon = require("../../assets/image/map/factory.png");
+                let wzIcon = null;
+                if(layerId == "factory"){
+                    wzIcon = require("../../assets/image/map/factory.png");
+                }else if(layerId == "mine"){
+                    wzIcon = require("../../assets/image/map/mine.png");
+                }else if(layerId == "wryFac"){
+                    wzIcon = require("../../assets/image/map/wryFac.png");
+                }
                 let facLayer = L.markerClusterGroup();
-                for(let i=0;i<this.allFactory.length;i++){
-                    let model = this.allFactory[i];
+                for(let i=0;i<list.length;i++){
+                    let model = list[i];
                     if(model.longitude&&model.latitude){
-                        //model.longitude =  this.DegreeConvertBack(model.lngDegree,model.lngMinute,model.lngSecond);
-                        //model.latitude = this.DegreeConvertBack(model.latDegree,model.latMinute,model.latSecond);
                         let po = point([model.longitude,model.latitude]);
                         if(booleanContains(this.bufferPolygon,po)){
                             let marker = this.$mapUtil.createPointMarker(model,wzIcon);
@@ -990,7 +1233,7 @@
                                 marker.model = model;
                                 marker.on("click",function(e){
                                     let cmodel = e.target.model;
-                                    _self.setDetailData(model,"factory");
+                                    _self.setDetailData(model,layerId);
                                 });
                                 facLayer.addLayer(marker);
                             }
@@ -1001,6 +1244,274 @@
                 this.$mapUtil.lMap.addLayer(facLayer);
                 this.$mapUtil.addTemLayer(layerId,facLayer);
                 this.setDataList(layerId,conList);
+            },
+            calcSttpAll(){
+                let layerId = "sttp_all";
+                let _self = this;
+                let wzIcon = require("../../assets/image/map/sttp_air.png");
+                let body = {
+                    "conditions":[
+
+                    ],
+                    "page":{
+                        "pageable": false,
+                        "currentPage": 1,
+                        "pageSize": 10
+                    },
+                    "sort":{
+                        "field": "",
+                        "order": "DESC"
+                    }
+                };
+                this.$axios({
+                    url: appCfg.map.gisApiUrl+"api/share/data/2c9a818f73768e65017376b968ff0048?userKey="+appCfg.map.userKey,
+                    method: "post",
+                    data: body,
+                    header:{'Content-type': 'application/json'}
+                }).then(res => {
+                    let list = res.data.data.list;
+                    let conList = [];
+                    let markers = [];
+                    for(let model of list) {
+                        if(model.longitude&&model.latitude){
+                            let po = point([model.longitude,model.latitude]);
+                            if(booleanContains(this.bufferPolygon,po)){
+                                let marker = this.$mapUtil.createPointMarker(model,wzIcon);
+                                if(marker){
+                                    marker.id = model.stationId;
+                                    marker.model = model;
+                                    marker.on("click",function(e){
+                                        let cmodel = e.target.model;
+                                        _self.setDetailData(model,"air");
+                                    });
+                                    let html = this.createGSttpHtml(model);
+                                    marker.bindPopup(html);
+                                    markers.push(marker);
+                                }
+                                conList.push(model);
+                            }
+                        }
+                    }
+                    let facLayer = L.layerGroup(markers);
+                    this.$mapUtil.lMap.addLayer(facLayer);
+                    this.$mapUtil.addTemLayer(layerId,facLayer);
+                    this.setDataList(layerId,conList);
+                })
+            },
+            calcSttpData(layerId,type,item){
+                let _self = this;
+                let body = {
+                    "conditions":[
+                        {
+                            "operator":"AND",
+                            "field":"stationType",
+                            "match":"equal",
+                            "value":type,//1常规站 2微站
+                        },
+                        {
+                            "operator":"AND",
+                            "field":"itemName",
+                            "match":"equal",
+                            "value":item
+                        }
+                    ],
+                    "page":{
+                        "pageable": false,
+                        "currentPage": 1,
+                        "pageSize": 10
+                    },
+                    "sort":{
+                        "field": "value",
+                        "order": "DESC"
+                    }
+                };
+                this.$axios({
+                    url: appCfg.map.gisApiUrl+"api/share/data/2c9a818f7473169a017476eb0bb51102?userKey="+appCfg.map.userKey,
+                    method: "post",
+                    data: body,
+                    header:{'Content-type': 'application/json'}
+                }).then(res => {
+                    let _self = this;
+                    let list = res.data.data.list;
+                    let conList = [];
+                    let markers = [];
+                    for(let model of list) {
+                        if(model.lat&&model.lng&&model.lat!=""&&model.lng!=""){
+                            let po = point([model.lng,model.lat]);
+                            if(booleanContains(this.bufferPolygon,po)){
+                                let marker = this.createPointByLevel(model);
+                                if(marker){
+                                    marker.id = model.stationId;
+                                    marker.model = model;
+                                    marker.on("click",function(e){
+                                        let cmodel = e.target.model;
+                                        _self.setDetailData(model,"sttp");
+                                    });
+
+                                    let html = this.createSttpHtml(model);
+                                    marker.bindPopup(html);
+                                    markers.push(marker);
+                                }
+                                conList.push(model);
+                            }
+                        }
+                    }
+                    let facLayer = L.layerGroup(markers);
+                    this.$mapUtil.lMap.addLayer(facLayer);
+                    this.$mapUtil.addTemLayer(layerId,facLayer);
+                    this.setDataList(layerId,conList);
+                })
+            },
+            calcCountryData(layerId,item){
+                let body = {
+                    "conditions":[
+                        
+                    ],
+                    "page":{
+                        "pageable": false,
+                        "currentPage": 1,
+                        "pageSize": 10
+                    },
+                    "sort":{
+                        "field": item,
+                        "order": "DESC"
+                    }
+                };
+                this.$axios({
+                    url: appCfg.map.gisApiUrl+"api/share/data/2c9a818f753f777a0175535ed4b856e7?userKey="+appCfg.map.userKey,
+                    method: "post",
+                    data: body,
+                    header:{'Content-type': 'application/json'}
+                }).then(res => {
+                    let _self = this;
+                    let list = res.data.data.list;
+                    let markers = [];
+                    let conList = [];
+                    for(let model of list) {
+                        if(model.longitude&&model.latitude){
+                            let po = point([model.longitude,model.latitude]);
+                            if(booleanContains(this.bufferPolygon,po)){
+                                if(item=="vaqi"){
+                                    model.value = model[item];
+                                    model.level = this.getLevel(model.quality);
+                                }else if(item=="v101"){
+                                    model.value = model[item];
+                                    model.level = this.getSo2Level(model.value);
+                                }else if(item=="v121"){
+                                    model.value = model[item];
+                                    model.level = this.getPm25Level(model.value);
+                                }else if(item=="v141"){
+                                    model.value = model[item];
+                                    model.level = this.getNo2Level(model.value);
+                                }else if(item=="v107"){
+                                    model.value = model[item];
+                                    model.level = this.getPm10Level(model.value);
+                                }else if(item=="v106"){
+                                    model.value = model[item];
+                                    model.level = this.getCOLevel(model.value);
+                                }else if(item=="v108"){
+                                    model.value = model[item];
+                                    model.level = this.getO3Level(model.value);
+                                }
+                                let marker = this.createGkPointByLevel(model);
+                                if(marker){
+                                    marker.id = model.stationId;
+                                    marker.model = model;
+                                    marker.on("click",function(e){
+                                        let cmodel = e.target.model;
+                                        _self.setDetailData(model,layerId);
+                                    });
+
+                                    let html = this.createGKttpHtml(model);
+                                    marker.bindPopup(html);
+                                    markers.push(marker);
+                                }
+                                conList.push(model);
+                            }
+                        }
+                    }
+                    let facLayer = L.layerGroup(markers);
+                    this.$mapUtil.lMap.addLayer(facLayer);
+                    this.$mapUtil.addTemLayer(layerId,facLayer);
+                    this.setDataList(layerId,conList);
+                })
+            },
+            calcCsttp(layerId,type){
+                let wzIcon = null;
+                if(layerId == "sttp_gk"){
+                    wzIcon = require("../../assets/image/map/sttp_gk.png");
+                }else{
+                    wzIcon = require("../../assets/image/map/sttp_sk.png");
+                }
+                let body = {
+                    "conditions":[
+                        {
+                            "operator":"AND",
+                            "field":"managerType",
+                            "match":"equal",
+                            "value":type,//国家级
+                            "maxValue":"",
+                            "minValue":""
+                        }
+                    ],
+                    "page":{
+                        "pageable": false,
+                        "currentPage": 1,
+                        "pageSize": 10
+                    },
+                    "sort":{
+                        "field": "",
+                        "order": "DESC"
+                    }
+                };
+                this.$axios({
+                    url: appCfg.map.gisApiUrl+"api/share/data/2c9a818f73768e65017376b968ff0048?userKey="+appCfg.map.userKey,
+                    method: "post",
+                    data: body,
+                    header:{'Content-type': 'application/json'}
+                }).then(res => {
+                    let list = res.data.data.list;
+                    let conList = [];
+                    let markers = [];
+                    for(let model of list) {
+                        if(model.longitude&&model.latitude){
+                            let po = point([model.longitude,model.latitude]);
+                            if(booleanContains(this.bufferPolygon,po)){
+                                let marker = this.$mapUtil.createPointMarker(model,wzIcon);
+                                if(marker){
+                                    marker.id = model.id;
+                                    marker.model = model;
+                                    marker.on("click",function(e){
+                                        let cmodel = e.target.model;
+                                        _self.setDetailData(model,"air");
+                                    });
+                                    let html = this.createGSttpHtml(model);
+                                    marker.bindPopup(html);
+                                    markers.push(marker);
+                                }
+                                conList.push(model);
+                            }
+                        }
+                    }
+                    let facLayer = L.layerGroup(markers);
+                    this.$mapUtil.lMap.addLayer(facLayer);
+                    this.$mapUtil.addTemLayer(layerId,facLayer);
+                    this.setDataList(layerId,conList);
+                })
+            },
+            createPointByLevel(model){
+                if(model.lat&&model.lng&&model.lat!=""&&model.lng!=""){
+                    let markCls = "gMarker_" + model.level;
+                    let divIcon = L.divIcon({
+                        className: markCls,
+                        //iconSize: [30, 30]
+                    });
+                    return L.marker([ model.lat,model.lng],{
+                        icon:divIcon
+                    });
+                }else{
+                    return null;
+                }
             },
             bufferCalc(){
                 let buffMeter = 0;
@@ -1185,6 +1696,9 @@
             },
             getSttpData(layerId,type,item){
                 return this.$refs.layerContains.getSttpData(layerId,type,item);
+            },
+            getCountryData(layerId,item){
+                return this.$refs.layerContains.getCountryData(layerId,item);
             },
             showSearchDiv(){
                 this.$refs.searchConf.showSearchDiv();
@@ -1455,7 +1969,7 @@
         top: 126px;
         right: 10px;
         z-index: 999;
-        width: auto;
+        width: 280px;
         border-radius: 3px;
         background-color: rgba(15, 35, 54, 0.83);
     }
@@ -1464,6 +1978,7 @@
         margin: 0;
         padding: 5px;
         display: flex;
+        flex-wrap: wrap;
     }
     .mapboxs ul li {
         width: 70px;
@@ -1493,7 +2008,7 @@
     .managerbox {
         position: absolute;
         top: 126px;
-        right: 150px;
+        right: 100px;
         z-index: 999;
         width: auto;
         display: flex;
@@ -1516,7 +2031,7 @@
         overflow: hidden;
         cursor: pointer;
         padding: 0 10px;
-        max-width: 220px;
+        /*max-width: 220px;*/
     }
     .managerbox ul li:hover,.managerbox ul li.active {
         color: #3071e9;
