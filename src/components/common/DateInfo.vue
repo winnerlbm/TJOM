@@ -27,7 +27,7 @@
     import {
         mapState
     } from 'vuex'
-
+    import appCfg from "@config/AppCfg"
     export default {
         name: 'DateInfo',
         components: {},
@@ -113,14 +113,47 @@
 			},
 			logOut(){
                 this.logShow = false;
-                this.$router.push('/login');
-                sessionStorage.removeItem('username');
-			}
+                let token = sessionStorage.getItem("token")
+                let logUrl = appCfg.map.loginUrl+":9007/simple-user-center-server/api/v1.0/user/logout";
+                this.$axios.get(logUrl,
+                  {
+                    headers: {'token': token}//设置header信息
+                  })
+                  .then(function (response) {
+                        
+                  })
+                  .catch(function (error) {
+                  });
+
+                  this.$router.push('/logout');
+                  sessionStorage.removeItem('token');
+			},
+            getUserName(){
+                let token = this.getUrl("token");
+                let _selt = this;
+                let url = appCfg.map.loginUrl+":9007/simple-user-center-server/userCenter/auth/"+token;
+                this.$axios.get(url)
+                  .then(function (response) {
+                    _selt.userName = response.data.data.name;
+                  })
+                  .catch(function (error) {
+                  });
+            },
+            getUrl(name){
+              let LocString = window.location.href;
+              var rs = new RegExp("(^|)" + name + "=([^&]*)(&|$)", "gi").exec(LocString), tmp; 
+              if (tmp = rs) { 
+                    return tmp[2]; 
+              } 
+              return ""; 
+              
+            }
         },
         created() {
             this.timeFormate();
             this.nowTimes();
-            this.userName = sessionStorage.getItem("username");
+            this.getUserName();
+           // this.userName = sessionStorage.getItem("username");
         },
         computed: {}
     }

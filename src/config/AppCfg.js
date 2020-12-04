@@ -1,3 +1,21 @@
+var innerNet = !!window.location.host.match("172");
+if(innerNet){//内网
+    var mapRootIp = "172.26.1.18";
+    var gisApiIp = "172.26.1.15";
+    var jumpIp = "172.26.1.11";
+    var loginIp = "172.26.1.11";
+    var xzcfIp = "172.26.1.12";
+    var gisWebIp = "172.26.1.18";
+}else{//外网
+    var mapRootIp = "202.99.99.49";
+    var gisApiIp = "202.99.99.49";
+    var jumpIp = "202.99.99.49";
+    var loginIp = "202.99.99.49";
+    var xzcfIp = "202.99.99.49";
+    var gisWebIp = "202.99.99.49";
+}
+
+
 const appCfg = {
     common: {
         nColor: '#FFFFFF',
@@ -6,14 +24,19 @@ const appCfg = {
         chartLabelFont: 0.26
     },
     map: {
-        mapRootUrl: 'http://172.26.1.18:6060/geoserver/sf/wms',
-        wfsRootUrl: 'http://172.26.1.18:6060/geoserver/sf/ows',
+        mapRootUrl: 'http://'+mapRootIp+':6060/geoserver/sf/wms',
+        wfsRootUrl: 'http://'+mapRootIp+':6060/geoserver/sf/ows',
         //接口外网202.99.99.49 接口内网172.26.1.15 地图外网114.116.231.97 地图内网172.26.1.18
-        gisApiUrl: 'http://172.26.1.15:8100/dc-server/',
+        gisApiUrl: 'http://'+gisApiIp+':8100/dc-server/',
         userKey:"9b10ae3a-bf25-46db-ac20-c0e8963367e0",
-        jumpUrl:"http://172.26.1.15",
+        //172.26.1.11
+        jumpUrl:"http://"+jumpIp,
+        //172.26.1.11
+        loginUrl:"http://"+loginIp,
+        //http://172.26.1.18:6080/onemap/map
+        gisWebUrl:"http://"+gisWebIp+":6080/onemap/#/map",
         //172.26.1.12
-        xzcfUrl:"http://172.26.1.12",
+        xzcfUrl:"http://"+xzcfIp,
         minZoom: 4,
         maxZoom: 18,
         zoom: 10,

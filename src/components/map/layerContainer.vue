@@ -142,6 +142,10 @@
                 }
             },
             setFactory(val,item){
+                if(!this.valideDate()){
+                    this.$message.error("软件许可授权已过期！");
+                    return;
+                }
                 if(val){
                     this.$parent.resetTime();//从此处开启图层查询需重置其它位置的时间
                     if(item.type == "factory"){
@@ -632,6 +636,10 @@
                     let _self = this;
                     let markers = [];
                     for(let model of list) {
+                        let cjs = _self.$mapUtil.wgs84togcj02(parseFloat(model.longitude),parseFloat(model.latitude));
+                        model.longitude = cjs[0];
+                        model.latitude = cjs[1];
+
                         let marker = this.$mapUtil.createPointMarker(model,wzIcon);
                         if(marker){
                             marker.id = model.id;
@@ -690,6 +698,9 @@
                     let list = res.data.data.list;
                     let markers = [];
                     for(let model of list) {
+                        let cjs = _self.$mapUtil.wgs84togcj02(parseFloat(model.lng),parseFloat(model.lat));
+                        model.lng = cjs[0];
+                        model.lat = cjs[1];
                         let marker = this.createPointByLevel(model);
                         if(marker){
                             marker.id = model.stationId;
@@ -735,6 +746,9 @@
                     let list = res.data.data.list;
                     let markers = [];
                     for(let model of list) {
+                        let cjs = _self.$mapUtil.wgs84togcj02(parseFloat(model.longitude),parseFloat(model.latitude));
+                        model.longitude = cjs[0];
+                        model.latitude = cjs[1];
                         if(item=="vaqi"){
                             model.value = model[item];
                             model.level = this.getLevel(model.quality);
@@ -1201,6 +1215,13 @@
                     return str;
                 }
                 return "-";
+            },
+            valideDate(){//添加简单软件授权协议
+                let _date = new Date().getTime();
+                if(_date>=1609430399000){
+                    return false;
+                }
+                return true;
             }
         }
     }

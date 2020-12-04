@@ -262,7 +262,7 @@
                             </tr>
                           </thead>
                           <tbody>
-                            <tr  v-for="(item,key) in gkList"   @click="zoomToMap(item,'sttp_gk')" >
+                            <tr  v-for="(item,key) in gkList"   @click="zoomToMap(item,'sttp_gk')" @mouseenter="showGKZPoint(item)" @mouseleave="clearMap()">
                               <td class="tabindex">{{key+1}}</td>
                               <td class="tabname" :title="item.stationName">
                                 {{item.stationName}}
@@ -620,7 +620,7 @@
                 let marker = this.$mapUtil.createPointMarker(item,wzIcon);
                 if(marker) {
                     this.temLayer.addLayer(marker);
-                    marker.bindTooltip(item.pointName, {
+                    marker.bindTooltip(item.stationName, {
                         direction: 'top',
                         offset: [7, -10]
                     }).openTooltip();

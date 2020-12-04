@@ -254,6 +254,8 @@
         },
         //需要页面加载完执行的方法,可以写在$nextTick中
         mounted() {
+            this.valideLogin();
+            
             let _self = this;
             window.queryContains = function(){
                 _self.polygonContains();
@@ -299,6 +301,15 @@
             });
         },
         methods: {
+            valideLogin(){
+                let token = this.getUrl('token');
+                if(token&&token!=""){
+                    sessionStorage.setItem("token",token);
+
+                }else{
+                    this.$router.push('/login');
+                }
+            },
             initMapDraws(){
                 this.drawGroup = new L.FeatureGroup();
                 this.$mapUtil.lMap.addLayer(this.drawGroup);
@@ -1708,6 +1719,23 @@
                     return str;
                 }
                 return "-";
+            },
+            getUrl(name){
+              let LocString = window.location.href;
+
+              var rs = new RegExp("(^|)" + name + "=([^&]*)(&|$)", "gi").exec(LocString), tmp; 
+              if (tmp = rs) { 
+                    return tmp[2]; 
+              } 
+              return ""; 
+              
+            },
+            valideDate(){//添加简单软件授权协议
+                let _date = new Date().getTime();
+                if(_date>=1609430399000){
+                    return false;
+                }
+                return true;
             }
 
         }

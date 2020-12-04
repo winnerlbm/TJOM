@@ -968,7 +968,7 @@
                     label: '数据表'
                 }, {
                     value: '2',
-                    label: '拆线图'
+                    label: '折线图'
                 }],
                 queryIndex:"AQI",
                 queryIndexOptions: [{
@@ -1171,6 +1171,9 @@
                 }
             },
             queryFactoryData(permitLicence){
+                if(permitLicence==null){
+                    permitLicence = "null-11";
+                }
                 let body = {
                     "conditions":[
                         {
@@ -1227,6 +1230,9 @@
 
             },
             queryFactoryXZData(permitLicence){
+                if(permitLicence==null){
+                    permitLicence = "null-11";
+                }
                 let xzcfbody = {
                     "conditions":[
                         {
@@ -1300,6 +1306,9 @@
                 });
             },
             queryMineLine(permitLicence){
+                if(permitLicence==null){
+                    permitLicence = "null-11";
+                }
                 let body = {
                     "conditions":[
                         {
@@ -2763,7 +2772,7 @@
                 return "-";
             },
             jumpWeb(item){
-                let webUrl = appCfg.map.jumpUrl+":9007/tj-bims-web/#/pollutionSource/edit/BaseInfo/Entry?id=8a8e80e173bc2db3017457062e73001a&enterpriseType=&permitLicence="+item.permitLicence;
+                let webUrl = appCfg.map.jumpUrl+":9007/tj-bims-web/#/pollutionSource/edit/BaseInfo/Entry?id="+item.id+"&enterpriseType=&permitLicence="+item.permitLicence;
                 window.open(webUrl,'_blank')
             },
             jumpXZCFWeb(item){
