@@ -1,5 +1,5 @@
 <template>
-    <div class="dataTimeDiv" v-show="showResult" v-loading="loading" element-loading-spinner="el-icon-loading"
+    <div :class="['dataTimeDiv',{'hidenTimeDiv':hidenTimeDiv}]" v-show="showResult" v-loading="loading" element-loading-spinner="el-icon-loading"
     element-loading-background="rgba(0, 0, 0, 0.8)">
         <div class="etitle">
             <span>{{validNullStr(showName)}}</span>
@@ -518,16 +518,36 @@
             <div class="detailDiv" v-if="showType=='sttp_gk'">
                 <div :class="currentCls">
                     <div class="eleft">
-                        <div class="company_name text-ell">{{showObj.stationName}}</div>
-                        <div class="company_type">测站类型：国控监测站</div>
-                        <p  class="describe text-ell">测站地址：{{showObj.address}}</p>
+                        <div class="dataCom">
+                             <div class="company_row">
+                                <span class="scol">SO2:</span>
+                                <span class="snum">{{showObj.v101}}</span>
+                                <span class="scol">PM2.5:</span>
+                                <span class="snum">{{showObj.v121}}</span>
+                             </div>
+                             <div class="company_row">
+                                <span class="scol">NO2:</span>
+                                <span class="snum">{{showObj.v141}}</span>
+                                <span class="scol">PM10:</span>
+                                <span class="snum">{{showObj.v107}}</span>
+                             </div>
+                             <div class="company_row">
+                                <span class="scol">CO:</span>
+                                <span class="snum">{{showObj.v106}}</span>
+                                <span class="scol">O3:</span>
+                                <span class="snum">{{showObj.v108}}</span>
+                             </div>
+                        </div>
                     </div>
                     <div class="eright">
-                        <div class="indexName">{{newData.indexName}}({{standardUnitName}})</div>
-                        <div class="indexVal">{{newData.indexVal==null?'-':parseFloat(newData.indexVal).toFixed(1)}}</div>
+                        <!--div class="indexName">{{newData.indexName}}({{standardUnitName}})</div-->
+                        <div class="indexName">AQI</div>
+                        <div class="indexVal">{{showObj.vaqi==null?'-':parseFloat(showObj.vaqi).toFixed(1)}}</div>
                         <div class="indexTime">{{newData.indexTime}}</div>
                     </div>
                 </div>
+
+
                 <div class="dataConts">
                     <div class="queryDiv">
                         <div class="queryTitle">数据查询</div>
@@ -885,8 +905,7 @@
                 </div>
             </div>
         </div>
-
-
+        <div class="hideBtn" @click="hideTime"><i class="el-icon-arrow-right"></i></div>
     </div>
 </template>
 
@@ -899,6 +918,7 @@
                 showResult:false,
                 backParent:false,//是否返回上级
                 loading:false,
+                hidenTimeDiv:false,
                 newData:{},
                 showName:"",
                 currentCls:"baseDiv",
@@ -1099,6 +1119,9 @@
                 const start = new Date();
                 start.setTime(start.getTime() - 3600 * 1000 * 24 * day);
                 return this.$appUtil.formatDate("yyyy-MM-dd HH:ff:ss",start);
+            },
+            hideTime(){
+                this.hidenTimeDiv = !this.hidenTimeDiv;
             },
             hideData(){
                 if(this.backParent){
@@ -1835,8 +1858,8 @@
                         let yda = list[i].value==null?"-":parseFloat(list[i].value).toFixed(3);
                         ydata.push(yda);
                     }
-                    chartObj.xdata = xdata;
-                    chartObj.ydata = ydata;
+                    chartObj.xdata = xdata.reverse();
+                    chartObj.ydata = ydata.reverse();
                     this.createLintChart(chartObj);
                 }
             },
@@ -2491,8 +2514,8 @@
                         let yda = list[i].dataValue==null?0:parseFloat(list[i].dataValue).toFixed(3);
                         ydata.push(yda);
                     }
-                    chartObj.xdata = xdata;
-                    chartObj.ydata = ydata;
+                    chartObj.xdata = xdata.reverse();
+                    chartObj.ydata = ydata.reverse();
                     this.chartDOM = "lineminechart";
                     this.createLintChart(chartObj);
                 }else if(this.showIndex == 2&&this.queryMineTimeType!="1"){
@@ -2512,8 +2535,8 @@
                         maxData.push(max);
                         minData.push(min);
                     }
-                    chartObj.xdata = xdata;
-                    chartObj.ydata = ydata;
+                    chartObj.xdata = xdata.reverse();
+                    chartObj.ydata = ydata.reverse();
                     chartObj.maxData = maxData;
                     chartObj.minData = minData;
                     this.chartDOM = "linedaychart";
@@ -2798,6 +2821,11 @@
         background-color: rgba(15, 35, 54, 0.83);
         color: #fff;
         height: calc(100% - 205px);
+        transition: left .3s linear;
+    }
+    .hidenTimeDiv {
+        left: -315px;
+        transition: left .3s linear;
     }
     .etitle {
         height: 32px;
@@ -3224,5 +3252,38 @@
         margin-right: 5px;
         margin-top: 2px;
         margin-left: 5px;
+    }
+
+    .hideBtn {
+        position: absolute;
+        width: 30px;
+        height: 35px;
+        line-height: 35px;
+        background-color: rgba(15, 35, 54, 0.83);
+        font-size: 18px;
+        top: 50%;
+        right: -30px;
+        cursor:pointer;
+    }
+    .dataCom {
+        border: 1px dashed rgba(221, 224, 225, 0.53);
+    }
+    .company_row {
+        display: flex;
+        height: 25px;
+        line-height: 25px;
+        padding:0 5px;
+    }
+    .company_row:nth-child(2) {
+        border-top: 1px dashed rgba(221, 224, 225, 0.53);
+        border-bottom: 1px dashed rgba(221, 224, 225, 0.53);
+    }
+    .company_row .scol{
+        display:inline-block;
+        width:40px;
+    }
+    .company_row .snum{
+        display:inline-block;
+        width:100px;
     }
 </style>

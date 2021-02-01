@@ -51,7 +51,7 @@
                     <img :src="toolImg.layerImg" alt=""  style="margin-right: 5px;">
                     <span>图层</span>
                 </li>
-                <li @click="clearMap" >
+                <li @click="clearMap(),setAllChecked(false)" >
                     <img :src="toolImg.clearImg" alt=""  style="margin-right: 5px;">
                     <span>清除</span>
                 </li>
@@ -70,6 +70,9 @@
         </div>
 
         <div class="managerbox" v-show="managerShow == true">
+            <div class="manaSearch">
+                <input type="text" placeholder="请输入关键字" v-model="managerName" @input="queryManagerList()" />
+            </div>
             <ul>
                 <li  v-for="(item,key) in managerList"  :class="{'active':menuSel == item.id}" :key="key" @click="queryManagerFac(item,key)"  @click.stop="doSomething($event)" >
                     <i class="bcircle"></i><span>{{item.name}}</span>
@@ -138,6 +141,7 @@
             return {
                 highLayer: null,
                 featureProps: null,
+                managerName:"",
                 windyLayer:null,
                 selecteIndex:0,
                 selecteMapIndex:0,
@@ -147,6 +151,7 @@
                 markerShow:false,
                 managerSelect:false,
                 managerShow:false,
+                managerAllList:[],
                 managerList:[],
                 showClass:"baseMap",
                 hourShow:true,
@@ -241,6 +246,7 @@
                     value: 'CO',
                     label: 'CO'
                 }],
+                facMapLayer:null,
                 qy:require("@/assets/image/fa/fa-qy.png"),
                 addr:require("@/assets/image/fa/fa-addr.png"),
                 qtype:require("@/assets/image/fa/fa-type.png"),
@@ -272,7 +278,8 @@
                // this.$refs.markRef.initDraw();
                 this.$refs.dataContainer.initDraw();
                 this.hourShow = false;
-                this.$mapUtil.wmsLayer('sf:TjMap').addTo(this.$mapUtil.lMap);
+                this.facMapLayer = this.$mapUtil.wmsLayer('sf:TjMap');
+                this.facMapLayer.addTo(this.$mapUtil.lMap);
                 this.getAllFactory();
                // this.getFactorySnList();
                // this.drawMapEchart();
@@ -309,6 +316,14 @@
                 }else{
                     this.$router.push('/login');
                 }
+            },
+            initFacMap(checked){
+                if(checked){
+                    this.facMapLayer.setOpacity(1);
+                }else{
+                    this.facMapLayer.setOpacity(0);
+                }
+                
             },
             initMapDraws(){
                 this.drawGroup = new L.FeatureGroup();
@@ -612,7 +627,6 @@
                     this.$refs.dataContainer.exportBtn();
                 }else {
                     this.bufferQuery = false;
-
                     this.clearMap();
                 }
             },
@@ -633,7 +647,7 @@
                 this.clearTopMap();
                 this.drawGroup.clearLayers();
                 this.bufferPolygon = null;
-                this.menuSel = ""
+                this.menuSel = "";
             },
             clearTopMap(){
                 this.$mapUtil.removeTemLayer("factory");
@@ -644,6 +658,11 @@
                 this.$mapUtil.removeTemLayer("wryFac");
                 this.$mapUtil.removeTemLayer("sttp_all");
                 this.$mapUtil.removeTemLayer("menulist");
+                this.$mapUtil.removeTemLayer("elecstatis");
+                this.$mapUtil.removeTemLayer("waterstatis");
+                this.$mapUtil.removeTemLayer("airstatis");
+                this.$mapUtil.removeTemLayer("vocstatis");
+                
                 this.removeDataList("factory");
                 this.removeDataList("sttp_all");
                 this.removeDataList("sttp_normal");
@@ -652,6 +671,10 @@
                 this.removeDataList("menulist");
                 this.removeDataList("mine");
                 this.removeDataList("wryFac");
+                this.removeDataList("elecstatis");
+                this.removeDataList("waterstatis");
+                this.removeDataList("airstatis");
+                this.removeDataList("vocstatis");
             },
             queryManager(){
                 let body = {
@@ -676,7 +699,17 @@
                 }).then(res => {
                     let list = res.data.data.list;
                     this.managerList = list;
+                    this.managerAllList = list;
                 })
+            },
+            queryManagerList(){
+                let listarr = [];
+                for(let i=0;i<this.managerAllList.length;i++){
+                    if(this.managerAllList[i].name.indexOf(this.managerName)>=0){
+                        listarr.push(this.managerAllList[i]);
+                    }
+                }
+                this.managerList = listarr;
             },
             queryManagerFac(item,key){
                 this.setManager();
@@ -1209,15 +1242,49 @@
                 }
             },
             polygonContains(){//计算点与面的相关关联
-                this.calcFactory(this.allFactory,"factory");
-                this.calcFactory(this.allMineFactory,"mine");
-                this.calcFactory(this.wryFactory,"wryFac");
-                this.calcSttpAll();
-                this.calcSttpData("sttp_normal","1","AQI");
-                this.calcSttpData("sttp_wz","2","AQI");
-                this.calcCountryData("sttp_gk","vaqi")
-                //this.calcCsttp("sttp_gk",1);
-                //this.calcCsttp("sttp_sk",2);
+                let queryAll = true;
+                let facList = this.getFacLayerList();
+                for(let i=0;i<facList.length;i++){
+                    if(facList[i].checked){
+                        queryAll = false;
+                        if(facList[i].type == "factory"){
+                            this.calcFactory(this.allFactory,"factory");
+                        }else if(facList[i].type == "mine"){
+                            this.calcFactory(this.allMineFactory,"mine");
+                        }else if(facList[i].type == "wryFac"){
+                            this.calcFactory(this.wryFactory,"wryFac");
+                        }
+                    }
+                }
+
+                let airList = this.getAirLayerList();
+                for(let j=0;j<airList.length;j++){
+                    if(airList[j].checked){
+                        queryAll = false;
+                        if(airList[j].type == "sttp_normal"){
+                            this.calcSttpData("sttp_normal","1","AQI");
+                        }else if(airList[j].type == "sttp_wz"){
+                            this.calcSttpData("sttp_wz","2","AQI");
+                        }else if(airList[j].type == "sttp_gk"){
+                            this.calcCountryData("sttp_gk","vaqi")
+                        }else{
+                            this.calcSttpAll();
+                        }
+                    }
+                }
+                if(queryAll){
+                    this.calcFactory(this.allFactory,"factory");
+                    this.calcFactory(this.allMineFactory,"mine");
+                    this.calcFactory(this.wryFactory,"wryFac");
+                    this.calcSttpAll();
+                    this.calcSttpData("sttp_normal","1","AQI");
+                    this.calcSttpData("sttp_wz","2","AQI");
+                    this.calcCountryData("sttp_gk","vaqi")
+                    //this.calcCsttp("sttp_gk",1);
+                    //this.calcCsttp("sttp_sk",2);
+                }
+
+                
             },
             calcFactory(list,layerId){
                 let _self = this;
@@ -1534,7 +1601,8 @@
                 }else{
                     buffMeter = this.bufferVal;
                 }
-                const buffered = buffer(this.drawLayer.toGeoJSON(), buffMeter, {
+                //js问题无法解决，通过偏移量处理
+                const buffered = buffer(this.drawLayer.toGeoJSON(), buffMeter*1.298701298701299, {
                     units: 'meters',steps:256
                 });
                 this.bufferPolygon = buffered;
@@ -1711,6 +1779,25 @@
             getCountryData(layerId,item){
                 return this.$refs.layerContains.getCountryData(layerId,item);
             },
+            getWryFac(layerType,layerId){
+                return this.$refs.layerContains.getWryFac(layerType,layerId);
+            },
+            queryElecData(layerId,type,stime,etime){
+                return this.$refs.layerContains.getElecData(layerId,type,stime,etime);
+            },
+
+            getWaterStatisData(layerId,type,stime,etime,vol){
+                return this.$refs.layerContains.getWaterStatisData(layerId,type,stime,etime,vol);
+            },
+            getAirStatisData(layerId,type,stime,etime,vol){
+                return this.$refs.layerContains.getAirStatisData(layerId,type,stime,etime,vol);
+            },
+            getVocStatisData(layerId,type,stime,etime,vol){
+                return this.$refs.layerContains.getVocStatisData(layerId,type,stime,etime,vol);
+            },
+            createHtml(model){
+                this.$refs.layerContains.createHtml(model);
+            },
             showSearchDiv(){
                 this.$refs.searchConf.showSearchDiv();
             },
@@ -1732,7 +1819,7 @@
             },
             valideDate(){//添加简单软件授权协议
                 let _date = new Date().getTime();
-                if(_date>=1609430399000){
+                if(_date>=1610672378000){
                     return false;
                 }
                 return true;
@@ -2039,9 +2126,12 @@
         right: 100px;
         z-index: 999;
         width: auto;
-        display: flex;
+        min-width: 300px;
         border-radius: 3px;
         background-color: rgba(15, 35, 54, 0.83);
+        max-height: 80%;
+        overflow-y: auto;
+        overflow-x: hidden;
     }
     .managerbox ul {
         list-style: none;
@@ -2192,8 +2282,29 @@
         background: rgba(194, 228, 242, 0.1);
         border-radius: 4px 4px 0px 0px;
     }
+    .manaSearch {
+        height: 30px;
+        line-height: 30px;
+        padding: 5px 10px;
+        padding-bottom: 0;
+    }
+    .manaSearch input {
+        width: 100%;
+        height: 25px;
+        line-height: 25px;
+        background-color: transparent;
+        border: 1px solid rgba(63, 81, 181, 0.6);
+        border-radius: 3px;
+        outline:none;
+        text-indent: 10px;
+        color:#fff;
+    }
 </style>
 <style>
+    .leaflet-popup-content {
+        margin: 0 !important;
+        line-height: 1.4;
+    }
     .gMarker_0 {
         width:30px;
         height:30px;
@@ -2236,12 +2347,108 @@
         border-radius:15px;
         background-color:#7E0023;        
     }
+
+
+    .aMarker_0 {
+        width:30px;
+        height:30px;
+        border-radius:0px;
+        background-color:#00E400;        
+    }
+    .aMarker_1 {
+        width:30px;
+        height:30px;
+        border-radius:0px;
+        background-color:#00E400;        
+    }
+    .aMarker_2 {
+        width:30px;
+        height:30px;
+        border-radius:0px;
+        background-color:#FFF600;        
+    }
+    .aMarker_3 {
+        width:30px;
+        height:30px;
+        border-radius:0px;
+        background-color:#FF5F00;        
+    }
+    .aMarker_4 {
+        width:30px;
+        height:30px;
+        border-radius:0px;
+        background-color:#FF0011;        
+    }
+    .aMarker_5 {
+        width:30px;
+        height:30px;
+        border-radius:0px;
+        background-color:#9A004C;        
+    }
+    .aMarker_6 {
+        width:30px;
+        height:30px;
+        border-radius:0px;
+        background-color:#7E0023;        
+    }
+
+
+    .tMarker_0 {
+        width: 0 !important;
+        height: 0 !important;
+        border-left: 8px solid transparent;
+        border-right: 8px solid transparent;
+        border-bottom: 16px solid #00E400;      
+    }
+    .tMarker_1 {
+        width: 0 !important;
+        height: 0 !important;
+        border-left: 8px solid transparent;
+        border-right: 8px solid transparent;
+        border-bottom: 16px solid #00E400;     
+           
+    }
+    .tMarker_2 {
+        width: 0 !important;
+        height: 0 !important;
+        border-left: 8px solid transparent;
+        border-right: 8px solid transparent;
+        border-bottom: 16px solid #FFF600;        
+    }
+    .tMarker_3 {
+        width: 0 !important;
+        height: 0 !important;
+        border-left: 8px solid transparent;
+        border-right: 8px solid transparent;
+        border-bottom: 16px solid #FF5F00;        
+    }
+    .tMarker_4 {
+        width: 0 !important;
+        height: 0 !important;
+        border-left: 8px solid transparent;
+        border-right: 8px solid transparent;
+        border-bottom: 16px solid #FF0011;        
+    }
+    .tMarker_5 {
+        width: 0 !important;
+        height: 0 !important;
+        border-left: 8px solid transparent;
+        border-right: 8px solid transparent;
+        border-bottom: 16px solid #9A004C;        
+    }
+    .tMarker_6 {
+        width: 0 !important;
+        height: 0 !important;
+        border-left: 8px solid transparent;
+        border-right: 8px solid transparent;
+        border-bottom: 16px solid #7E0023;        
+    }
     .popuDiv {
         height: auto;
         line-height: 28px;
         min-width: 250px;
         width:auto;
-        padding: 0 0px;
+        padding: 0 15px;
         word-break: break-all;
         word-wrap: break-word;
     }
@@ -2275,6 +2482,64 @@
         height:15px;
         vertical-align: middle;
         margin-right:5px;
+    }
+
+    .gkDiv {
+        width: auto;
+        color: #fff;
+        background-color: rgba(33, 32, 32, 0);
+        padding: 0px;
+    }
+    .gkDiv ul {
+        list-style: none;
+        display: flex;
+        margin: 0;
+        padding: 0 10px;
+    }
+    .gkDiv ul li {
+        padding: 15px 15px;
+    }
+    .gkDiv ul li:nth-child(2){
+        border-left: 1px solid rgba(90, 126, 144, 0.65);
+        border-right:1px solid rgba(90, 126, 144, 0.65);
+    }
+    .gkDiv ul li span{
+        display: block;
+        width: 100%;
+        font-size:13px;
+    }
+    .gkDiv ul li span.st {
+        color: #e2e3e2;
+        margin-bottom: 3px;
+        font-size:12px;
+    }
+    .nr_0 {
+        color:#00E400;
+        font-size:13px;        
+    }
+    .nr_1 {
+        color:#00E400;
+        font-size:13px;        
+    }
+    .nr_2 {
+        color:#FFF600;
+        font-size:13px;        
+    }
+    .nr_3 {
+        color:#FF5F00;
+        font-size:13px;        
+    }
+    .nr_4 {
+        color:#FF0011;
+        font-size:13px;        
+    }
+    .nr_5 {
+        color:#9A004C;
+        font-size:13px;        
+    }
+    .nr_6 {
+        color:#7E0023;
+        font-size:13px;        
     }
     ::-webkit-scrollbar {
         width: 6px;
@@ -2312,5 +2577,21 @@
         scrollbar-arrow-color: #000;
         scrollbar-shadow-color: #ccc;
         scrollbar-dark-shadow-color: #ccc
+    }
+    input::-webkit-input-placeholder{
+        font-size: 12px;
+        color: #03e8eb;
+    }
+    input::-moz-placeholder{   /* Mozilla Firefox 19+ */
+        font-size: 12px;
+        color: #03e8eb;
+    }
+    input:-moz-placeholder{    /* Mozilla Firefox 4 to 18 */
+        font-size: 12px;
+        color: #03e8eb;
+    }
+    input:-ms-input-placeholder{  /* Internet Explorer 10-11 */ 
+        font-size: 12px;
+        color: #03e8eb;
     }
 </style>

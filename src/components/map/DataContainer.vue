@@ -7,6 +7,41 @@
         <div class="apiDatas">
             <el-collapse v-model="activeNames" accordion>
                 <el-collapse-item :title="'所有企业数据('+factoryList.length+')'" name="factory" class="leftBox" v-show="facShow">
+                    <div class="queryCont">
+                        <div class="iptw-130 mgr-8">
+                            <span>污染源类型：</span>
+                            <el-select v-model="queryFacType"  @change="changeFactoryQuery()" placeholder="请选择">
+                                <el-option
+                                        v-for="item in queryFacTypeList"
+                                        :key="item.value"
+                                        :label="item.label"
+                                        :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </div>
+                        <div class="iptw-130 mgr-8">
+                            <span>排污许可管理类别：</span>
+                            <el-select v-model="queryPerType"  @change="changeFactoryQuery()" placeholder="请选择">
+                                <el-option
+                                        v-for="item in queryPerTypeList"
+                                        :key="item.value"
+                                        :label="item.label"
+                                        :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </div>
+                        <div class="iptw-130 mgr-8">
+                            <span>企业生产状态：</span>
+                            <el-select v-model="queryRunType"  @change="changeFactoryQuery()" placeholder="请选择">
+                                <el-option
+                                        v-for="item in queryRunTypeList"
+                                        :key="item.value"
+                                        :label="item.label"
+                                        :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </div>
+                    </div>
                     <div v-for="(item,key) in factoryList" class="container public" :key="key"  @click="zoomToMap(item,'factory')"  @mouseenter="showMapPoint(item)" @mouseleave="clearMap()">
                         <div class="source">
                             <div class="content">
@@ -22,6 +57,20 @@
                     </div>
                 </el-collapse-item>
                 <el-collapse-item :title="'在线监控企业数据('+wryFacList.length+')'" name="wryFac" class="leftBox" v-show="wryFacShow">
+                    <div class="queryCont">
+                        <div class="iptw-130 mgr-8">
+                            <span>在线监测类型：</span>
+                            <el-select v-model="queryOlFacType"  @change="changeWryFactoryQuery()" placeholder="请选择">
+                                <el-option
+                                        v-for="item in queryOlFacTypeList"
+                                        :key="item.value"
+                                        :label="item.label"
+                                        :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </div>
+                    </div>
+
                     <div v-for="(item,key) in wryFacList" class="container" :key="key"  @click="zoomToMap(item,'wryFac')"  @mouseenter="showMapPoint(item)" @mouseleave="clearMap()">
                         <div class="source">
                             <div class="content">
@@ -424,13 +473,163 @@
                         <span>未查询到相关数据</span>
                     </div>
                 </el-collapse-item>
+
+                <el-collapse-item title="工况企业用电量统计" name="elecstatis" class="leftBox" v-show="elecstatisShow">
+                    <div class="queryCont">
+                        
+                        <div class="itime">
+                            <el-date-picker
+                                    v-model="electime"
+                                    type="datetimerange"
+                                    align="right"
+                                    unlink-panels
+                                    @change="changeElecQuery"
+                                    value-format="yyyy-MM-dd HH:mm:ss"
+                                    range-separator=""
+                                    start-placeholder="开始日期"
+                                    end-placeholder="结束日期"
+                            >
+                            </el-date-picker>
+                        </div>
+                    </div>
+                    <div v-for="(item,key) in elecstatisList" class="container" :key="key">
+                        <div class="source">
+                            <div class="content">
+                                <div class="company_name text-ell">{{validNullStr(item.companyName)}}</div>
+                                <div class="company_type">用电量合计：{{item.val}}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="nodata" v-if="elecstatisList.length==0">
+                        <span>未查询到相关数据</span>
+                    </div>
+                </el-collapse-item>
+
+                <el-collapse-item title="废气排口因子含量统计" name="airstatis" class="leftBox" v-show="airStatisShow">
+                    <div class="queryCont">
+                        <div class="iptw-130 mgr-8">
+                            <el-select v-model="queryAirType"  @change="changeAirStatisQuery()" placeholder="请选择">
+                                <el-option
+                                        v-for="item in queryAirTypeList"
+                                        :key="item.value"
+                                        :label="item.label"
+                                        :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </div>
+                        <div class="itime">
+                            <el-date-picker
+                                    v-model="electime"
+                                    type="datetimerange"
+                                    align="right"
+                                    unlink-panels
+                                    @change="changeAirStatisQuery"
+                                    value-format="yyyy-MM-dd HH:mm:ss"
+                                    range-separator=""
+                                    start-placeholder="开始日期"
+                                    end-placeholder="结束日期"
+                            >
+                            </el-date-picker>
+                        </div>
+                    </div>
+                    <div v-for="(item,key) in airStatisList" class="container" :key="key">
+                        <div class="source">
+                            <div class="content">
+                                <div class="company_name text-ell">{{validNullStr(item.companyName)}}</div>
+                                <div class="company_type">总量合计：{{item.val}}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="nodata" v-if="airStatisList.length==0">
+                        <span>未查询到相关数据</span>
+                    </div>
+                </el-collapse-item>
+
+                <el-collapse-item title="废水排口因子含量统计" name="waterstatis" class="leftBox" v-show="waterStatisShow">
+                    <div class="queryCont">
+                        <div class="iptw-130 mgr-8">
+                            <el-select v-model="queryWaterType"  @change="changeWaterStatisQuery()" placeholder="请选择">
+                                <el-option
+                                        v-for="item in queryWaterTypeList"
+                                        :key="item.value"
+                                        :label="item.label"
+                                        :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </div>
+                        <div class="itime">
+                            <el-date-picker
+                                    v-model="electime"
+                                    type="datetimerange"
+                                    align="right"
+                                    unlink-panels
+                                    @change="changeWaterStatisQuery"
+                                    value-format="yyyy-MM-dd HH:mm:ss"
+                                    range-separator=""
+                                    start-placeholder="开始日期"
+                                    end-placeholder="结束日期"
+                            >
+                            </el-date-picker>
+                        </div>
+                    </div>
+                    <div v-for="(item,key) in waterStatisList" class="container" :key="key">
+                        <div class="source">
+                            <div class="content">
+                                <div class="company_name text-ell">{{validNullStr(item.companyName)}}</div>
+                                <div class="company_type">总量合计：{{item.val}}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="nodata" v-if="waterStatisList.length==0">
+                        <span>未查询到相关数据</span>
+                    </div>
+                </el-collapse-item>
+                <el-collapse-item title="VOC排口因子含量统计" name="vocstatis" class="leftBox" v-show="vocStatisShow">
+                    <div class="queryCont">
+                        <div class="iptw-130 mgr-8">
+                            <el-select v-model="queryVocType"  @change="changeVocStatisQuery()" placeholder="请选择">
+                                <el-option
+                                        v-for="item in queryVocTypeList"
+                                        :key="item.value"
+                                        :label="item.label"
+                                        :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </div>
+                        <div class="itime">
+                            <el-date-picker
+                                    v-model="electime"
+                                    type="datetimerange"
+                                    align="right"
+                                    unlink-panels
+                                    @change="changeVocStatisQuery"
+                                    value-format="yyyy-MM-dd HH:mm:ss"
+                                    range-separator=""
+                                    start-placeholder="开始日期"
+                                    end-placeholder="结束日期"
+                            >
+                            </el-date-picker>
+                        </div>
+                    </div>
+                    <div v-for="(item,key) in vocStatisList" class="container" :key="key">
+                        <div class="source">
+                            <div class="content">
+                                <div class="company_name text-ell">{{validNullStr(item.companyName)}}</div>
+                                <div class="company_type">总量合计：{{item.val}}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="nodata" v-if="vocStatisList.length==0">
+                        <span>未查询到相关数据</span>
+                    </div>
+                </el-collapse-item>
             </el-collapse>
         </div>
     </div>
 </template>
 
 <script>
-    import {export_json_to_excel} from "../../excel/Export2Excel.js"
+    import {export_json_to_excel,export_arrjson_to_excel} from "../../excel/Export2Excel.js"
     export default {
         name: "data-container",
         data(){
@@ -439,7 +638,8 @@
                 searchVal:"",
                 resultList:[],
                 activeNames: '',
-                factoryList:[],
+                allFactoryList:[],//所有数据
+                factoryList:[],//筛选数据
                 wryFacList:[],
                 menuList:[],
                 mineList:[],
@@ -454,6 +654,10 @@
                 xzcfList:[],
                 fqpkList:[],
                 fspkList:[],
+                elecstatisList:[],
+                airStatisList:[],
+                waterStatisList:[],
+                vocStatisList:[],
                 facShow:false,
                 wryFacShow:false,
                 menuShow:false,
@@ -469,8 +673,13 @@
                 xzcfShow:false,
                 fspkShow:false,
                 fqpkShow:false,
+                elecstatisShow:false,
+                waterStatisShow:false,
+                airStatisShow:false,
+                vocStatisShow:false,
                 temLayer:null,
                 stime:[this.initETime(30),this.initSTime()],
+                electime:this.initTodyTime(),
                 queryNorIndex:"AQI",
                 queryWzIndex:"AQI",
                 queryGkIndex:"vaqi",
@@ -518,7 +727,126 @@
                 },{
                     value: 'v106',
                     label: 'CO'
-                }]
+                }],
+                queryFacTypeList:[{
+                    value:"",
+                    label:"请选择"
+                },{
+                    value:"2c9a818b761915cc01761d2153c300d4",
+                    label:"工业源"
+                },{
+                    value:"2c9a818b761915cc01761d219e4000d5",
+                    label:"生活源"
+                },{
+                    value:"2c9a818b761915cc01761d21ecce00d6",
+                    label:"移动源"
+                },{
+                    value:"2c9a818b761915cc01761d224f6400d7",
+                    label:"集中式"
+                },{
+                    value:"2c9a818b763befe70176608f37450076",
+                    label:"建筑工地"
+                }],
+                queryFacType:"2c9a818b761915cc01761d2153c300d4",
+                queryRunTypeList:[{
+                    value:"",
+                    label:"请选择"
+                },{
+                    value:"48e00a5cd987492b852839fe7cd59200",
+                    label:"运行"
+                },{
+                    value:"2c9384c14a2810be014a28c90076000c",
+                    label:"停产"
+                },{
+                    value:"2c9384c14a2810be014a28ca97230010",
+                    label:"未投产"
+                },{
+                    value:"88d82a1ce48e4430928c57676c6fd89c",
+                    label:"关闭/注销"
+                }],
+                queryRunType:"48e00a5cd987492b852839fe7cd59200",
+                queryPerTypeList:[{
+                    value:"",
+                    label:"请选择"
+                },{
+                    value:"2c9a818b761915cc01761d08be4d00b1",
+                    label:"重点管理"
+                },{
+                    value:"2c9a818b761915cc01761d08f0ce00b2",
+                    label:"简化管理"
+                },{
+                    value:"2c9a818b761915cc01761d093ba900b3",
+                    label:"登记管理"
+                }],
+                queryPerType:"",
+                queryOlFacTypeList:[{
+                    value:"all",
+                    label:"请选择"
+                },{
+                    value:"voc",
+                    label:"VOC"
+                },{
+                    value:"water",
+                    label:"水"
+                },{
+                    value:"air",
+                    label:"烟气"
+                }],
+                queryOlFacType:"all",
+                queryStatisType:"hour",
+                queryStatisTypeList:[{
+                    value:"day",
+                    label:"日统计"
+                },{
+                    value:"hour",
+                    label:"小时统计"
+                }],
+                queryAirTypeList:[{
+                    value:"all",
+                    label:"污染物总量"
+                },{
+                    value:"sd",
+                    label:"烟尘含量"
+                },{
+                    value:"nox",
+                    label:"氮氧化物总量"
+                },{
+                    value:"so2",
+                    label:"SO2总量"
+                }],
+                queryAirType:"all",
+                queryWaterTypeList:[{
+                    value:"all",
+                    label:"污染物总量"
+                },{
+                    value:"nh3n",
+                    label:"氨氮总量"
+                },{
+                    value:"cod",
+                    label:"cod总量"
+                },{
+                    value:"tn",
+                    label:"总氮总量"
+                },{
+                    value:"tp",
+                    label:"总磷总量"
+                }],
+                queryWaterType:"all",
+                queryVocTypeList:[{
+                    value:"nmhc",
+                    label:"非甲烷总烃总量"
+                },{
+                    value:"flow",
+                    label:"流量总量"
+                }],
+                queryVocType:"nmhc",
+                dateFormat:"yyyy-MM-dd",
+                qy:require("@/assets/image/fa/fa-qy.png"),
+                addr:require("@/assets/image/fa/fa-addr.png"),
+                qtype:require("@/assets/image/fa/fa-type.png"),
+                lic:require("@/assets/image/fa/fa-lic.png"),
+                sttp:require("@/assets/image/fa/fa-sttp.png"),
+                par:require("@/assets/image/fa/fa-par.png"),
             }
         },
         mounted(){
@@ -534,15 +862,22 @@
                 start.setTime(start.getTime() - 3600 * 1000 * 24 * day);
                 return this.$appUtil.formatDate("yyyy-MM-dd HH:ff:ss",start);
             },
+            initTodyTime(){
+                let today = this.$appUtil.formatDate("yyyy-MM-dd",new Date());
+                let stoday = today + " 00:00:00";
+                let etoday = today + " 23:59:59";
+                return [stoday,etoday];
+            },
             resetTime(){
                 this.stime = [this.initETime(30),this.initSTime()];
+                this.electime = this.initTodyTime();
             },
             initDraw(){
                 this.temLayer = L.layerGroup();
                 this.$mapUtil.lMap.addLayer(this.temLayer);
             },
             showData() {
-                if(!this.mineShow&&!this.facShow&&!this.wwShow&&!this.wgShow&&!this.normalShow&&!this.wzShow&&!this.gkShow&&!this.skShow&&!this.allShow&&!this.hjxfShow&&!this.xzcfShow&&!this.fspkShow&&!this.fqpkShow&&!this.menuShow&&!this.wryFacShow){
+                if(!this.mineShow&&!this.facShow&&!this.wwShow&&!this.wgShow&&!this.normalShow&&!this.wzShow&&!this.gkShow&&!this.skShow&&!this.allShow&&!this.hjxfShow&&!this.xzcfShow&&!this.fspkShow&&!this.fqpkShow&&!this.menuShow&&!this.wryFacShow&&!this.elecstatisShow&&!this.airStatisShow&&!this.waterStatisShow&&!this.vocStatisShow){
                     this.showConts = false;
                 }else{
                     this.showConts = true;
@@ -717,7 +1052,9 @@
                 //this.resetTime();重置查询时间
                 this.activeNames = type;
                 if(type=="factory"){
-                    this.factoryList = list;
+                    //this.factoryList = list;
+                    this.allFactoryList = list;
+                    this.changeFactoryQuery();
                     this.facShow = true;
                 }else if(type == "mine"){
                     this.mineList = list;
@@ -761,6 +1098,18 @@
                 }else if(type == "wryFac"){
                     this.wryFacList = list;
                     this.wryFacShow = true;
+                }else if(type == "elecstatis"){
+                    this.elecstatisList = list;
+                    this.elecstatisShow = true;
+                }else if(type == "waterstatis"){
+                    this.waterStatisList = list;
+                    this.waterStatisShow = true;
+                }else if(type == "airstatis"){
+                    this.airStatisList = list;
+                    this.airStatisShow = true;
+                }else if(type == "vocstatis"){
+                    this.vocStatisList = list;
+                    this.vocStatisShow = true;
                 }
                 if(!this.showConts){
                     this.showConts = true;
@@ -812,8 +1161,20 @@
                 }else if(type == "wryFac"){
                     this.wryFacList = [];
                     this.wryFacShow = false;
+                }else if(type == "elecstatis"){
+                    this.elecstatisList = [];
+                    this.elecstatisShow = false;
+                }else if(type == "waterstatis"){
+                    this.waterStatisList = [];
+                    this.waterStatisShow = false;
+                }else if(type == "airstatis"){
+                    this.airStatisList = [];
+                    this.airStatisShow = false;
+                }else if(type == "vocstatis"){
+                    this.vocStatisList = [];
+                    this.vocStatisShow = false;
                 }
-                if(!this.mineShow&&!this.facShow&&!this.wwShow&&!this.wgShow&&!this.normalShow&&!this.wzShow&&!this.gkShow&&!this.skShow&&!this.allShow&&!this.hjxfShow&&!this.xzcfShow&&!this.fspkShow&&!this.fqpkShow&&!this.menuShow&&!this.wryFacShow){
+                if(!this.mineShow&&!this.facShow&&!this.wwShow&&!this.wgShow&&!this.normalShow&&!this.wzShow&&!this.gkShow&&!this.skShow&&!this.allShow&&!this.hjxfShow&&!this.xzcfShow&&!this.fspkShow&&!this.fqpkShow&&!this.menuShow&&!this.wryFacShow&&!this.elecstatisShow&&!this.airStatisShow&&!this.waterStatisShow&&!this.vocStatisShow){
                     this.showConts = false;
                 }
                 if(!this.normalShow&&!this.wzShow&&!this.gkShow&&!this.skShow&&!this.allShow){
@@ -831,6 +1192,25 @@
             },
             changeFqpkQuery(){
                 this.$parent.queryFqpkData("fqpk",this.stime[0],this.stime[1])
+            },
+            changeElecType(){
+                if(this.queryStatisType == "day"){
+                    this.dateFormat = "yyyy-MM-dd";
+                }else{
+                    this.dateFormat = "yyyy-MM-dd HH";
+                }
+            },
+            changeElecQuery(){
+                this.$parent.queryElecData("elecstatis",this.queryStatisType,this.electime[0],this.electime[1]);
+            },
+            changeAirStatisQuery(){
+                this.$parent.getAirStatisData("airstatis","hour",this.electime[0],this.electime[1],this.queryAirType);
+            },
+            changeWaterStatisQuery(){
+                this.$parent.getWaterStatisData("waterstatis","hour",this.electime[0],this.electime[1],this.queryWaterType);
+            },
+            changeVocStatisQuery(){
+                this.$parent.getVocStatisData("vocstatis","hour",this.electime[0],this.electime[1],this.queryVocType);
             },
             showXzcf(item){
                 this.$parent.setDetailData(item,"xzcf",this.stime);
@@ -853,8 +1233,62 @@
                     this.$parent.getCountryData(type,this.queryGkIndex);
                 }
             },
+            //企业数据筛选
+            changeFactoryQuery(){
+                this.factoryList = [];
+                let _this = this;
+                this.allFactoryList.forEach(function(item,key){
+                    let isFac = (_this.queryFacType=="")||(_this.queryFacType == item.ipsType);
+                    let isPer = (_this.queryPerType=="")||(_this.queryPerType == item.permitManaType);
+                    let isRun = (_this.queryRunType=="")||(_this.queryRunType == item.status);
+                    if(isFac&&isPer&&isRun){
+                        _this.factoryList.push(item);
+                    }
+                });
+                this.drawFactoryMap("factory",this.factoryList);
+            },
+            //在线监测企业筛选
+            changeWryFactoryQuery(){
+                this.$mapUtil.removeTemLayer("wryFac");
+                this.$parent.getWryFac(this.queryOlFacType,"wryFac");     
+            },
             getLevelCls(item){
                 return "level_"+item.level;
+            },
+            drawFactoryMap(layerId,list){
+                this.$mapUtil.removeTemLayer("factory");
+                let wzIcon = null;
+                if(layerId == "factory"){
+                    wzIcon = require("../../assets/image/map/factory.png");
+                }else {
+                    wzIcon = require("../../assets/image/map/wryFac.png");
+                }
+                let _self = this;
+                let facLayer = L.markerClusterGroup({maxClusterRadius:40});
+                for(let model of list) {
+                    let marker = this.$mapUtil.createPointMarker(model,wzIcon);
+                    if(marker){
+                        marker.model = model;
+                        marker.on("click",function(e){
+                            let cmodel = e.target.model;
+                            _self.$parent.setDetailData(model,"factory");
+                        });
+                        marker.id = model.permitLicence;
+                        let html = this.createHtml(model);
+                        marker.bindPopup(html);
+                        facLayer.addLayer(marker);
+                    }
+                }
+                this.$mapUtil.lMap.addLayer(facLayer);
+                this.$mapUtil.addTemLayer(layerId,facLayer);
+            },
+            createHtml(model){
+                let html = [];
+                html.push('<div class="popuDiv"><img class="faicon" src="'+this.qy+'" />'+validNullStr(model.companyName)+'</div>');
+                html.push('<div class="popuDiv"><img class="faicon" src="'+this.addr+'" />'+validNullStr(model.operationAddress)+'</div>');
+                html.push('<div class="popuDiv"><img class="faicon" src="'+this.qtype+'" />'+validNullStr(model.industryTypeName)+'</div>');
+                html.push('<div class="popuDiv"><img class="faicon" src="'+this.lic+'" />'+validNullStr(model.permitLicence)+'</div>');
+                return html.join('');
             },
             validNullStr(str){
                 if(str!=null&&str!="null"){
@@ -870,21 +1304,53 @@
                 return obj.label;
             },
             exportBtn(){
+                let thHeads = [];
+                let datas = [];
+                let ws_names = [];
+                let excelName = "企业数据";
+                let tHeader = ["企业名称", "信用代码"];
+                let filterVal = ["companyName", "uscCode"];
+
                 //导出企业内的数据
-                if(this.factoryList.length==0&&this.menuList.length==0){
+
+                if(this.factoryList.length==0&&this.wryFacList.length==0&&this.mineList.length==0&&this.menuList.length==0){
                     this.$message.error("无企业数据可导出！");
                     return;
                 }
                 if(this.factoryList.length>0){
-                    this.exportExcel(this.factoryList,"企业数据列表");
+                    thHeads.push(tHeader);
+                    let data = this.formatJson(filterVal, this.factoryList);
+                    datas.push(data);
+                    ws_names.push("企业数据列表");
+                   // this.exportExcel(this.factoryList,"企业数据列表");
+                }
+                if(this.wryFacList.length>0){
+                    thHeads.push(tHeader);
+                    let data = this.formatJson(filterVal, this.wryFacList);
+                    datas.push(data);
+                    ws_names.push("在线监控企业");
+                    //this.exportExcel(this.menuList,"环境管理清单");
+                }
+                if(this.mineList.length>0){
+                    thHeads.push(tHeader);
+                    let gkFiler = ["enterpriseName","uscCode"];
+                    let data = this.formatJson(gkFiler, this.mineList);
+                    datas.push(data);
+                    ws_names.push("工况监测企业");
+                    //this.exportExcel(this.menuList,"环境管理清单");
                 }
                 if(this.menuList.length>0){
-                    this.exportExcel(this.menuList,"环境管理清单");
+                    thHeads.push(tHeader);
+                    let data = this.formatJson(filterVal, this.menuList);
+                    datas.push(data);
+                    ws_names.push("环境管理清单");
+                   // this.exportExcel(this.menuList,"环境管理清单");
+                   // return;
                 }
+                this.exportArrExcel(thHeads,datas,ws_names,excelName);
             },
             exportExcel(list,sheetName) {
               require.ensure([], () => {
-                
                 //const { export_json_to_excel } = require("../../excel/Export2Excel.js");
                 const tHeader = ["企业名称", "信用代码"];
                 // 上面设置Excel的表格第一行的标题
@@ -895,6 +1361,9 @@
                 export_json_to_excel(tHeader, data, sheetName);
               });
             },
+            exportArrExcel(ths,datas,ws,wbName){
+                export_arrjson_to_excel(ths,datas,ws,wbName);
+            },
             formatJson(filterVal, jsonData) {
               return jsonData.map(v => filterVal.map(j => v[j]));
             }
@@ -1206,5 +1675,9 @@
     }
     .tabvalue span.level_6{
         background-color: #7E0023;
+    }
+    .mgr-8>span{
+        display:inline-block;
+        width:120px;
     }
 </style>

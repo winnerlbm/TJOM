@@ -139,3 +139,27 @@ export function export_json_to_excel(th, jsonData, defaultTitle) {
     var title = defaultTitle || '列表'
     saveAs(new Blob([s2ab(wbout)], {type: "application/octet-stream"}), title + ".xlsx")
 }
+export function export_arrjson_to_excel(ths,jsonArrData,ws_name, defaultTitle) {
+
+    var data = jsonArrData;
+    //添加标题
+    for (var i = 0; i < ths.length; i++) {
+      data[i].unshift(ths[i])
+    }
+    var wb = new Workbook(),ws=[];
+    //数据转换
+    for (var j = 0; j < ths.length; j++) {
+      ws.push(sheet_from_array_of_arrays(data[j]))
+    }
+
+    /* add worksheet to workbook */
+    //生成多个sheet
+    for (var k = 0; k < ths.length; k++) {
+      wb.SheetNames.push(ws_name[k])
+      wb.Sheets[ws_name[k]] = ws[k]
+    }
+
+    var wbout = XLSX.write(wb, {bookType: 'xlsx', bookSST: false, type: 'binary'});
+    var title = defaultTitle || '列表'
+    saveAs(new Blob([s2ab(wbout)], {type: "application/octet-stream"}), title + ".xlsx")
+}

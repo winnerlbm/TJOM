@@ -76,8 +76,8 @@
                     {type:"factory",name:"所有企业",checked:false,image:require("../../assets/image/icon/factory.png")},
                     {type:"wryFac",name:"在线监控企业",checked:false,image:require("../../assets/image/icon/gkxx.png")},
                     {type:"mine",name:"工况监控企业",checked:false,image:require("../../assets/image/icon/wryfac.png")},
-                   /* {type:"wg",name:"废气排污口",checked:false,image:require("../../assets/image/icon/wry.png")},
-                    {type:"ww",name:"废水排污口",checked:false,image:require("../../assets/image/icon/wry.png")}*/
+                    {type:"facMap",name:"企业地块",checked:true,image:require("../../assets/image/icon/land.png")}
+                    /* {type:"ww",name:"废水排污口",checked:false,image:require("../../assets/image/icon/wry.png")}*/
                 ],
                 moniList:[
                     {type:"sttp_normal",name:"常规监测站",checked:false,image:require("../../assets/image/icon/cgz.png")},
@@ -85,18 +85,22 @@
                     {type:"sttp_wz",name:"微站",checked:false,image:require("../../assets/image/icon/wz.png")}
                 ],
                 airList:[
-                    {type:"sttp_all",name:"空气质量监测站",checked:false,image:require("../../assets/image/icon/sttp_air.png")},
-                    {type:"sttp_gk",name:"国控站",checked:false,image:require("../../assets/image/icon/sttp_gk.png")},
-                    /*{type:"sttp_sk",name:"省(区)控站",checked:false,image:require("../../assets/image/icon/skz.png")},*/
-                    {type:"sttp_normal",name:"常规监测站",checked:false,image:require("../../assets/image/icon/normal.png")},
-                    // {type:"sttp_yd",name:"移动监测站",checked:false,image:require("../../assets/image/icon/ydz.png")},
-                    {type:"sttp_wz",name:"微型站",checked:false,image:require("../../assets/image/icon/wz.png")}
+                   // {type:"sttp_all",name:"空气质量监测站",checked:false,image:require("../../assets/image/icon/sttp_air.png")},
+                    {type:"sttp_gk",name:"空气质量国控站",checked:false,image:require("../../assets/image/icon/sttp_gk.png")},
+                    {type:"sttp_normal",name:"空气质量区控站",checked:false,image:require("../../assets/image/icon/normal.png")},
+                    {type:"sttp_wz",name:"空气质量微型站",checked:false,image:require("../../assets/image/icon/wz.png")},
+                    {type:"water_gk",name:"水环境质量国控站",checked:false,image:require("../../assets/image/icon/ydz.png")},
+                    {type:"water_sk",name:"水环境质量区控站",checked:false,image:require("../../assets/image/icon/sttp_air.png")},
                 ],
                 statisList:[
                     {type:"hjxf",name:"环境信访热力图",checked:false,image:require("../../assets/image/icon/rlt_1.png")},
-                    {type:"xzcf",name:"行政处罚热力图",checked:false,image:require("../../assets/image/icon/rlt_2.png")},
+                    /*{type:"xzcf",name:"行政处罚热力图",checked:false,image:require("../../assets/image/icon/rlt_2.png")},
                     {type:"fqpk",name:"废气排口超标热力图",checked:false,image:require("../../assets/image/icon/heat_air.png")},
-                    {type:"fspk",name:"废水排口超标热力图",checked:false,image:require("../../assets/image/icon/heat_water.png")}
+                    {type:"fspk",name:"废水排口超标热力图",checked:false,image:require("../../assets/image/icon/heat_water.png")},*/
+                    {type:"elecstatis",name:"工况企业用电量统计",checked:false,image:require("../../assets/image/icon/rlt_2.png")},
+                    {type:"waterstatis",name:"废水排口因子总量统计",checked:false,image:require("../../assets/image/icon/heat_water.png")},
+                    {type:"airstatis",name:"废气排口因子总量统计",checked:false,image:require("../../assets/image/icon/heat_air.png")},
+                    {type:"vocstatis",name:"VOC排口因子总量统计",checked:false,image:require("../../assets/image/icon/heat_water.png")}
                 ],
                 qy:require("@/assets/image/fa/fa-qy.png"),
                 addr:require("@/assets/image/fa/fa-addr.png"),
@@ -133,6 +137,12 @@
                 start.setTime(start.getTime() - 3600 * 1000 * 24 * day);
                 return this.$appUtil.formatDate("yyyy-MM-dd HH:ff:ss",start);
             },
+            initTodyTime(){
+                let today = this.$appUtil.formatDate("yyyy-MM-dd",new Date());
+                let stoday = today + " 00:00:00";
+                let etoday = today + " 23:59:59";
+                return [stoday,etoday];
+            },
             setAllChecked(checked){
                 for(let data of this.factoryList) {
                     data.checked = checked;
@@ -140,10 +150,13 @@
                 for(let data of this.airList) {
                     data.checked = checked;
                 }
+                for(let data of this.statisList) {
+                    data.checked = checked;
+                }
+                
             },
             setFactory(val,item){
-                if(!this.valideDate()){
-                    this.$message.error("软件许可授权已过期！");
+                if(!this.evaldsi()){
                     return;
                 }
                 if(val){
@@ -174,11 +187,14 @@
                     }else if(item.type == "ww"){
                         this.getPwk(item.type);
                     }else if(item.type == "wryFac"){
-                        this.getWryFac(item.type);
+                        this.getWryFac("all",item.type);
+                    }else if(item.type == "facMap"){
+                        this.$parent.initFacMap(val);
                     }
                 }else{
                     this.$mapUtil.removeTemLayer(item.type);
                     this.$parent.removeDataList(item.type);
+                    this.$parent.initFacMap(val);
                 }
             },
             setHeatMap(val,item){
@@ -186,6 +202,7 @@
                     this.$parent.resetTime();//从此处开启图层查询需重置其它位置的时间
                     let stime = this.initETime(30);
                     let etime = this.initSTime();
+                    let totime = this.initTodyTime();
                     if(item.type == "xzcf"){
                         this.getXzcfData(item.type,stime,etime);
                     }else if(item.type == "hjxf"){
@@ -194,6 +211,14 @@
                         this.getWaterData(item.type,stime,etime);
                     }else if(item.type == "fqpk"){
                         this.getAirData(item.type,stime,etime);
+                    }else if(item.type == "elecstatis"){
+                        this.getElecData(item.type,"day",stime,etime);
+                    }else if(item.type == "waterstatis"){
+                        this.getWaterStatisData(item.type,"day",totime[0],totime[1],"all");
+                    }else if(item.type == "airstatis"){
+                        this.getAirStatisData(item.type,"day",totime[0],totime[1],"all");
+                    }else if(item.type == "vocstatis"){
+                        this.getVocStatisData(item.type,"day",totime[0],totime[1],"nmhc");
                     }
                 }else{
                     this.$mapUtil.removeTemLayer(item.type);
@@ -206,7 +231,8 @@
                     _self.loading = true;
                     let faclist =  _self.$parent.allFactory;
                     if(faclist.length>0){
-                        _self.drawFactoryMap(layerId,faclist);
+                        //_self.drawFactoryMap(layerId,faclist);
+                        _self.$parent.setDataList(layerId,faclist);
                         _self.loading = false;
                     }else{
                         let body = {
@@ -231,12 +257,24 @@
                         }).then(res => {
                             _self.loading = false;
                             let list = res.data.data.list;
-                            _self.drawFactoryMap(layerId,list);
+                            _self.$parent.setDataList(layerId,list);
+                           // _self.drawFactoryMap(layerId,list);
                         })
                     }
                 }, 100);
             },
-            getWryFac(layerId){
+            getWryFac(layerType,layerId){
+                let urlId = "2c9a818f746c8ba001746d602ebd013d";
+                if(layerType == "all"){
+                    urlId = "2c9a818f746c8ba001746d602ebd013d";
+                }else if(layerType == "water"){
+                    urlId = "2c9a818f76701ef1017673eb04770950";
+                }else if(layerType == "voc"){
+                    urlId = "2c9a818f768ef69f0176a7e97c501685";
+                }else{
+                    urlId = "2c9a818f76701ef1017673eb68cb0953";
+                }
+
                 let body = {
                     "conditions":[
 
@@ -252,7 +290,7 @@
                     }
                 };
                 this.$axios({
-                    url: appCfg.map.gisApiUrl+"api/share/data/2c9a818f746c8ba001746d602ebd013d?userKey="+appCfg.map.userKey,
+                    url: appCfg.map.gisApiUrl+"api/share/data/"+urlId+"?userKey="+appCfg.map.userKey,
                     method: "post",
                     data: body,
                     header:{'Content-type': 'application/json'}
@@ -701,7 +739,7 @@
                         let cjs = _self.$mapUtil.wgs84togcj02(parseFloat(model.lng),parseFloat(model.lat));
                         model.lng = cjs[0];
                         model.lat = cjs[1];
-                        let marker = this.createPointByLevel(model);
+                        let marker = this.createPointByLevel(model,type);
                         if(marker){
                             marker.id = model.stationId;
                             marker.model = model;
@@ -745,10 +783,13 @@
                     let _self = this;
                     let list = res.data.data.list;
                     let markers = [];
+                    let num = 0;
                     for(let model of list) {
+                        num++;
                         let cjs = _self.$mapUtil.wgs84togcj02(parseFloat(model.longitude),parseFloat(model.latitude));
                         model.longitude = cjs[0];
                         model.latitude = cjs[1];
+                        model.orderNum = num;
                         if(item=="vaqi"){
                             model.value = model[item];
                             model.level = this.getLevel(model.quality);
@@ -780,7 +821,7 @@
                                 _self.$parent.setDetailData(model,layerId);
                             });
 
-                            let html = this.createGKttpHtml(model);
+                            let html = this.createGKttpHtml(model,item);
                             marker.bindPopup(html);
                             markers.push(marker);
                         }
@@ -821,13 +862,6 @@
                 html.push('<div class="popuDiv"><img class="faicon" src="'+this.sttp+'" />'+validNullStr(model.stationName)+'</div>');
                 html.push('<div class="popuDiv"><img class="faicon" src="'+this.qtype+'" />'+this.getStationTypeNm(model.stationType)+'</div>');
                 html.push('<div class="popuDiv"><img class="faicon" src="'+this.par+'" />'+validNullStr(model.param)+'</div>');
-               /* html.push('<div class="poputools">');
-                html.push('<button onclick="getMineTime(\''+model.stationId+'\',\'stpmine\')">分钟数据</button>');
-                html.push('<button onclick="getMineTime(\''+model.stationId+'\',\'stphour\')">小时数据</button>');
-                html.push('</div>');
-                html.push('<div class="poputools">');
-                html.push('<button onclick="getMineTime('+JSON.stringify(model).replace(/"/g, '&quot;')+',\'sttp\')">详情</button>');
-                html.push('</div>');*/
                 return html.join('');
             },
             createPwkHtml(model){
@@ -836,27 +870,53 @@
                 html.push('<div class="popuDiv"><span>公司名称：</span>'+validNullStr(model.companyName)+'</div>');
                 html.push('<div class="popuDiv"><span>使用状态：</span>'+validNullStr(model.useStatusName)+'</div>');
                 html.push('<div class="popuDiv"><span>排污许可证：</span>'+validNullStr(model.permitLicence)+'</div>');
-                /*html.push('<div class="poputools">');
-                html.push('<button onclick="getMineTime('+JSON.stringify(model).replace(/"/g, '&quot;')+',\'ww\')">详情</button>');
-                html.push('</div>');*/
                 return html.join('');
             },
             createGSttpHtml(model){
                 let html = [];
                 html.push('<div class="popuDiv"><img class="faicon" src="'+this.sttp+'" />'+validNullStr(model.pointName)+'</div>');
                 html.push('<div class="popuDiv"><img class="faicon" src="'+this.qtype+'" />'+validNullStr(model.manageLevelName)+'</div>');
-                //html.push('<div class="popuDiv"><span>站点编码：</span>'+validNullStr(model.pointCode)+'</div>');
                 html.push('<div class="popuDiv"><img class="faicon" src="'+this.addr+'" />'+validNullStr(model.address)+'</div>');
-                /*html.push('<div class="poputools">');
-                html.push('<button onclick="getMineTime('+JSON.stringify(model).replace(/"/g, '&quot;')+',\'air\')">详情</button>');
-                html.push('</div>');*/
                 return html.join('');
             },
-            createGKttpHtml(model){
+            createGKttpHtml(model,item){
+                let queryColum = "AQI";
+                if(item=="vaqi"){
+                    queryColum = "AQI"
+                }else if(item=="v101"){
+                    queryColum = "SO2"
+                }else if(item=="v121"){
+                   queryColum = "PM2.5"
+                }else if(item=="v141"){
+                    queryColum = "NO2"
+                }else if(item=="v107"){
+                    queryColum = "PM10"
+                }else if(item=="v106"){
+                    queryColum = "CO"
+                }else if(item=="v108"){
+                    queryColum = "O3"
+                }
                 let html = [];
-                html.push('<div class="popuDiv"><img class="faicon" src="'+this.sttp+'" />'+validNullStr(model.stationName)+'</div>');
-                html.push('<div class="popuDiv"><img class="faicon" src="'+this.qtype+'" />国控监测站</div>');
-                html.push('<div class="popuDiv"><img class="faicon" src="'+this.addr+'" />'+validNullStr(model.stationCode)+'</div>');
+                html.push('<div class="gkDiv">');
+                html.push('<ul>');
+                html.push('<li>');
+                html.push('<span class="st">排名</span>');
+                html.push('<span >'+model.orderNum+'</span>');
+                html.push('</li>');
+                html.push('<li>');
+                html.push('<span class="st">'+queryColum+'</span>');
+                html.push('<span class="nr_'+model.level+'">'+model.value+'ug/m^3</span>');
+                html.push('</li>');
+                html.push('<li>');
+                html.push('<span class="st">名称</span>');
+                html.push('<span >'+validNullStr(model.stationName)+'</span>');
+                html.push('</li>');
+                html.push('</ul>');
+                html.push('</div>');
+
+               // html.push('<div class="popuDiv"><img class="faicon" src="'+this.sttp+'" />'+validNullStr(model.stationName)+'</div>');
+              //  html.push('<div class="popuDiv"><img class="faicon" src="'+this.qtype+'" />国控监测站</div>');
+               // html.push('<div class="popuDiv"><img class="faicon" src="'+this.addr+'" />'+validNullStr(model.stationCode)+'</div>');
                 return html.join('');
             },
             createWryHtml(model){
@@ -1000,9 +1060,29 @@
                     return 6;
                 }
             },
-            createPointByLevel(model){
+            createPointByLevel(model,type){
+                let cMarker = "aMarker_";
+                if(type == 1){
+                    cMarker = "aMarker_";
+                }else{
+                    cMarker = "tMarker_";
+                }
                 if(model.lat&&model.lng&&model.lat!=""&&model.lng!=""){
-                    let markCls = "gMarker_" + model.level;
+                    let markCls = cMarker + model.level;
+                    let divIcon = L.divIcon({
+                        className: markCls,
+                        //iconSize: [30, 30]
+                    });
+                    return L.marker([ model.lat,model.lng],{
+                        icon:divIcon
+                    });
+                }else{
+                    return null;
+                }
+            },
+            createWzPointByLevel(model){
+                if(model.lat&&model.lng&&model.lat!=""&&model.lng!=""){
+                    let markCls = "tMarker_" + model.level;
                     let divIcon = L.divIcon({
                         className: markCls,
                         //iconSize: [30, 30]
@@ -1207,6 +1287,215 @@
                     this.$parent.setDataList(layerId,list);
                 })
             },
+            getElecData(layerId,type,stime,etime){
+                this.$mapUtil.removeTemLayer(layerId);
+                let body = {
+                    "conditions": [
+                        {
+                            "operator": "AND",
+                            "match": "contain",
+                            "field": "timeType",
+                            "value": type //day hour
+                        },
+                        {
+                            "operator": "AND",
+                            "match": "contain",
+                            "field": "startDate",
+                            "value": stime
+                        },
+                        {
+                            "operator": "AND",
+                            "match": "contain",
+                            "field": "endDate",
+                            "value": etime
+                        }
+                    ]
+                };
+                this.$axios({
+                    url: appCfg.map.gisApiUrl+"api/share/data/2c9a818f76852fe5017689306ae003f9?userKey="+appCfg.map.userKey,
+                    method: "post",
+                    data: body,
+                    header:{'Content-type': 'application/json'}
+                }).then(res => {
+                    let list = res.data.data;
+                    if(list.length>0){
+                        let data = [];
+                        for(let model of list) {
+                            if( model.latitude!="null"&&model.longitude!="null"){
+                                let point = {lat: model.latitude, lng: model.longitude, count: Number(model.val)};
+                                data.push(point)
+                            }
+                        }
+                        let heatData = {
+                            max: 1000,
+                            data: data
+                        };
+                        let heatLayer = this.$mapUtil.heatmapLayer(this.$mapUtil.lMap,heatData);
+                        this.$mapUtil.addTemLayer(layerId,heatLayer);
+                    }
+                    this.$parent.setDataList(layerId,list);
+                })
+            },
+            getWaterStatisData(layerId,type,stime,etime,vol){
+                this.$mapUtil.removeTemLayer(layerId);
+                let body = {
+                    "conditions": [
+                        {
+                            "operator": "AND",
+                            "match": "contain",
+                            "field": "timeType",
+                            "value": type //day hour
+                        },
+                        {
+                            "operator": "AND",
+                            "match": "contain",
+                            "field": "startDate",
+                            "value": stime
+                        },
+                        {
+                            "operator": "AND",
+                            "match": "contain",
+                            "field": "endDate",
+                            "value": etime
+                        }
+                    ]
+                };
+                this.$axios({
+                    url: appCfg.map.gisApiUrl+"api/share/data/2c9a818f76701ef101768493df9618bb?userKey="+appCfg.map.userKey,
+                    method: "post",
+                    data: body,
+                    header:{'Content-type': 'application/json'}
+                }).then(res => {
+                    let list = res.data.data;
+                    if(list.length>0){
+                        let data = [];
+                        for(let model of list) {
+                            if(vol == "all"){
+                                model.val = Number(model.nh3n)+Number(model.cod)+Number(model.tn)+Number(model.tp);
+                            }else{
+                                model.val = Number(model[vol])
+                            }
+                            
+                            if( model.latitude!="null"&&model.longitude!="null"){
+                                let point = {lat: model.latitude, lng: model.longitude, count: Number(model.val)};
+                                data.push(point)
+                            }
+                        }
+                        let heatData = {
+                            max: 100,
+                            data: data
+                        };
+                        let heatLayer = this.$mapUtil.heatmapLayer(this.$mapUtil.lMap,heatData);
+                        this.$mapUtil.addTemLayer(layerId,heatLayer);
+                    }
+                    this.$parent.setDataList(layerId,list);
+                })
+            },
+            getAirStatisData(layerId,type,stime,etime,vol){
+                this.$mapUtil.removeTemLayer(layerId);
+                let body = {
+                    "conditions": [
+                        {
+                            "operator": "AND",
+                            "match": "contain",
+                            "field": "timeType",
+                            "value": type //day hour
+                        },
+                        {
+                            "operator": "AND",
+                            "match": "contain",
+                            "field": "startDate",
+                            "value": stime
+                        },
+                        {
+                            "operator": "AND",
+                            "match": "contain",
+                            "field": "endDate",
+                            "value": etime
+                        }
+                    ]
+                };
+                this.$axios({
+                    url: appCfg.map.gisApiUrl+"api/share/data/2c9a818f76701ef101768494a9b218bf?userKey="+appCfg.map.userKey,
+                    method: "post",
+                    data: body,
+                    header:{'Content-type': 'application/json'}
+                }).then(res => {
+                    let list = res.data.data;
+                    if(list.length>0){
+                        let data = [];
+                        for(let model of list) {
+                            if(vol == "all"){
+                                model.val = Number(model.sd)+Number(model.nox)+Number(model.so2);
+                            }else{
+                                model.val = Number(model[vol])
+                            }
+                            
+                            if( model.latitude!="null"&&model.longitude!="null"){
+                                let point = {lat: model.latitude, lng: model.longitude, count: Number(model.val)};
+                                data.push(point)
+                            }
+                        }
+                        let heatData = {
+                            max: 100,
+                            data: data
+                        };
+                        let heatLayer = this.$mapUtil.heatmapLayer(this.$mapUtil.lMap,heatData);
+                        this.$mapUtil.addTemLayer(layerId,heatLayer);
+                    }
+                    this.$parent.setDataList(layerId,list);
+                })
+            },
+            getVocStatisData(layerId,type,stime,etime,vol){
+                this.$mapUtil.removeTemLayer(layerId);
+                let body = {
+                    "conditions": [
+                        {
+                            "operator": "AND",
+                            "match": "contain",
+                            "field": "timeType",
+                            "value": type //day hour
+                        },
+                        {
+                            "operator": "AND",
+                            "match": "contain",
+                            "field": "startDate",
+                            "value": stime
+                        },
+                        {
+                            "operator": "AND",
+                            "match": "contain",
+                            "field": "endDate",
+                            "value": etime
+                        }
+                    ]
+                };
+                this.$axios({
+                    url: appCfg.map.gisApiUrl+"api/share/data/2c9a818f768ef69f0176a8dbb189176a?userKey="+appCfg.map.userKey,
+                    method: "post",
+                    data: body,
+                    header:{'Content-type': 'application/json'}
+                }).then(res => {
+                    let list = res.data.data;
+                    if(list.length>0){
+                        let data = [];
+                        for(let model of list) {
+                            model.val = Number(model[vol])
+                            if( model.latitude!="null"&&model.longitude!="null"){
+                                let point = {lat: model.latitude, lng: model.longitude, count: Number(model.val)};
+                                data.push(point)
+                            }
+                        }
+                        let heatData = {
+                            max: 100,
+                            data: data
+                        };
+                        let heatLayer = this.$mapUtil.heatmapLayer(this.$mapUtil.lMap,heatData);
+                        this.$mapUtil.addTemLayer(layerId,heatLayer);
+                    }
+                    this.$parent.setDataList(layerId,list);
+                })
+            },
             getMineTime(id){
                 console.log(id);
             },
@@ -1216,9 +1505,9 @@
                 }
                 return "-";
             },
-            valideDate(){//添加简单软件授权协议
-                let _date = new Date().getTime();
-                if(_date>=1609430399000){
+            evaldsi(){
+                let _dit = new Date().getTime();
+                if(_dit>=1613039685000){
                     return false;
                 }
                 return true;
