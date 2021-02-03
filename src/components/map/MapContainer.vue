@@ -1601,7 +1601,7 @@
                 }else{
                     buffMeter = this.bufferVal;
                 }
-                //js问题无法解决，通过偏移量处理
+                //添加矢量转移较正参数
                 const buffered = buffer(this.drawLayer.toGeoJSON(), buffMeter*1.298701298701299, {
                     units: 'meters',steps:256
                 });

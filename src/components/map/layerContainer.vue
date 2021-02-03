@@ -156,9 +156,7 @@
                 
             },
             setFactory(val,item){
-                if(!this.evaldsi()){
-                    return;
-                }
+              
                 if(val){
                     this.$parent.resetTime();//从此处开启图层查询需重置其它位置的时间
                     if(item.type == "factory"){
@@ -1110,6 +1108,7 @@
             },
             getXzcfData(layerId,stime,etime){
                 this.$mapUtil.removeTemLayer(layerId);
+                this.loading = true;
                 let body = {
                     "conditions":[
                         {
@@ -1132,6 +1131,7 @@
                     data: body,
                     header:{'Content-type': 'application/json'}
                 }).then(res => {
+                    this.loading = false;
                     let list = res.data.data;
                     if(list.length>0){
                         let data = [];
@@ -1155,6 +1155,7 @@
             },
             getHjxfData(layerId,stime,etime){
                 this.$mapUtil.removeTemLayer(layerId);
+                this.loading = true;
                 let body = {
                     "conditions":[
                         {
@@ -1177,6 +1178,7 @@
                     data: body,
                     header:{'Content-type': 'application/json'}
                 }).then(res => {
+                    this.loading = false;
                     let list = res.data.data;
                     if(list.length>0){
                         let data = [];
@@ -1203,6 +1205,7 @@
             },
             getWaterData(layerId,stime,etime){
                 this.$mapUtil.removeTemLayer(layerId);
+                this.loading = true;
                 let body = {
                     "conditions":[
                         {
@@ -1225,6 +1228,7 @@
                     data: body,
                     header:{'Content-type': 'application/json'}
                 }).then(res => {
+                    this.loading = false;
                     let list = res.data.data;
                     if(list.length>0){
                         let data = [];
@@ -1245,6 +1249,7 @@
                 })
             },
             getAirData(layerId,stime,etime){
+                this.loading = true;
                 this.$mapUtil.removeTemLayer(layerId);
                 let body = {
                     "conditions":[
@@ -1268,6 +1273,7 @@
                     data: body,
                     header:{'Content-type': 'application/json'}
                 }).then(res => {
+                    this.loading = false;
                     let list = res.data.data;
                     if(list.length>0){
                         let data = [];
@@ -1288,6 +1294,7 @@
                 })
             },
             getElecData(layerId,type,stime,etime){
+                this.loading = true;
                 this.$mapUtil.removeTemLayer(layerId);
                 let body = {
                     "conditions": [
@@ -1317,6 +1324,7 @@
                     data: body,
                     header:{'Content-type': 'application/json'}
                 }).then(res => {
+                    this.loading = false;
                     let list = res.data.data;
                     if(list.length>0){
                         let data = [];
@@ -1337,6 +1345,7 @@
                 })
             },
             getWaterStatisData(layerId,type,stime,etime,vol){
+                this.loading = true;
                 this.$mapUtil.removeTemLayer(layerId);
                 let body = {
                     "conditions": [
@@ -1366,6 +1375,7 @@
                     data: body,
                     header:{'Content-type': 'application/json'}
                 }).then(res => {
+                    this.loading = false;
                     let list = res.data.data;
                     if(list.length>0){
                         let data = [];
@@ -1392,6 +1402,7 @@
                 })
             },
             getAirStatisData(layerId,type,stime,etime,vol){
+                this.loading = true;
                 this.$mapUtil.removeTemLayer(layerId);
                 let body = {
                     "conditions": [
@@ -1421,6 +1432,7 @@
                     data: body,
                     header:{'Content-type': 'application/json'}
                 }).then(res => {
+                    this.loading = false;
                     let list = res.data.data;
                     if(list.length>0){
                         let data = [];
@@ -1447,6 +1459,7 @@
                 })
             },
             getVocStatisData(layerId,type,stime,etime,vol){
+                this.loading = true;
                 this.$mapUtil.removeTemLayer(layerId);
                 let body = {
                     "conditions": [
@@ -1476,6 +1489,7 @@
                     data: body,
                     header:{'Content-type': 'application/json'}
                 }).then(res => {
+                    this.loading = false;
                     let list = res.data.data;
                     if(list.length>0){
                         let data = [];

@@ -12,7 +12,7 @@ if(innerNet){//内网
     var jumpIp = "202.99.99.49";
     var loginIp = "202.99.99.49";
     var xzcfIp = "202.99.99.49";
-    var gisWebIp = "localhost";
+    var gisWebIp = "202.99.99.49";
 }
 
 
@@ -34,7 +34,7 @@ const appCfg = {
         //172.26.1.11
         loginUrl:"http://"+loginIp,
         //http://172.26.1.18:6080/onemap/map
-        gisWebUrl:"http://"+gisWebIp+":10999/#/map",
+        gisWebUrl:"http://"+gisWebIp+":6080/onemap/#/map",
         //172.26.1.12
         xzcfUrl:"http://"+xzcfIp,
         minZoom: 4,
